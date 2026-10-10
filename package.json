@@ -1,0 +1,24 @@
+{
+  "name": "kiga",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "check-types": "turbo check-types",
+    "db:generate": "bun --filter @kiga/api db:generate",
+    "db:push": "bun --filter @kiga/api db:push",
+    "db:migrate": "bun --filter @kiga/api db:migrate",
+    "db:studio": "bun --filter @kiga/api db:studio",
+    "db:mobile:generate": "bun --filter @kiga/mobile db:generate"
+  },
+  "devDependencies": {
+    "oxlint": "^1.87.0",
+    "turbo": "^2.11.7"
+  },
+  "packageManager": "bun@1.4.2"
+}
