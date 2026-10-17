@@ -17,7 +17,7 @@ export default function Index() {
           contentFit="contain"
         />
         <Text className="text-2xl text-center">
-          Bem-vindo ao Kagi!
+          Bem-vindo ao Kiga!
         </Text>
         <Text className="text-lg text-zinc-800">
           Como você está se sentindo hoje?
