@@ -3,12 +3,9 @@ import { Button, ButtonGroup, ButtonText } from "@/components/ui/button";
 import { FormControl, FormControlHelper, FormControlHelperText, FormControlLabel, FormControlLabelText } from "@/components/ui/form-control";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { VStack } from "@/components/ui/vstack";
 import { useRouter } from "expo-router";
-import { Form } from "lucide-react-native";
-import { createContext, PropsWithChildren, useContext, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { useFormStep } from "./FormStepContext";
 
 const STEPS = [
