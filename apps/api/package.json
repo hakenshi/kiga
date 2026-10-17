@@ -11,10 +11,13 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@kiga/schema": "workspace:*",
     "@libsql/client": "^0.18.0",
     "better-auth": "^1.7.7",
     "drizzle-orm": "^0.45.4",
-    "hono": "^4.13.13"
+    "drizzle-zod": "^0.8.3",
+    "hono": "^4.13.13",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/bun": "latest",

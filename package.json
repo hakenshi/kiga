@@ -1,12 +1,22 @@
 {
   "name": "kiga",
+  "devDependencies": {
+    "oxlint": "^1.87.0",
+    "turbo": "^2.11.7"
+  },
+  "dependencies": {
+    "drizzle-zod": "^0.8.3",
+    "zod": "^4.6.5"
+  },
+  "overrides": {
+    "lightningcss": "1.30.1"
+  },
+  "packageManager": "bun@1.4.2",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "dev": "turbo dev",
+    "dev:mobile": "turbo dev --filter @kiga/mobile",
+    "dev:api": "turbo dev --filter @kiga/api",
     "build": "turbo build",
     "lint": "turbo lint",
     "check-types": "turbo check-types",
@@ -16,9 +26,8 @@
     "db:studio": "bun --filter @kiga/api db:studio",
     "db:mobile:generate": "bun --filter @kiga/mobile db:generate"
   },
-  "devDependencies": {
-    "oxlint": "^1.87.0",
-    "turbo": "^2.11.7"
-  },
-  "packageManager": "bun@1.4.2"
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
