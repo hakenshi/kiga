@@ -8,6 +8,48 @@
       "when": 1791670949647,
       "tag": "0000_legal_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792253596702,
+      "tag": "0001_fresh_ego",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792278998311,
+      "tag": "0002_bent_wild_child",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792284180328,
+      "tag": "0003_omniscient_sue_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792355179878,
+      "tag": "0004_amazing_sunspot",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792361922161,
+      "tag": "0005_tense_frank_castle",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792362107137,
+      "tag": "0006_sparkling_dorian_gray",
+      "breakpoints": true
     }
   ]
 }
