@@ -7,7 +7,7 @@ import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import migrations from "../../drizzle/migrations";
 import db from "../lib/db";
-import "@/example/src/global.css";
+import "../../global.css";
 
 const queryClient = new QueryClient();
 
