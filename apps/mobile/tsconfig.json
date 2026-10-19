@@ -1,7 +1,9 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": [
+    "expo/tsconfig.base",
+    "@kiga/typescript-config/react-native.json"
+  ],
   "compilerOptions": {
-    "strict": true,
     "paths": {
       "@/*": [
         "./src/*",
@@ -10,7 +12,8 @@
       "@/assets/*": [
         "./assets/*"
       ]
-    }
+    },
+    "strict": true
   },
   "include": [
     "**/*.ts",

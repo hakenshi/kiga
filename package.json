@@ -1,6 +1,8 @@
 {
   "name": "kiga",
   "devDependencies": {
+    "@kiga/oxlint-config": "workspace:*",
+    "@kiga/typescript-config": "workspace:*",
     "oxlint": "^1.87.0",
     "turbo": "^2.11.7"
   },

@@ -21,6 +21,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@kiga/typescript-config": "workspace:*",
     "typescript": "^5.8.2"
   }
 }

@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 export default function HomeLayout() {
   const { bottom, top } = useSafeAreaInsets()
   const currentPath = usePathname()
+
   return (
     <VStack className="flex-1">
       <HStack className="bg-white p-5" style={{ paddingTop: top, }}>

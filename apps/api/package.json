@@ -20,6 +20,8 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@kiga/oxlint-config": "workspace:*",
+    "@kiga/typescript-config": "workspace:*",
     "@types/bun": "latest",
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",

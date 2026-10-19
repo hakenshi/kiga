@@ -22,6 +22,7 @@
     "@legendapp/motion": "^2.4.0",
     "@tanstack/react-query": "^5.104.1",
     "drizzle-orm": "^0.45.4",
+    "drizzle-zod": "^0.8.3",
     "expo": "~57.0.30",
     "expo-constants": "~57.0.22",
     "expo-device": "~57.0.2",
@@ -53,9 +54,12 @@
     "react-native-worklets": "0.10.1",
     "react-stately": "^3.39.0",
     "tailwind-variants": "^0.1.20",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@kiga/oxlint-config": "workspace:*",
+    "@kiga/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/bun": "^1.4.3",
     "@types/react": "~19.2.2",

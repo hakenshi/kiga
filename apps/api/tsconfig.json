@@ -1,15 +1,5 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "types": ["bun"],
-    "strict": true,
-    "skipLibCheck": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "noEmit": true
-  },
+  "extends": "@kiga/typescript-config/bun.json",
   "include": [
     "src/**/*",
     "lib/**/*",

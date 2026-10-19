@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": [
+    "./node_modules/@kiga/oxlint-config/base.json"
+  ],
+  "ignorePatterns": [
+    "dist/**",
+    ".expo/**",
+    "node_modules/**",
+    "example/**"
+  ],
+  "env": {
+    "builtin": true,
+    "browser": true
+  }
+}

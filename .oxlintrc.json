@@ -1,26 +1,12 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "unicorn",
-    "oxc",
-    "react"
+  "extends": [
+    "./packages/oxlint-config/base.json"
   ],
-  "categories": {
-    "correctness": "error"
-  },
-  "rules": {
-    "unicorn/no-empty-file": "off"
-  },
   "ignorePatterns": [
     "dist/**",
     ".expo/**",
     "node_modules/**",
     "example/**"
-  ],
-  "env": {
-    "builtin": true,
-    "browser": true,
-    "node": true
-  }
+  ]
 }

@@ -2,7 +2,8 @@ import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text().primaryKey().$defaultFn(() => crypto.randomUUID()),
-  name: text().notNull(),
+  firstName: text().notNull(),
+  secondName: text().notNull(),
   username: text().notNull().unique(),
   password: text().notNull(),
   pin: integer({ mode: "number" }).notNull(),
