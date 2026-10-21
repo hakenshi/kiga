@@ -1,18 +1,27 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import { VStack } from "@/components/ui/vstack";
-import { Button, ButtonGroup } from "@/components/ui/button";
-import { HomeIcon } from "lucide-react-native";
+import { View } from "react-native";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
+
+const PATH_PERCENTAGE = {
+  "/register": 25,
+  "/register/security": 50,
+  "/register/identity": 75,
+  "/register/pin": 100,
+
+}
 
 export default function RegisterLayout() {
-  const router = useRouter()
+  const pathName = usePathname()
+
   return (
     <VStack className="flex-1 pt-14">
-      <ButtonGroup className="p-4">
-        <Button onPress={() => router.push("/")} size="md">
-          <HomeIcon color="white" size={16} />
-        </Button>
-      </ButtonGroup>
-      <Stack screenOptions={{ headerShown: false }} />
+      <View className="w-full p-5">
+        <Progress orientation="horizontal" value={PATH_PERCENTAGE[pathName as keyof typeof PATH_PERCENTAGE]} className="bg-secondary">
+          <ProgressFilledTrack className="rounded-full bg-primary" />
+        </Progress>
+      </View>
+      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
     </VStack >
   );
 }

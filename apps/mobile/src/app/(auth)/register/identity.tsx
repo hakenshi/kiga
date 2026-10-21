@@ -1,4 +1,4 @@
-import { AuthButtonNext, AuthButtonsContainer } from "@/components/auth/auth-pages-buttons";
+import { AuthButtonBack, AuthButtonNext, AuthButtonsContainer } from "@/components/auth/auth-pages-buttons";
 import { AuthHeader, AuthSubtitle, AuthTitle } from "@/components/auth/auth-pages-header";
 import AuthPagesShell from "@/components/auth/auth-pages-shell";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -11,11 +11,14 @@ import {
 } from "@/components/ui/form-control";
 import { VStack } from "@/components/ui/vstack";
 import { registerIdentitySchema } from "@/lib/db/zod/zod-schemas";
-import { createTimestamps, isExpired } from "@/lib/utils";
+import {
+  createTimestamps,
+  getStoredItem,
+  removeStoredItem,
+  setStoredItem,
+} from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { deleteItemAsync, getItem, setItemAsync } from "expo-secure-store";
-import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { View } from "react-native";
 
@@ -34,88 +37,23 @@ export const PRONOUN_OPTIONS = [
   { label: "Outro", value: "other" },
 ] as const;
 
-type RegisterIdentityStore = {
-  data: RegisterIdentitySchema;
-  updatedAt: number;
-  expiresAt: number;
-};
-
 export default function IdentityPage() {
   const router = useRouter();
 
-  const registerIdentity = getItem("register-identity");
-  const registerIdentityData: RegisterIdentityStore | null = (() => {
-    if (!registerIdentity) return null;
-    try {
-      const parsed: RegisterIdentityStore = JSON.parse(registerIdentity);
-      if (isExpired(parsed.expiresAt)) {
-        return null;
-      }
-      return parsed;
-    } catch {
-      return null;
-    }
-  })();
+  const registerIdentityData =
+    getStoredItem<RegisterIdentitySchema>("register-identity");
 
   const {
     control,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm<RegisterIdentitySchema>({
     resolver: zodResolver(registerIdentitySchema),
     defaultValues: {
-      gender: registerIdentityData ? registerIdentityData.data.gender : undefined,
-      pronoun: registerIdentityData ? registerIdentityData.data.pronoun : undefined,
+      gender: registerIdentityData?.gender ?? undefined,
+      pronoun: registerIdentityData?.pronoun ?? undefined,
     },
   });
-
-  useEffect(() => {
-    const checkExpiration = async () => {
-      const stored = getItem("register-identity");
-      if (!stored) return;
-
-      try {
-        const parsed: RegisterIdentityStore = JSON.parse(stored);
-        if (typeof parsed.expiresAt === "number") {
-          const remainingTime = parsed.expiresAt - Date.now();
-          if (remainingTime <= 0) {
-            await deleteItemAsync("register-identity");
-            reset({
-              gender: undefined,
-              pronoun: undefined,
-            });
-          } else {
-            const timer = setTimeout(async () => {
-              await deleteItemAsync("register-identity");
-              reset({
-                gender: undefined,
-                pronoun: undefined,
-              });
-            }, remainingTime);
-            return () => clearTimeout(timer);
-          }
-        }
-      } catch {
-        await deleteItemAsync("register-identity");
-        reset({
-          gender: undefined,
-          pronoun: undefined,
-        });
-      }
-    };
-
-    let cleanupTimer: (() => void) | undefined;
-    checkExpiration().then((cleanup) => {
-      if (typeof cleanup === "function") {
-        cleanupTimer = cleanup;
-      }
-    });
-
-    return () => {
-      if (cleanupTimer) cleanupTimer();
-    };
-  }, [reset]);
 
   const submit = async (formData: RegisterIdentitySchema) => {
     const validatedData = registerIdentitySchema.safeParse(formData);
@@ -125,16 +63,17 @@ export default function IdentityPage() {
     }
 
     const timestamps = createTimestamps();
-    const registerIdentityStore: RegisterIdentityStore = {
-      data: validatedData.data,
-      ...timestamps,
-    };
-
-    await setItemAsync(
+    await setStoredItem(
       "register-identity",
-      JSON.stringify(registerIdentityStore)
+      validatedData.data,
+      timestamps.expiresAt
     );
     router.push("/(auth)/register/pin");
+  };
+
+  const handleBack = async () => {
+    await removeStoredItem("register-identity");
+    router.back();
   };
 
   return (
@@ -213,10 +152,14 @@ export default function IdentityPage() {
       </VStack>
 
       <AuthButtonsContainer>
+        <AuthButtonBack onPress={handleBack} variant="half">
+          Voltar
+        </AuthButtonBack>
         <AuthButtonNext
           testId="register-identity-continue-button"
           disabled={isSubmitting}
           onPress={handleSubmit(submit)}
+          variant="half"
         >
           Continuar
         </AuthButtonNext>

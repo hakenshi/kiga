@@ -20,7 +20,7 @@ export interface AuthTitleProps extends PropsWithChildren, TextProps {
 
 export function AuthTitle({
   children,
-  className = "text-2xl font-bold",
+  className = "text-2xl font-heading font-bold",
   ...props
 }: AuthTitleProps) {
   return (
@@ -36,7 +36,7 @@ export interface AuthSubtitleProps extends PropsWithChildren, TextProps {
 
 export function AuthSubtitle({
   children,
-  className = "text-zinc-600",
+  className = "text-zinc-600 font-body",
   ...props
 }: AuthSubtitleProps) {
   return (

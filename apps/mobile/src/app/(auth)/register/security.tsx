@@ -11,119 +11,56 @@ import {
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import { registerSecuritySchema } from "@/lib/db/zod/zod-schemas";
-import { createTimestamps, isExpired } from "@/lib/utils";
+import {
+  createTimestamps,
+  getStoredItem,
+  removeStoredItem,
+  setStoredItem,
+} from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { deleteItemAsync, getItem, setItemAsync } from "expo-secure-store";
 import { Eye, EyeOff, KeyRound, Lock } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-
-type RegisterSecurityStore = {
-  data: {
-    password: string;
-    confirmPassword: string;
-  };
-  updatedAt: number;
-  expiresAt: number;
-};
 
 export default function SecurityPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const registerSecurity = getItem("register-security");
-  const registerSecurityData: RegisterSecurityStore | null = (() => {
-    if (!registerSecurity) return null;
-    try {
-      const parsed: RegisterSecurityStore = JSON.parse(registerSecurity);
-      if (isExpired(parsed.expiresAt)) {
-        return null;
-      }
-      return parsed;
-    } catch {
-      return null;
-    }
-  })();
+  const registerSecurityData = getStoredItem<{
+    password: string;
+    confirmPassword: string;
+  }>("register-security");
 
   const {
     control,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm<RegisterSecurityInput, any, RegisterSecuritySchema>({
     resolver: zodResolver(registerSecuritySchema),
     defaultValues: {
-      password: registerSecurityData ? registerSecurityData.data.password : "",
-      confirmPassword: registerSecurityData
-        ? registerSecurityData.data.confirmPassword
-        : "",
+      password: registerSecurityData?.password ?? "",
+      confirmPassword: registerSecurityData?.confirmPassword ?? "",
     },
   });
 
-  useEffect(() => {
-    const checkExpiration = async () => {
-      const stored = getItem("register-security");
-      if (!stored) return;
-
-      try {
-        const parsed: RegisterSecurityStore = JSON.parse(stored);
-        if (typeof parsed.expiresAt === "number") {
-          const remainingTime = parsed.expiresAt - Date.now();
-          if (remainingTime <= 0) {
-            await deleteItemAsync("register-security");
-            reset({
-              password: "",
-              confirmPassword: "",
-            });
-          } else {
-            const timer = setTimeout(async () => {
-              await deleteItemAsync("register-security");
-              reset({
-                password: "",
-                confirmPassword: "",
-              });
-            }, remainingTime);
-            return () => clearTimeout(timer);
-          }
-        }
-      } catch {
-        await deleteItemAsync("register-security");
-        reset({
-          password: "",
-          confirmPassword: "",
-        });
-      }
-    };
-
-    let cleanupTimer: (() => void) | undefined;
-    checkExpiration().then((cleanup) => {
-      if (typeof cleanup === "function") {
-        cleanupTimer = cleanup;
-      }
-    });
-
-    return () => {
-      if (cleanupTimer) cleanupTimer();
-    };
-  }, [reset]);
-
   const submit = async (formData: RegisterSecuritySchema) => {
     const timestamps = createTimestamps();
-    const registerSecurityStore = {
-      data: {
+    await setStoredItem(
+      "register-security",
+      {
         password: formData.password,
         confirmPassword: formData.confirmPassword,
       },
-      ...timestamps,
-    };
-
-    await setItemAsync(
-      "register-security",
-      JSON.stringify(registerSecurityStore)
+      timestamps.expiresAt
     );
     router.push("/(auth)/register/identity");
+  };
+
+  const handleBack = async () => {
+    await removeStoredItem("register-security");
+    router.back();
   };
 
   return (
@@ -211,7 +148,7 @@ export default function SecurityPage() {
         <AuthButtonBack
           variant="half"
           disabled={isSubmitting}
-          onPress={() => router.back()}
+          onPress={handleBack}
           testId="register-security-back-button"
         >
           Voltar

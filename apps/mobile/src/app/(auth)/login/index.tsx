@@ -1,5 +1,4 @@
-import { AuthHeader, AuthSubtitle, AuthTitle } from "@/components/auth/auth-pages-header";
-import AuthPagesShell from "@/components/auth/auth-pages-shell";
+import { AuthSubtitle, AuthTitle } from "@/components/auth/auth-pages-header";
 import { AuthButtonNext, AuthButtonsContainer } from "@/components/auth/auth-pages-buttons";
 import { Button, ButtonGroup, ButtonText } from "@/components/ui/button";
 import {
@@ -57,6 +56,14 @@ export default function LoginPage() {
 
     const user = await db.query.users.findFirst({
       where: eq(users.username, userData.username),
+      with: {
+        emotions: true,
+        journalEntries: true,
+        moods: true,
+        profileImages: true,
+        reactions: true,
+        thoughts: true
+      }
     });
 
     if (!user) {
@@ -83,13 +90,7 @@ export default function LoginPage() {
     );
 
     authStore.setUser({ user, isAuthenticated: true });
-
-    const storedUser = await SecureStore.getItemAsync("session");
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
-    if (authStore.isAuthenticated && authStore.user && parsedUser) {
-      router.navigate("/home");
-    }
+    router.navigate("/home");
   };
 
   return (

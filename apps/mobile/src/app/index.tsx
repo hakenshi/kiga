@@ -3,18 +3,17 @@ import { VStack } from "@/components/ui/vstack";
 import { Redirect, useRouter } from "expo-router";
 import { Text } from "react-native";
 import Logo from "@/components/Logo";
-import { useAuthStore } from "@/stores/auth-store";
-import { getItem } from "expo-secure-store";
+import { SessionState, useAuthStore } from "@/stores/auth-store";
 import { HStack } from "@/components/ui/hstack";
 import { ArrowRightIcon, UserIcon } from "lucide-react-native";
+import { getStoredItem } from "@/utils";
+
 
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
-  const sessionString = getItem("session");
-  const sessionData = sessionString ? JSON.parse(sessionString) : null;
-
+  const sessionData = getStoredItem<SessionState>("session");
   if (isAuthenticated || sessionData?.isAuthenticated) {
     return <Redirect href="/home" />;
   }
@@ -23,13 +22,13 @@ export default function Index() {
     <VStack className="flex-1 justify-center items-center px-5 py-20">
       <VStack className="flex-1 justify-center items-center gap-4">
         <Logo size="xl" />
-        <Text className="text-2xl text-center">
+        <Text className="text-2xl text-center font-heading">
           Bem-vindo ao Kiga!
         </Text>
-        <Text className="text-lg text-zinc-600 text-center">
+        <Text className="text-lg text-zinc-600 text-center font-body">
           Seu diário privado para registrar pensamentos, emoções e humor.
         </Text>
-        <Text className="text-lg text-zinc-600 text-center">
+        <Text className="text-lg text-zinc-600 text-center font-body">
           100% offline
         </Text>
       </VStack>
@@ -49,7 +48,7 @@ export default function Index() {
           <Text>
             Já possui uma conta?
           </Text>
-          <Button variant="ghost" className="shadow-none" onPress={() => router.push("/login")}>
+          <Button variant="ghost" className="shadow-none" onPress={() => { }}>
             <ButtonText className="font-bold">
               Fazer Login
             </ButtonText>

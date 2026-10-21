@@ -1,7 +1,7 @@
-import { AuthButtonsContainer } from "@/components/auth/auth-pages-buttons";
+import { AuthButtonBack, AuthButtonsContainer } from "@/components/auth/auth-pages-buttons";
 import { AuthHeader, AuthSubtitle, AuthTitle } from "@/components/auth/auth-pages-header";
 import AuthPagesShell from "@/components/auth/auth-pages-shell";
-import { Button, ButtonText } from "@/components/ui/button";
+import { Button, ButtonGroup, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
   FormControlError,
@@ -15,14 +15,16 @@ import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { registerPinSchema } from "@/lib/db/zod/zod-schemas";
+import { birthDateSchema, registerPinSchema } from "@/lib/db/zod/zod-schemas";
+import { clearRegisterStorage, getStoredItem } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { deleteItemAsync, getItem, setItemAsync } from "expo-secure-store";
-import { Check, KeyRound } from "lucide-react-native";
-import { useEffect } from "react";
+import { setItemAsync } from "expo-secure-store";
+import { Check, DeleteIcon, KeyRound } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
+import { RegisterNameData } from "./index";
+import { View } from "react-native";
 
 export default function PinPage() {
   const router = useRouter();
@@ -31,7 +33,6 @@ export default function PinPage() {
   const {
     control,
     handleSubmit,
-    reset,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterPinSchema>({
@@ -41,58 +42,23 @@ export default function PinPage() {
     },
   });
 
-  useEffect(() => {
-    const checkExpiration = async () => {
-      const keys = ["register-name", "register-security", "register-identity"] as const;
-      const now = Date.now();
-      let hasExpired = false;
-
-      for (const key of keys) {
-        const item = getItem(key);
-        if (item) {
-          try {
-            const parsed = JSON.parse(item);
-            if (typeof parsed.expiresAt === "number" && now > parsed.expiresAt) {
-              await deleteItemAsync(key);
-              hasExpired = true;
-            }
-          } catch {
-            await deleteItemAsync(key);
-            hasExpired = true;
-          }
-        }
-      }
-
-      if (hasExpired) {
-        reset({ pin: "" });
-        setError("pin", {
-          type: "manual",
-          message: "O tempo de cadastro expirou. Por favor, reinicie o processo.",
-        });
-      }
-    };
-
-    checkExpiration();
-  }, [reset, setError]);
-
   const submit = async (formData: RegisterPinSchema) => {
-    const nameRaw = getItem("register-name");
-    const securityRaw = getItem("register-security");
-    const identityRaw = getItem("register-identity");
+    const nameData = getStoredItem<RegisterNameData>("register-name");
+    const securityData =
+      getStoredItem<RegisterSecuritySchema>("register-security");
+    const identityData =
+      getStoredItem<RegisterIdentitySchema>("register-identity");
 
-    if (!nameRaw || !securityRaw || !identityRaw) {
+    if (!nameData || !securityData || !identityData) {
       setError("pin", {
         type: "manual",
-        message: "Dados de etapas anteriores incompletos. Reinicie o cadastro.",
+        message:
+          "Dados de etapas anteriores incompletos ou expirados. Reinicie o cadastro.",
       });
       return;
     }
 
     try {
-      const nameData = JSON.parse(nameRaw).data;
-      const securityData = JSON.parse(securityRaw).data;
-      const identityData = JSON.parse(identityRaw).data;
-
       const [createdUser] = await db
         .insert(users)
         .values({
@@ -100,7 +66,7 @@ export default function PinPage() {
           secondName: nameData.secondName,
           username: nameData.username,
           password: securityData.password,
-          birthDate: new Date(nameData.birthDate ?? securityData.birthDate),
+          birthDate: birthDateSchema.parse(nameData.birthDate),
           gender: identityData.gender,
           pronoun: identityData.pronoun,
           pin: formData.pin,
@@ -111,9 +77,7 @@ export default function PinPage() {
         throw new Error("Falha ao registrar usuário.");
       }
 
-      await deleteItemAsync("register-name");
-      await deleteItemAsync("register-security");
-      await deleteItemAsync("register-identity");
+      await clearRegisterStorage();
 
       const sessionUser: User = {
         id: createdUser.id,
@@ -165,17 +129,18 @@ export default function PinPage() {
               </FormControlLabel>
               <Input>
                 <InputSlot>
-                  <InputIcon as={KeyRound} />
+                  <InputIcon as={KeyRound} size={18} />
                 </InputSlot>
                 <InputField
                   testID="register-pin-input"
                   keyboardType="numeric"
-                  maxLength={6}
-                  type="password"
+                  maxLength={6} type="password"
                   onChangeText={field.onChange}
                   value={field.value}
                   onBlur={field.onBlur}
                   placeholder="••••"
+                  editable={false}
+                  className="h-20 px-5 text-4xl"
                 />
               </Input>
               <FormControlHelper>
@@ -189,12 +154,26 @@ export default function PinPage() {
             </FormControl>
           )}
         />
+        <ButtonGroup className="flex-1 flex-wrap justify-center items-center py-5">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0].map((item, i) => (
+            <Button key={i} className="w-32 h-20" variant="secondary">
+              <ButtonText className="text-4xl text-center">
+                {item}
+              </ButtonText>
+            </Button>
+          ))}
+          <Button className="w-32 h-20">
+            <DeleteIcon key={20} color="white" />
+          </Button>
+        </ButtonGroup>
       </VStack>
-
       <AuthButtonsContainer>
+        <AuthButtonBack variant="half">
+          Voltar
+        </AuthButtonBack>
         <Button
           testID="register-pin-submit-button"
-          className="w-full flex-row items-center justify-center gap-2"
+          className="w-1/2 flex-row items-center justify-center gap-2"
           disabled={isSubmitting}
           onPress={handleSubmit(submit)}
         >
@@ -202,6 +181,6 @@ export default function PinPage() {
           <Check color="white" size={16} />
         </Button>
       </AuthButtonsContainer>
-    </AuthPagesShell>
+    </AuthPagesShell >
   );
 }
