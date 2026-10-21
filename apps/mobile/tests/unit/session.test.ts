@@ -12,7 +12,7 @@ describe("Persistência e Estrutura da Sessão", () => {
 
   it("deve salvar corretamente a sessão do usuário com flag de autenticação", async () => {
     const mockUser: User = {
-      id: "usr_12345",
+      id: 1,
       username: "yoru",
       firstName: "Yoru",
       secondName: "Kiga",
@@ -38,14 +38,14 @@ describe("Persistência e Estrutura da Sessão", () => {
     expect(rawStored).toBeDefined();
 
     const parsedSession = JSON.parse(rawStored!);
-    expect(parsedSession.id).toBe("usr_12345");
+    expect(parsedSession.id).toBe(1);
     expect(parsedSession.username).toBe("yoru");
     expect(parsedSession.isAuthenticated).toBe(true);
   });
 
   it("deve restaurar a sessão do storage para o authStore com sucesso", () => {
     const storedUserJson = JSON.stringify({
-      id: "usr_12345",
+      id: 1,
       username: "yoru",
       firstName: "Yoru",
       secondName: "Kiga",
@@ -66,7 +66,7 @@ describe("Persistência e Estrutura da Sessão", () => {
     const currentState = useAuthStore.getState();
     expect(currentState.isAuthenticated).toBe(true);
     expect(currentState.user?.username).toBe("yoru");
-    expect(currentState.user?.id).toBe("usr_12345");
+    expect(currentState.user?.id).toBe(1);
   });
 
   it("deve limpar tanto a store quanto a sessão no storage ao deslogar", () => {

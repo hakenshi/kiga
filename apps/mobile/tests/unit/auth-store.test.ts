@@ -15,7 +15,7 @@ describe("useAuthStore", () => {
 
   it("deve atualizar o usuário e definir isAuthenticated como true com setUser", () => {
     const mockUser: User = {
-      id: "123",
+      id: 1,
       username: "johndoe",
       firstName: "John",
       secondName: "Doe",
@@ -34,7 +34,7 @@ describe("useAuthStore", () => {
 
   it("deve limpar o usuário e definir isAuthenticated como false com logout", () => {
     const mockUser: User = {
-      id: "123",
+      id: 1,
       username: "johndoe",
       firstName: "John",
       secondName: "Doe",
