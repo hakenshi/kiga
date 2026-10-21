@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { Link, Stack, usePathname } from "expo-router";
+import { useAuthStore } from "@/stores/auth-store";
+import { Link, Redirect, Stack, usePathname } from "expo-router";
+import { getItem } from "expo-secure-store";
 import { Calendar, ChartBar, HomeIcon, UserIcon } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -10,11 +12,21 @@ export default function HomeLayout() {
   const { bottom, top } = useSafeAreaInsets()
   const currentPath = usePathname()
 
+  const { isAuthenticated, user } = useAuthStore()
+
+  const userData = getItem("session")
+
+  const userParsedData = userData ? JSON.parse(userData) : null
+
+  if (!isAuthenticated && !userParsedData?.isAuthenticated) {
+    return <Redirect href="/" />
+  }
+
   return (
     <VStack className="flex-1">
       <HStack className="bg-white p-5" style={{ paddingTop: top, }}>
         <Text>
-          Header
+          {user?.username}
         </Text>
       </HStack>
       <View className="flex-1 px-5 py-2">

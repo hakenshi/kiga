@@ -1,14 +1,19 @@
-import { User } from "@/lib/db/zod-schemas"
-import { create } from "zustand"
+import { create } from "zustand";
 
+export type SessionState = {
+  user: User | null;
+  isAuthenticated: boolean
+};
 
-type State = {
-  user?: User
-}
-type Actions = {
-  updateAuth: (user: State['user']) => void
-}
-export const useAuthStore = create<State & Actions>((set) => ({
-  user: undefined,
-  updateAuth: (user: State["user"]) => set(() => ({ user: user })),
-}))
+type SessionActions = {
+  setUser: ({ user, isAuthenticated }: SessionState) => void;
+  logout: () => void;
+};
+
+export const useAuthStore = create<SessionState & SessionActions>((set) => ({
+  isAuthenticated: false,
+  user: null,
+  setUser: ({ user, isAuthenticated }: SessionState) => set({ user, isAuthenticated }),
+  logout: () => set({ user: null, isAuthenticated: false })
+}));
+

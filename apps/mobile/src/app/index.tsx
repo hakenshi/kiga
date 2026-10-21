@@ -1,56 +1,62 @@
 import { Button, ButtonText } from "@/components/ui/button";
 import { VStack } from "@/components/ui/vstack";
-import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
-import { LogInIcon, UserPlus } from "lucide-react-native";
-import { Image } from "expo-image";
+import { Redirect, useRouter } from "expo-router";
+import { Text } from "react-native";
+import Logo from "@/components/Logo";
+import { useAuthStore } from "@/stores/auth-store";
+import { getItem } from "expo-secure-store";
+import { HStack } from "@/components/ui/hstack";
+import { ArrowRightIcon, UserIcon } from "lucide-react-native";
 
 export default function Index() {
   const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  const sessionString = getItem("session");
+  const sessionData = sessionString ? JSON.parse(sessionString) : null;
+
+  if (isAuthenticated || sessionData?.isAuthenticated) {
+    return <Redirect href="/home" />;
+  }
 
   return (
     <VStack className="flex-1 justify-center items-center px-5 py-20">
-      <View className="flex-1 justify-center items-center gap-4">
-        <Image
-          source={require("../../assets/images/kiga-logo.jpg")}
-          style={{ width: 160, height: 160, borderRadius: 20 }}
-          contentFit="contain"
-        />
+      <VStack className="flex-1 justify-center items-center gap-4">
+        <Logo size="xl" />
         <Text className="text-2xl text-center">
           Bem-vindo ao Kiga!
         </Text>
-        <Text className="text-lg text-zinc-800">
-          Como você está se sentindo hoje?
+        <Text className="text-lg text-zinc-600 text-center">
+          Seu diário privado para registrar pensamentos, emoções e humor.
         </Text>
-      </View>
-      <View className="w-full flex-1 justify-start gap-3">
-        <Button className="w-full">
+        <Text className="text-lg text-zinc-600 text-center">
+          100% offline
+        </Text>
+      </VStack>
+      <VStack space="md" className="w-full justify-end">
+        <Button onPress={() => router.push("/(auth)/register")}>
+          <UserIcon size={16} color="white" />
+          <ButtonText>
+            Começar agora - Criar Conta
+          </ButtonText>
+        </Button>
+        <Button variant="secondary">
           <ButtonText>
             Fazer login com o Google
           </ButtonText>
         </Button>
-
-        <View className="flex-row w-full gap-2">
-          <Button
-            className="flex-1 justify-center"
-            onPress={() => router.navigate("/(auth)/register")}
-          >
-            <UserPlus color="white" size={16} />
-            <ButtonText>
-              Criar Conta
-            </ButtonText>
-          </Button>
-          <Button
-            className="flex-1 justify-center"
-            onPress={() => router.navigate("/(auth)/login")}
-          >
-            <LogInIcon color="white" size={16} />
-            <ButtonText>
+        <HStack className="items-center justify-center pt-8">
+          <Text>
+            Já possui uma conta?
+          </Text>
+          <Button variant="ghost" className="shadow-none" onPress={() => router.push("/login")}>
+            <ButtonText className="font-bold">
               Fazer Login
             </ButtonText>
+            <ArrowRightIcon size={16} />
           </Button>
-        </View>
-      </View>
-    </VStack>
+        </HStack>
+      </VStack>
+    </VStack >
   );
 }
