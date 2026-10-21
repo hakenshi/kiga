@@ -12,6 +12,7 @@ import m0007 from './0007_majestic_luminals.sql';
 import m0008 from './0008_stale_carlie_cooper.sql';
 import m0009 from './0009_swift_robbie_robertson.sql';
 import m0010 from './0010_certain_the_liberteens.sql';
+import m0011 from './0011_stale_bedlam.sql';
 
   export default {
     journal,
@@ -26,7 +27,8 @@ m0006,
 m0007,
 m0008,
 m0009,
-m0010
+m0010,
+m0011
     }
   }
   

@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   emotions,
   entryEmotions,
+  entryImages,
   entryReactions,
   entryThoughts,
   journalEntries,
@@ -72,6 +73,7 @@ export const journalEntriesRelations = relations(journalEntries, ({ one, many })
   entryReactions: many(entryReactions),
   entryThoughts: many(entryThoughts),
   entryEmotions: many(entryEmotions),
+  entryImages: many(entryImages),
 }));
 
 export const entryReactionsRelations = relations(entryReactions, ({ one }) => ({
@@ -106,3 +108,10 @@ export const entryEmotionsRelations = relations(entryEmotions, ({ one }) => ({
     references: [emotions.id],
   }),
 }));
+
+export const entryImagesRelations = relations(entryImages, ({ one }) => ({
+  entry: one(journalEntries, {
+    fields: [entryImages.entryId],
+    references: [journalEntries.id],
+  }),
+}))
