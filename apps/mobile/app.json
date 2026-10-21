@@ -34,7 +34,8 @@
       "expo-sqlite",
       "expo-status-bar",
       "expo-image",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

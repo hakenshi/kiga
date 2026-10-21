@@ -4,32 +4,73 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { useEffect } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import {
+  useFonts,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from "@expo-google-fonts/plus-jakarta-sans";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from "@expo-google-fonts/inter";
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import migrations from "../../drizzle/migrations";
 import db from "../lib/db";
 import "../../global.css";
-import { getItem } from "expo-secure-store";
-import { useAuthStore } from "@/stores/auth-store";
+import { getStoredItem } from "@/lib/utils";
+import { SessionState, useAuthStore } from "@/stores/auth-store";
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+    "PlusJakartaSans-Regular": PlusJakartaSans_400Regular,
+    "PlusJakartaSans-Medium": PlusJakartaSans_500Medium,
+    "PlusJakartaSans-SemiBold": PlusJakartaSans_600SemiBold,
+    "PlusJakartaSans-Bold": PlusJakartaSans_700Bold,
+    "PlusJakartaSans-ExtraBold": PlusJakartaSans_800ExtraBold,
+
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+    "Inter-Regular": Inter_400Regular,
+    "Inter-Medium": Inter_500Medium,
+    "Inter-SemiBold": Inter_600SemiBold,
+    "Inter-Bold": Inter_700Bold,
+    "Inter-ExtraBold": Inter_800ExtraBold,
+  });
+
   const { success, error } = useMigrations(db, migrations);
   const { setUser } = useAuthStore();
 
   useEffect(() => {
-    try {
-      const sessionString = getItem("session");
-      if (sessionString) {
-        const parsed = JSON.parse(sessionString);
-        if (parsed?.isAuthenticated) {
-          const user = (parsed.user ?? parsed) as User;
-          setUser({ user, isAuthenticated: true });
-        }
-      }
-    } catch (e) {
-      console.error("Erro ao recuperar sessão:", e);
+    if ((fontsLoaded || fontError) && (success || error)) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError, success, error]);
+
+  useEffect(() => {
+    const session = getStoredItem<SessionState>("session");
+    if (session?.isAuthenticated) {
+      const user = (session.user ?? session) as User;
+      setUser({ user, isAuthenticated: true });
     }
   }, [setUser]);
 
@@ -39,6 +80,10 @@ export default function RootLayout() {
         <Text>Erro na migração do banco: {error.message}</Text>
       </View>
     );
+  }
+
+  if (!fontsLoaded && !fontError) {
+    return null;
   }
 
   if (!success) {
@@ -53,7 +98,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider mode="system">
-          <Stack screenOptions={{ headerShown: false }} />
+          <Stack screenOptions={{ animation: "none", headerShown: false }} />
         </GluestackUIProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>

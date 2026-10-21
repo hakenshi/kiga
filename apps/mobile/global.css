@@ -13,6 +13,9 @@
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
 
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
@@ -28,7 +31,23 @@
 
   --color-indicator-primary: var(--indicator-primary);
 
-  --font-body: var(--font-sans);
+  --font-heading: PlusJakartaSans_700Bold;
+  --font-title: PlusJakartaSans_700Bold;
+  --font-jakarta: PlusJakartaSans_700Bold;
+  --font-jakarta-regular: PlusJakartaSans_400Regular;
+  --font-jakarta-medium: PlusJakartaSans_500Medium;
+  --font-jakarta-semibold: PlusJakartaSans_600SemiBold;
+  --font-jakarta-bold: PlusJakartaSans_700Bold;
+  --font-jakarta-extrabold: PlusJakartaSans_800ExtraBold;
+
+  --font-sans: Inter_400Regular;
+  --font-body: Inter_400Regular;
+  --font-inter: Inter_400Regular;
+  --font-inter-regular: Inter_400Regular;
+  --font-inter-medium: Inter_500Medium;
+  --font-inter-semibold: Inter_600SemiBold;
+  --font-inter-bold: Inter_700Bold;
+  --font-inter-extrabold: Inter_800ExtraBold;
 }
 
 :root {
@@ -40,6 +59,9 @@
 
   --secondary: #f4f4f5;
   --secondary-foreground: #18181b;
+
+  --tertiary: var(--color-sky-400);
+  --tertiary-foreground: var(--color-sky-950);
 
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
@@ -68,6 +90,9 @@
 
     --secondary: #27272a;
     --secondary-foreground: #fafafa;
+
+    --tertiary: var(--color-sky-400);
+    --tertiary-foreground: var(--color-sky-950);
 
     --muted: #27272a;
     --muted-foreground: #a1a1aa;
