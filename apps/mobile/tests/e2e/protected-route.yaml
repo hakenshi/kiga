@@ -1,0 +1,9 @@
+appId: host.exp.exponent
+---
+# Tenta navegar diretamente para a rota /home
+- openLink: "exp://127.0.0.1:8081/--/home"
+
+# Verifica se a Home foi bloqueada e redirecionada para a tela de Login
+# Se a Home estiver desprotegida, este assert vai falhar mostrando a falha de segurança
+- assertVisible: "Fazer Login"
+- assertNotVisible: "Header"

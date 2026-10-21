@@ -1,0 +1,28 @@
+appId: host.exp.exponent
+---
+# Se estiver no Login ou Cadastro, volta para a Home primeiro
+- runFlow:
+    when:
+      visible: "Home"
+    commands:
+      - tapOn: "Home"
+
+- assertVisible: "Bem-vindo ao Kiga!"
+
+# Navega para tela de cadastro
+- tapOn: "Criar Conta"
+- assertVisible: "Nome de Usuário"
+- assertVisible: "Confirmar Senha"
+
+# Volta para a home
+- tapOn: "Home"
+- assertVisible: "Bem-vindo ao Kiga!"
+
+# Navega para login
+- tapOn: "Fazer Login"
+- assertVisible: "Nome de Usuário"
+- assertVisible: "Fazer login na nuvem?"
+
+# Volta para a home
+- tapOn: "Home"
+- assertVisible: "Bem-vindo ao Kiga!"

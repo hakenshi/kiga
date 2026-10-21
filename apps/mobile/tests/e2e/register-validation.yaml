@@ -1,0 +1,117 @@
+appId: host.exp.exponent
+---
+# Se estiver na tela inicial do Expo Go, abre o app kiga
+- runFlow:
+    when:
+      visible: "Recent history"
+    commands:
+      - tapOn: "kiga"
+
+# Se estiver em etapas anteriores ou com tela aberta, volta para a tela inicial
+- runFlow:
+    when:
+      visible: "PIN"
+    commands:
+      - tapOn: "Home"
+
+- runFlow:
+    when:
+      visible: "Gênero"
+    commands:
+      - tapOn: "Home"
+
+- runFlow:
+    when:
+      visible: "Senha"
+    commands:
+      - tapOn: "Home"
+
+# 1. Navega para a tela de cadastro
+- runFlow:
+    when:
+      visible: "Criar Conta"
+    commands:
+      - tapOn: "Criar Conta"
+
+# Garante que está na Etapa 1 (Nome e Usuário)
+- assertVisible: "Primeiro Nome"
+- assertVisible: "Sobrenome"
+- assertVisible: "Nome de Usuário"
+
+# Preenche a Etapa 1
+- tapOn:
+    id: "register-firstname-input"
+- eraseText: 20
+- inputText: "Yoru"
+- hideKeyboard
+
+- tapOn:
+    id: "register-secondname-input"
+- eraseText: 20
+- inputText: "Kiga"
+- hideKeyboard
+
+- evalScript: ${output.username = 'usr_' + Math.floor(Math.random() * 100000)}
+- tapOn:
+    id: "register-username-input"
+- eraseText: 20
+- inputText: ${output.username}
+- hideKeyboard
+
+- tapOn:
+    id: "register-continue-button"
+
+# Garante que avançou para a Etapa 2 (Segurança e Nascimento)
+- assertVisible: "Senha"
+- assertVisible: "Confirmar Senha"
+- assertVisible: "Data de nascimento"
+
+# Preenche a Etapa 2
+- tapOn:
+    id: "register-password-input"
+- eraseText: 20
+- inputText: "minhasenha123"
+- hideKeyboard
+
+- tapOn:
+    id: "register-confirm-password-input"
+- eraseText: 20
+- inputText: "minhasenha123"
+- hideKeyboard
+
+- tapOn:
+    id: "register-birthdate-input"
+- eraseText: 20
+- inputText: "20051998"
+- hideKeyboard
+
+- tapOn:
+    id: "register-security-continue-button"
+
+# Garante que avançou para a Etapa 3 (Gênero e Pronome)
+- assertVisible: "Gênero"
+- assertVisible: "Pronome"
+
+# Seleciona opções na Etapa 3
+- tapOn: "Masculino"
+- tapOn: "Ele/Dele"
+
+- tapOn:
+    id: "register-identity-continue-button"
+
+# Garante que avançou para a Etapa 4 (PIN e Conclusão)
+- assertVisible: "PIN"
+- assertVisible: "Crie um PIN de 4 a 6 dígitos para proteger sua conta"
+
+# Preenche o PIN
+- tapOn:
+    id: "register-pin-input"
+- eraseText: 10
+- inputText: "1234"
+- hideKeyboard
+
+- tapOn:
+    id: "register-pin-submit-button"
+
+# Garante que o usuário foi cadastrado e autenticado, acessando a área logada
+- assertVisible: "Header"

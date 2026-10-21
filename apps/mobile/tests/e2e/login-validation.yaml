@@ -1,0 +1,48 @@
+appId: host.exp.exponent
+---
+# Se estiver na tela inicial, navega para o login
+- runFlow:
+    when:
+      visible: "Fazer Login"
+    commands:
+      - tapOn: "Fazer Login"
+
+- assertVisible: "Nome de Usuário"
+- assertVisible: "Senha"
+
+# 1. Garante que os campos estão limpos
+- tapOn:
+    id: "username-input"
+- eraseText: 20
+- tapOn:
+    id: "password-input"
+- eraseText: 20
+
+# 2. Testa validação de campos vazios ao clicar em Login
+- tapOn:
+    id: "login-button"
+- assertVisible: "Informe o nome de usuário"
+- assertVisible: "Informe a senha"
+
+# 3. Testa validação de senha curta
+- tapOn:
+    id: "username-input"
+- inputText: "usuario_teste"
+
+- tapOn:
+    id: "password-input"
+- inputText: "12"
+
+- tapOn:
+    id: "login-button"
+- assertVisible: "A senha deve ter no mínimo 3 caracteres"
+
+# 4. Testa credenciais inexistentes
+- tapOn:
+    id: "password-input"
+- eraseText: 2
+- inputText: "senhaerrada"
+
+- tapOn:
+    id: "login-button"
+- assertVisible: "Nome de usuário ou senha incorretos"
