@@ -25,15 +25,17 @@ import { Check, DeleteIcon, KeyRound } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import { RegisterNameData } from "./index";
 import { View } from "react-native";
+import { HStack } from "@/components/ui/hstack";
 
 export default function PinPage() {
   const router = useRouter();
   const authStore = useAuthStore();
-
   const {
     control,
     handleSubmit,
     setError,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterPinSchema>({
     resolver: zodResolver(registerPinSchema),
@@ -50,11 +52,7 @@ export default function PinPage() {
       getStoredItem<RegisterIdentitySchema>("register-identity");
 
     if (!nameData || !securityData || !identityData) {
-      setError("pin", {
-        type: "manual",
-        message:
-          "Dados de etapas anteriores incompletos ou expirados. Reinicie o cadastro.",
-      });
+      router.push("/")
       return;
     }
 
@@ -110,42 +108,47 @@ export default function PinPage() {
     }
   };
 
+  const pin = watch("pin") || ""
+
   return (
     <AuthPagesShell>
-      <AuthHeader>
-        <AuthTitle>Código de Segurança</AuthTitle>
-        <AuthSubtitle>
-          Crie um PIN de 4 a 6 dígitos para proteger sua conta
-        </AuthSubtitle>
-      </AuthHeader>
-      <VStack className="flex-1 pt-10" space="lg">
+      <VStack className="flex-1" space="lg">
+
+        <AuthHeader>
+          <AuthTitle>Código de Segurança</AuthTitle>
+          <AuthSubtitle>
+            Crie um PIN de 4 a 6 dígitos para proteger sua conta
+          </AuthSubtitle>
+        </AuthHeader>
         <Controller
           name="pin"
           control={control}
           render={({ field }) => (
-            <FormControl isRequired isInvalid={Boolean(errors.pin)}>
+            <FormControl isRequired isInvalid={Boolean(errors.pin)} className="">
               <FormControlLabel>
                 <FormControlLabelText>PIN</FormControlLabelText>
               </FormControlLabel>
-              <Input>
-                <InputSlot>
-                  <InputIcon as={KeyRound} size={18} />
-                </InputSlot>
-                <InputField
-                  testID="register-pin-input"
-                  keyboardType="numeric"
-                  maxLength={6} type="password"
-                  onChangeText={field.onChange}
-                  value={field.value}
-                  onBlur={field.onBlur}
-                  placeholder="••••"
-                  editable={false}
-                  className="h-20 px-5 text-4xl"
-                />
-              </Input>
+              <HStack space="md" className="justify-center py-5">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Input key={i} className="w-1/5">
+                    <InputField
+                      testID="register-pin-input"
+                      keyboardType="numeric"
+                      maxLength={6}
+                      type="password"
+                      onChangeText={field.onChange}
+                      value={field.value?.[i] ?? ""}
+                      onBlur={field.onBlur}
+                      editable={false}
+                      style={{ textAlign: "center" }}
+                      className="h-20 px-5 text-4xl"
+                    />
+                  </Input>
+                ))}
+              </HStack>
               <FormControlHelper>
                 <FormControlHelperText>
-                  O PIN deve conter de 4 a 6 números.
+                  O PIN deve conter 4 números.
                 </FormControlHelperText>
               </FormControlHelper>
               <FormControlError>
@@ -156,13 +159,17 @@ export default function PinPage() {
         />
         <ButtonGroup className="flex-1 flex-wrap justify-center items-center py-5">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0].map((item, i) => (
-            <Button key={i} className="w-32 h-20" variant="secondary">
+            <Button key={i} className="w-32 h-20" variant="secondary" onPress={() => {
+              if (item !== "") {
+                setValue("pin", pin + item, { shouldValidate: true })
+              }
+            }}>
               <ButtonText className="text-4xl text-center">
                 {item}
               </ButtonText>
             </Button>
           ))}
-          <Button className="w-32 h-20">
+          <Button className="w-32 h-20" onPress={() => setValue("pin", pin.slice(0, -1), { shouldValidate: true })}>
             <DeleteIcon key={20} color="white" />
           </Button>
         </ButtonGroup>

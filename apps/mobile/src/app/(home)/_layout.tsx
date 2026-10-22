@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { SessionState, useAuthStore } from "@/stores/auth-store";
@@ -30,25 +30,28 @@ export default function HomeLayout() {
       <View className="flex-1 px-5 py-2">
         <Stack screenOptions={{ headerShown: false }} />
       </View>
-      <HStack className="bg-white py-5 px-2 w-full justify-between" style={{ paddingBottom: bottom }}>
+      <HStack className="bg-white py-5 px-4 w-full justify-around" style={{ paddingBottom: bottom }}>
         <Link href="/home" asChild>
-          <Button variant={currentPath.includes("/home") ? "default" : "ghost"} className="flex-col shadow-none">
-            <HomeIcon color={currentPath.includes("/home") ? "white" : "black"} />
+          <Button variant={currentPath.includes("/home") ? "navgiation" : "ghost"} className="px-8 py-2 flex-col shadow-none">
+            <ButtonText className={currentPath.includes("/home") ? "text-sky-600" : "text-gray-500"}>
+              <HomeIcon color={currentPath.includes("/home") ? "#0084D1" : "black"} />
+              Feed
+            </ButtonText>
           </Button>
         </Link>
         <Link href="/history" asChild>
-          <Button variant={currentPath.includes("/history") ? "default" : "ghost"} className="flex-col shadow-none">
-            <Calendar color={currentPath.includes("/history") ? "white" : "black"} />
+          <Button variant={currentPath.includes("/history") ? "navgiation" : "ghost"} className="flex-col shadow-none px-4">
+            <Calendar color={currentPath.includes("/history") ? "#0084D1" : "black"} />
           </Button>
         </Link>
         <Link href="/statistics" asChild>
-          <Button variant={currentPath.includes("/statistics") ? "default" : "ghost"} className="flex-col shadow-none">
-            <ChartBar color={currentPath.includes("/statistics") ? "white" : "black"} />
+          <Button variant={currentPath.includes("/statistics") ? "navgiation" : "ghost"} className="flex-col shadow-none px-4">
+            <ChartBar color={currentPath.includes("/statistics") ? "#0084D1" : "black"} />
           </Button>
         </Link>
         <Link href="/profile" asChild>
-          <Button variant={currentPath.includes("/profile") ? "default" : "ghost"} className="flex-col shadow-none">
-            <UserIcon color={currentPath.includes("/profile") ? "white" : "black"} />
+          <Button variant={currentPath.includes("/profile") ? "navgiation" : "ghost"} className="flex-col shadow-none px-4">
+            <UserIcon color={currentPath.includes("/profile") ? "#0084D1" : "black"} />
           </Button>
         </Link>
       </HStack>

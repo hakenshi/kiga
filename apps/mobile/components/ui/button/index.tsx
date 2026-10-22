@@ -26,8 +26,8 @@ const buttonStyle = tva({
   base: 'rounded-xl flex-row items-center shadow-xl justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2 h-fit',
   variants: {
     variant: {
-      default:
-        'bg-primary data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
+      default: 'bg-primary data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
+      navgiation: 'bg-tertiary/20 data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
       destructive:
         'bg-destructive data-[hover=true]:bg-destructive/90 data-[active=true]:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
       outline:
