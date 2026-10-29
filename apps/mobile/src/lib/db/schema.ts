@@ -62,6 +62,7 @@ export const journalEntries = sqliteTable("journal_entries", {
   moodId: integer().references(() => moods.id, { onDelete: "set null" }),
   liked: integer({ mode: "boolean" }).notNull(),
   entryType: text({ enum: journalEntryType }),
+  title: text(),
   content: text().notNull(),
   date: integer({ mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   deletedAt: integer({ mode: "timestamp" }),
