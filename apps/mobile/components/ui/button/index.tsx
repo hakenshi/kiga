@@ -26,14 +26,14 @@ const buttonStyle = tva({
   base: 'rounded-xl flex-row items-center shadow-xl justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2 h-fit',
   variants: {
     variant: {
-      default: 'bg-primary data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
+      tertiary: 'bg-primary data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
       navgiation: 'bg-tertiary/20 data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
       destructive:
         'bg-destructive data-[hover=true]:bg-destructive/90 data-[active=true]:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
       outline:
         'border border-border bg-background shadow-xs data-[hover=true]:bg-accent data-[active=true]:bg-accent dark:bg-input/[0.045] dark:border-border/90 dark:data-[hover=true]:bg-input/[0.075] dark:data-[active=true]:bg-input/[0.075]',
       secondary: 'border-zinc-300 border bg-secondary text-secondary-foreground data-[hover=true]:bg-secondary/80 data-[active=true]:bg-secondary/80',
-      tertiary: 'bg-tertiary data-[hover=true]:bg-tertiary/90 data-[active=true]:bg-tertiary/90',
+      default: 'bg-tertiary data-[hover=true]:bg-tertiary/90 data-[active=true]:bg-tertiary/90',
       ghost: 'data-[hover=true]:bg-accent data-[active=true]:bg-accent dark:data-[hover=true]:bg-accent/50 dark:data-[active=true]:bg-accent/50',
       link: 'text-primary underline-offset-4 data-[hover=true]:underline data-[active=true]:underline',
     },
