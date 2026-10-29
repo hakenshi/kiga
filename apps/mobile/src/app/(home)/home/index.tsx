@@ -1,11 +1,5 @@
-import { Text, View } from "react-native";
+import { Redirect } from "expo-router";
 
 export default function HomePage() {
-  return (
-    <View>
-      <Text>
-        Home page
-      </Text>
-    </View>
-  )
+  return <Redirect href="/home/new-post" />;
 }

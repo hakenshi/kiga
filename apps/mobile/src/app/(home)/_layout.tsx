@@ -4,10 +4,11 @@ import { VStack } from "@/components/ui/vstack";
 import { SessionState, useAuthStore } from "@/stores/auth-store";
 import { Link, Redirect, Stack, usePathname } from "expo-router";
 import { getStoredItem } from "@/lib/utils";
-import { Calendar, ChartBar, HomeIcon, UserIcon } from "lucide-react-native";
+import { Calendar, ChartBar, HomeIcon, PlusIcon, UserIcon } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
+import NavLinkButton from "./_components/nav-link-button";
 
 export default function HomeLayout() {
   const { bottom, top } = useSafeAreaInsets()
@@ -23,58 +24,45 @@ export default function HomeLayout() {
 
   return (
     <VStack className="flex-1">
-      <HStack space="md" className="items-center bg-white p-5" style={{ paddingTop: top, }}>
-        <Avatar className="">
-          <AvatarImage />
-          <AvatarFallbackText className="text-2xl ">{user?.firstName}</AvatarFallbackText>
-        </Avatar>
-        <VStack className="pl-2">
-          <Text className="text-2xl font-jakarta">
-            {user?.firstName}
-          </Text>
-          <Text className="text-zinc-600">
-            @{user?.username}
-          </Text>
-        </VStack>
-        <DotIcon
-      </HStack>
-      <View className="flex-1 px-5 py-2">
-        <Stack screenOptions={{ headerShown: false }} />
-      </View>
-      <HStack className="bg-white py-5 px-4 w-full justify-around" style={{ paddingBottom: bottom }}>
-        <Link href="/home" asChild>
-          <Button variant={currentPath.includes("/home") ? "navgiation" : "ghost"} className="px-8 py-2 flex-col shadow-none">
-            <HomeIcon color={currentPath.includes("/home") ? "#0084D1" : "black"} />
-            <ButtonText className={currentPath.includes("/home") ? "text-sky-600" : "text-gray-500"}>
-              Feed
-            </ButtonText>
-          </Button>
-        </Link>
-        <Link href="/history" asChild>
-          <Button variant={currentPath.includes("/history") ? "navgiation" : "ghost"} className="flex-col shadow-none px-4">
-            <Calendar color={currentPath.includes("/history") ? "#0084D1" : "black"} />
-            <ButtonText className={currentPath.includes("/history") ? "text-sky-600" : "text-gray-500"}>
-              Histórico
-            </ButtonText>
-          </Button>
-        </Link>
-        <Link href="/statistics" asChild>
-          <Button variant={currentPath.includes("/statistics") ? "navgiation" : "ghost"} className="flex-col shadow-none px-4">
-            <ChartBar color={currentPath.includes("/statistics") ? "#0084D1" : "black"} />
-            <ButtonText className={currentPath.includes("/statistics") ? "text-sky-600" : "text-gray-500"}>
-              Estatísticas
-            </ButtonText>
-          </Button>
-        </Link>
-        <Link href="/profile" asChild>
-          <Button variant={currentPath.includes("/profile") ? "navgiation" : "ghost"} className="flex-col shadow-none px-4">
-            <UserIcon color={currentPath.includes("/profile") ? "#0084D1" : "black"} />
-            <ButtonText className={currentPath.includes("/profile") ? "text-sky-600" : "text-gray-500"}>
-              Meu Kiga
+      <HStack space="md" className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} items-center justify-between bg-white p-5`} style={{ paddingTop: top, }}>
+        <HStack className="items-center" space="md">
+          <Avatar className="">
+            <AvatarImage />
+            <AvatarFallbackText className="text-2xl ">{user?.firstName}</AvatarFallbackText>
+          </Avatar>
+          <View className="text-lg font-jakarta">
+            <Text>
+              {user?.firstName}
+            </Text>
+            <Text className="text-gray-500 text-sm">
+              @{user?.username}
+            </Text>
+          </View>
+        </HStack>
+
+        <Link href="/home/new-post" asChild>
+          <Button size="icon" className="rounded-full p-3" variant="tertiary">
+            <ButtonText>
+              <PlusIcon color="white" size={16} />
             </ButtonText>
           </Button>
         </Link>
       </HStack>
-    </VStack >
+      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
+      <HStack className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} bg-white py-5 px-4 w-full justify-around`} style={{ paddingBottom: bottom }}>
+        <NavLinkButton Icon={HomeIcon} path="/home">
+          Feed
+        </NavLinkButton>
+        <NavLinkButton Icon={Calendar} path="/history">
+          Histórico
+        </NavLinkButton>
+        <NavLinkButton Icon={ChartBar} path="/statistics">
+          Estatísticas
+        </NavLinkButton>
+        <NavLinkButton Icon={UserIcon} path="/profile">
+          Meu Kiga
+        </NavLinkButton>
+      </HStack>
+    </VStack>
   )
 }

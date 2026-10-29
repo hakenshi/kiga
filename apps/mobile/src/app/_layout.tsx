@@ -27,8 +27,9 @@ import db from "../lib/db";
 import "../../global.css";
 import { getStoredItem } from "@/lib/utils";
 import { SessionState, useAuthStore } from "@/stores/auth-store";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.preventAutoHideAsync().catch(() => { });
 
 const queryClient = new QueryClient();
 
@@ -98,9 +99,11 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <GluestackUIProvider mode="system">
-          <Stack screenOptions={{ animation: "none", headerShown: false }} />
+          <KeyboardProvider>
+            <Stack screenOptions={{ animation: "none", headerShown: false }} />
+          </KeyboardProvider>
         </GluestackUIProvider>
       </QueryClientProvider>
-    </GestureHandlerRootView>
+    </GestureHandlerRootView >
   );
 }

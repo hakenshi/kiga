@@ -48,7 +48,7 @@ export default function Index() {
           <Text>
             Já possui uma conta?
           </Text>
-          <Button variant="ghost" className="shadow-none" onPress={() => { }}>
+          <Button variant="ghost" className="shadow-none" onPress={() => router.push("/(auth)/login")}>
             <ButtonText className="font-bold">
               Fazer Login
             </ButtonText>

@@ -11,7 +11,7 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { Input, InputField } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -21,10 +21,9 @@ import { useAuthStore } from "@/stores/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { setItemAsync } from "expo-secure-store";
-import { Check, DeleteIcon, KeyRound } from "lucide-react-native";
+import { Check, DeleteIcon } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import { RegisterNameData } from "./index";
-import { View } from "react-native";
 import { HStack } from "@/components/ui/hstack";
 
 export default function PinPage() {
@@ -108,6 +107,7 @@ export default function PinPage() {
     }
   };
 
+  // oxlint-disable-next-line react/incompatible-library
   const pin = watch("pin") || ""
 
   return (

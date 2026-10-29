@@ -1,4 +1,4 @@
-import { Stack, usePathname } from "expo-router";
+import { Slot, usePathname } from "expo-router";
 import { VStack } from "@/components/ui/vstack";
 import { View } from "react-native";
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
@@ -21,7 +21,7 @@ export default function RegisterLayout() {
           <ProgressFilledTrack className="rounded-full bg-primary" />
         </Progress>
       </View>
-      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
+      <Slot />
     </VStack >
   );
 }
