@@ -7378,69 +7378,79 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "fr_3wk",
-                  "name": "JournalEntry Card 1",
+                  "id": "eH7FX",
+                  "name": "Twitter Post 1 (Pensamento)",
                   "width": "fill_container",
-                  "fill": "#FFFFFF",
+                  "fill": "$bg-card",
                   "cornerRadius": 16,
-                  "stroke": "#E4E4E7",
+                  "stroke": "$border-base",
                   "strokeWidth": 1,
-                  "layout": "vertical",
-                  "gap": 10,
+                  "gap": 12,
                   "padding": 14,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "fr_3vt",
-                      "name": "Post 1 Header",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
+                      "id": "JFvcj",
+                      "name": "Avatar Column",
+                      "width": 36,
+                      "layout": "vertical",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "frame",
-                          "id": "fr_3vq",
-                          "name": "Author Row",
-                          "gap": 8,
+                          "id": "ObOgD",
+                          "name": "Avatar Container",
+                          "width": 36,
+                          "height": 36,
+                          "fill": "#F4F4F5",
+                          "cornerRadius": 999,
+                          "stroke": "$border-base",
+                          "strokeWidth": 1,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "R0QW1",
+                              "name": "Avatar Initial",
+                              "fill": "$text-primary",
+                              "content": "F",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dbEja",
+                      "name": "Post Body Column",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "QsnbG",
+                          "name": "Post Header Instance",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "frame",
-                              "id": "fr_3vk",
-                              "name": "Mini Avatar",
-                              "width": 32,
-                              "height": 32,
-                              "fill": "#F4F4F5",
-                              "cornerRadius": 999,
-                              "stroke": "#E4E4E7",
-                              "strokeWidth": 1,
-                              "justifyContent": "center",
+                              "id": "yHOQr",
+                              "name": "Author Meta Stack",
+                              "gap": 5,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "tx_3vj",
-                                  "name": "Initial",
-                                  "fill": "#18181B",
-                                  "content": "F",
-                                  "fontFamily": "Plus Jakarta Sans",
-                                  "fontSize": 14,
-                                  "fontWeight": "700"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "fr_3vp",
-                              "name": "Names Stack",
-                              "gap": 4,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "tx_3vl",
-                                  "name": "Name",
-                                  "fill": "#09090B",
+                                  "id": "pHETM",
+                                  "name": "Author Name",
+                                  "fill": "$text-primary",
                                   "content": "Felipe",
                                   "fontFamily": "Plus Jakarta Sans",
                                   "fontSize": 13,
@@ -7448,9 +7458,9 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "tx_3vm",
-                                  "name": "Handle",
-                                  "fill": "#71717A",
+                                  "id": "dMCIT",
+                                  "name": "Author Handle",
+                                  "fill": "$text-muted",
                                   "content": "@yoru",
                                   "fontFamily": "Inter",
                                   "fontSize": 12,
@@ -7458,9 +7468,9 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "tx_3vn",
-                                  "name": "Dot",
-                                  "fill": "#71717A",
+                                  "id": "QktMB",
+                                  "name": "Meta Dot",
+                                  "fill": "$text-muted",
                                   "content": "·",
                                   "fontFamily": "Inter",
                                   "fontSize": 12,
@@ -7468,120 +7478,183 @@
                                 },
                                 {
                                   "type": "text",
-                                  "id": "tx_3vo",
-                                  "name": "Date",
-                                  "fill": "#71717A",
-                                  "content": "Hoje, 14:20",
+                                  "id": "XepNh",
+                                  "name": "Post Time",
+                                  "fill": "$text-muted",
+                                  "content": "14:20",
                                   "fontFamily": "Inter",
                                   "fontSize": 11,
                                   "fontWeight": "normal"
                                 }
                               ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "m102eN",
+                              "name": "Header Right Actions",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "FAuwc",
+                                  "name": "Mood Badge Pill",
+                                  "fill": "#F0FDF4",
+                                  "cornerRadius": 999,
+                                  "stroke": "#BBF7D0",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    2,
+                                    7
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "N68Yof",
+                                      "name": "Mood Text",
+                                      "fill": "#15803D",
+                                      "content": "🙂 Bem",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 11,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "icon",
+                                  "id": "Q248Yi",
+                                  "name": "More Options Icon",
+                                  "width": 15,
+                                  "height": 15,
+                                  "icon": "ellipsis",
+                                  "library": "lucide",
+                                  "fill": "#A1A1AA"
+                                }
+                              ]
                             }
                           ]
                         },
                         {
                           "type": "frame",
-                          "id": "fr_3vs",
-                          "name": "Mood Badge",
-                          "fill": "#F0FDF4",
-                          "cornerRadius": 999,
-                          "stroke": "#BBF7D0",
-                          "strokeWidth": 1,
-                          "padding": [
-                            3,
-                            8
-                          ],
+                          "id": "v4Ckw7",
+                          "name": "Post Content Instance",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
                           "children": [
                             {
                               "type": "text",
-                              "id": "tx_3vr",
-                              "name": "Mood Text",
-                              "fill": "#15803D",
-                              "content": "🙂 Bem (moodId)",
+                              "id": "p86z8",
+                              "name": "Thought Content Text",
+                              "fill": "$text-primary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Apresentação da arquitetura de sincronização do TCC. No início bateu aquela sensação de que qualquer pergunta imprevista invalidaria meses de esforço, mas respirei e conduzi o alinhamento com clareza.",
+                              "lineHeight": 1.45,
                               "fontFamily": "Inter",
-                              "fontSize": 11,
-                              "fontWeight": "600"
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "tx_3vu",
-                      "name": "Entry Content",
-                      "fill": "#18181B",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "Apresentação da arquitetura de sincronização do TCC. No início bateu aquela sensação de que qualquer pergunta imprevista invalidaria meses de esforço, mas respirei e conduzi o alinhamento com clareza.",
-                      "lineHeight": 1.45,
-                      "fontFamily": "Inter",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "fr_3w7",
-                      "name": "Schema Relations Stack",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 6,
-                      "children": [
+                        },
                         {
                           "type": "frame",
-                          "id": "fr_3vz",
-                          "name": "Thoughts Row",
+                          "id": "nS6tV",
+                          "name": "Post Relations Instance",
+                          "width": "fill_container",
+                          "layout": "vertical",
                           "gap": 6,
-                          "alignItems": "center",
                           "children": [
                             {
                               "type": "frame",
-                              "id": "fr_3vw",
-                              "name": "Thought Pill 1",
-                              "fill": "#FEF2F2",
-                              "cornerRadius": 8,
-                              "stroke": "#FECACA",
-                              "strokeWidth": 1,
-                              "padding": [
-                                3,
-                                8
-                              ],
+                              "id": "UGtz7",
+                              "name": "Thoughts Tags Row",
+                              "gap": 6,
+                              "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "tx_3vv",
-                                  "name": "Th Txt",
-                                  "fill": "#B91C1C",
-                                  "content": "💭 Não vou dar conta",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
+                                  "type": "frame",
+                                  "id": "uQv7W",
+                                  "name": "Thought Tag",
+                                  "fill": "#FEF2F2",
+                                  "cornerRadius": 8,
+                                  "stroke": "#FECACA",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    3,
+                                    8
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "jQWpB",
+                                      "name": "Thought Tag Text",
+                                      "fill": "#B91C1C",
+                                      "content": "💭 Catastrofização: invalidar esforço",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "fr_3vy",
-                              "name": "Thought Pill 2",
-                              "fill": "#FEF2F2",
-                              "cornerRadius": 8,
-                              "stroke": "#FECACA",
-                              "strokeWidth": 1,
-                              "padding": [
-                                3,
-                                8
-                              ],
+                              "id": "y6gAXD",
+                              "name": "Emotions & Reactions Tags Row",
+                              "gap": 6,
+                              "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "text",
-                                  "id": "tx_3vx",
-                                  "name": "Th Txt 2",
-                                  "fill": "#B91C1C",
-                                  "content": "💭 Vão me julgar amador",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
+                                  "type": "frame",
+                                  "id": "l32kqt",
+                                  "name": "Emotion Tag",
+                                  "fill": "#F0FDF4",
+                                  "cornerRadius": 8,
+                                  "stroke": "#BBF7D0",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    3,
+                                    8
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "nkINk",
+                                      "name": "Emotion Tag Text",
+                                      "fill": "#15803D",
+                                      "content": "❤️ Alívio",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "QCMTM",
+                                  "name": "Reaction Tag",
+                                  "fill": "#FFFBEB",
+                                  "cornerRadius": 8,
+                                  "stroke": "#FDE68A",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    3,
+                                    8
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "uRhaH",
+                                      "name": "Reaction Tag Text",
+                                      "fill": "#B45309",
+                                      "content": "⚡ Respiração 4-7-8",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
                                 }
                               ]
                             }
@@ -7589,165 +7662,39 @@
                         },
                         {
                           "type": "frame",
-                          "id": "fr_3w6",
-                          "name": "Emotions and Reactions Row",
-                          "gap": 6,
+                          "id": "bjxWn",
+                          "name": "Post Actions Instance",
+                          "width": "fill_container",
+                          "padding": [
+                            4,
+                            0
+                          ],
+                          "justifyContent": "space_between",
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "frame",
-                              "id": "fr_3w1",
-                              "name": "Emotion Pill 1",
-                              "fill": "#EFF6FF",
-                              "cornerRadius": 8,
-                              "stroke": "#BFDBFE",
-                              "strokeWidth": 1,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "tx_3w0",
-                                  "name": "Em Txt 1",
-                                  "fill": "#1D4ED8",
-                                  "content": "❤️ Ansiedade",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "fr_3w3",
-                              "name": "Emotion Pill 2",
-                              "fill": "#F0FDF4",
-                              "cornerRadius": 8,
-                              "stroke": "#BBF7D0",
-                              "strokeWidth": 1,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "tx_3w2",
-                                  "name": "Em Txt 2",
-                                  "fill": "#15803D",
-                                  "content": "❤️ Alívio",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "fr_3w5",
-                              "name": "Reaction Pill 1",
-                              "fill": "#FFFBEB",
-                              "cornerRadius": 8,
-                              "stroke": "#FDE68A",
-                              "strokeWidth": 1,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "tx_3w4",
-                                  "name": "Re Txt 1",
-                                  "fill": "#B45309",
-                                  "content": "⚡ Respiração 4-7-8",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "fr_3wj",
-                      "name": "Post 1 Actions Bar",
-                      "width": "fill_container",
-                      "stroke": "#F4F4F5",
-                      "strokeWidth": 1,
-                      "padding": [
-                        8,
-                        4,
-                        2,
-                        4
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "fr_3wh",
-                          "name": "Left Actions",
-                          "gap": 16,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "fr_3wa",
-                              "name": "Like Button (liked: true)",
+                              "id": "w6QD3",
+                              "name": "Action Reply",
                               "gap": 5,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "icon",
-                                  "id": "ic_3w8",
-                                  "name": "Heart Icon",
-                                  "width": 16,
-                                  "height": 16,
-                                  "icon": "heart",
-                                  "library": "lucide",
-                                  "fill": "#EF4444"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "tx_3w9",
-                                  "name": "Liked Label",
-                                  "fill": "#EF4444",
-                                  "content": "Favoritado (liked)",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 11,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "fr_3wd",
-                              "name": "Reply Button",
-                              "gap": 5,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "icon",
-                                  "id": "ic_3wb",
+                                  "id": "P2HPS",
                                   "name": "Reply Icon",
-                                  "width": 16,
-                                  "height": 16,
+                                  "width": 15,
+                                  "height": 15,
                                   "icon": "message-circle",
                                   "library": "lucide",
                                   "fill": "#71717A"
                                 },
                                 {
                                   "type": "text",
-                                  "id": "tx_3wc",
+                                  "id": "ATM56",
                                   "name": "Reply Label",
                                   "fill": "#71717A",
-                                  "content": "Refletir (reply)",
+                                  "content": "1",
                                   "fontFamily": "Inter",
                                   "fontSize": 11,
                                   "fontWeight": "normal"
@@ -7756,24 +7703,24 @@
                             },
                             {
                               "type": "frame",
-                              "id": "fr_3wg",
-                              "name": "Repost Button",
+                              "id": "bpZaw",
+                              "name": "Action Repost",
                               "gap": 5,
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "icon",
-                                  "id": "ic_3we",
-                                  "name": "Repeat Icon",
-                                  "width": 16,
-                                  "height": 16,
+                                  "id": "w0UqgH",
+                                  "name": "Repost Icon",
+                                  "width": 15,
+                                  "height": 15,
                                   "icon": "repeat",
                                   "library": "lucide",
                                   "fill": "#71717A"
                                 },
                                 {
                                   "type": "text",
-                                  "id": "tx_3wf",
+                                  "id": "MYIix",
                                   "name": "Repost Label",
                                   "fill": "#71717A",
                                   "content": "Reavaliar",
@@ -7782,18 +7729,56 @@
                                   "fontWeight": "normal"
                                 }
                               ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "jzvo2",
+                              "name": "Action Like",
+                              "gap": 5,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "DoOUZ",
+                                  "name": "Like Icon",
+                                  "width": 15,
+                                  "height": 15,
+                                  "icon": "heart",
+                                  "library": "lucide",
+                                  "fill": "#EF4444"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "piQV7",
+                                  "name": "Like Label",
+                                  "fill": "#EF4444",
+                                  "content": "1",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ero4H",
+                              "name": "Action Bookmark",
+                              "gap": 5,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "BpIq9",
+                                  "name": "Bookmark Icon",
+                                  "width": 15,
+                                  "height": 15,
+                                  "icon": "bookmark",
+                                  "library": "lucide",
+                                  "fill": "#71717A"
+                                }
+                              ]
                             }
                           ]
-                        },
-                        {
-                          "type": "icon",
-                          "id": "ic_3wi",
-                          "name": "More Menu",
-                          "width": 16,
-                          "height": 16,
-                          "icon": "more-horizontal",
-                          "library": "lucide",
-                          "fill": "#A1A1AA"
                         }
                       ]
                     }
@@ -7801,328 +7786,446 @@
                 },
                 {
                   "type": "frame",
-                  "id": "fr_3xe",
-                  "name": "JournalEntry Card 2 (Reply)",
+                  "id": "qFuOv",
+                  "name": "Twitter Post 2 (Resposta/Thread)",
                   "width": "fill_container",
-                  "fill": "#FFFFFF",
+                  "fill": "$bg-card",
                   "cornerRadius": 16,
-                  "stroke": "#E4E4E7",
+                  "stroke": "$border-base",
                   "strokeWidth": 1,
                   "layout": "vertical",
-                  "gap": 8,
+                  "gap": 10,
                   "padding": 14,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "fr_3wn",
-                      "name": "Reply Indicator Row",
-                      "gap": 4,
+                      "id": "jgDQV",
+                      "name": "Thread Context Row",
+                      "gap": 6,
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "icon",
-                          "id": "ic_3wl",
-                          "name": "Corner Down Right",
+                          "id": "U1HMa",
+                          "name": "Reply Corner Icon",
                           "width": 12,
                           "height": 12,
-                          "icon": "arrow-right",
+                          "icon": "corner-down-right",
                           "library": "lucide",
                           "fill": "#71717A"
                         },
                         {
                           "type": "text",
-                          "id": "tx_3wm",
-                          "name": "Reply Hint",
+                          "id": "MX1ao",
+                          "name": "Reply Context Text",
                           "fill": "#71717A",
-                          "content": "entryType = \"reply\" · Resposta ao registro das 14:20",
+                          "content": "Em resposta ao pensamento das 14:20 · Reavaliação cognitiva",
                           "fontFamily": "Inter",
-                          "fontSize": 10,
-                          "fontWeight": "600"
+                          "fontSize": 11,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "fr_3wy",
-                      "name": "Post 2 Header",
+                      "id": "FTz9w",
+                      "name": "Reply Main Row",
                       "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
+                      "gap": 12,
                       "children": [
                         {
                           "type": "frame",
-                          "id": "fr_3wv",
-                          "name": "Author Row 2",
-                          "gap": 8,
+                          "id": "ffkNY",
+                          "name": "Reply Avatar Col",
+                          "width": 36,
+                          "layout": "vertical",
                           "alignItems": "center",
                           "children": [
                             {
                               "type": "frame",
-                              "id": "fr_3wp",
-                              "name": "Mini Avatar 2",
-                              "width": 32,
-                              "height": 32,
+                              "id": "g9YjM",
+                              "name": "Avatar Container 2",
+                              "width": 36,
+                              "height": 36,
                               "fill": "#F4F4F5",
                               "cornerRadius": 999,
-                              "stroke": "#E4E4E7",
+                              "stroke": "$border-base",
                               "strokeWidth": 1,
                               "justifyContent": "center",
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "tx_3wo",
-                                  "name": "Initial 2",
-                                  "fill": "#18181B",
+                                  "id": "G6bGcb",
+                                  "name": "Avatar Initial 2",
+                                  "fill": "$text-primary",
                                   "content": "F",
                                   "fontFamily": "Plus Jakarta Sans",
-                                  "fontSize": 14,
+                                  "fontSize": 15,
                                   "fontWeight": "700"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "G7F2Mx",
+                          "name": "Reply Body Column",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "K6aQf",
+                              "name": "Reply Header Instance",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "H1J9R",
+                                  "name": "Author Meta Stack",
+                                  "gap": 5,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "AlvL3",
+                                      "name": "Author Name",
+                                      "fill": "$text-primary",
+                                      "content": "Felipe",
+                                      "fontFamily": "Plus Jakarta Sans",
+                                      "fontSize": 13,
+                                      "fontWeight": "700"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "uaQJx",
+                                      "name": "Author Handle",
+                                      "fill": "$text-muted",
+                                      "content": "@yoru",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "gsz6w",
+                                      "name": "Meta Dot",
+                                      "fill": "$text-muted",
+                                      "content": "·",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "jzXpI",
+                                      "name": "Post Time",
+                                      "fill": "$text-muted",
+                                      "content": "14:45",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "E7RERW",
+                                  "name": "Header Right Actions",
+                                  "gap": 8,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "K2iVTc",
+                                      "name": "Mood Badge Pill",
+                                      "fill": "#F0FDF4",
+                                      "cornerRadius": 999,
+                                      "stroke": "#BBF7D0",
+                                      "strokeWidth": 1,
+                                      "padding": [
+                                        2,
+                                        7
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "c4R49B",
+                                          "name": "Mood Text",
+                                          "fill": "#15803D",
+                                          "content": "😄 Muito Bem",
+                                          "fontFamily": "Inter",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "icon",
+                                      "id": "jbI2e",
+                                      "name": "More Options Icon",
+                                      "width": 15,
+                                      "height": 15,
+                                      "icon": "ellipsis",
+                                      "library": "lucide",
+                                      "fill": "#A1A1AA"
+                                    }
+                                  ]
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "fr_3wu",
-                              "name": "Names Stack 2",
-                              "gap": 4,
-                              "alignItems": "center",
+                              "id": "G8aCvv",
+                              "name": "Reply Content Instance",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "tx_3wq",
-                                  "name": "Name 2",
-                                  "fill": "#09090B",
-                                  "content": "Felipe",
-                                  "fontFamily": "Plus Jakarta Sans",
+                                  "id": "Gm0OM",
+                                  "name": "Thought Content Text",
+                                  "fill": "$text-primary",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "A reunião terminou com elogios da equipe à cobertura dos testes. Dizer 'vou verificar esse detalhe e te confirmo por escrito' foi totalmente natural e bem aceito.",
+                                  "lineHeight": 1.45,
+                                  "fontFamily": "Inter",
                                   "fontSize": 13,
-                                  "fontWeight": "700"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "tx_3wr",
-                                  "name": "Handle 2",
-                                  "fill": "#71717A",
-                                  "content": "@yoru",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 12,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "tx_3ws",
-                                  "name": "Dot 2",
-                                  "fill": "#71717A",
-                                  "content": "·",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 12,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "tx_3wt",
-                                  "name": "Date 2",
-                                  "fill": "#71717A",
-                                  "content": "Hoje, 14:45",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "fr_3wx",
-                          "name": "Mood Badge 2",
-                          "fill": "#F0FDF4",
-                          "cornerRadius": 999,
-                          "stroke": "#BBF7D0",
-                          "strokeWidth": 1,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "tx_3ww",
-                              "name": "Mood Text 2",
-                              "fill": "#15803D",
-                              "content": "🙂 Muito Bem",
-                              "fontFamily": "Inter",
-                              "fontSize": 11,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "tx_3wz",
-                      "name": "Content 2",
-                      "fill": "#18181B",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "A reunião terminou com elogios da equipe à cobertura dos testes. Dizer 'vou verificar esse detalhe e te confirmo por escrito' foi totalmente natural e bem aceito.",
-                      "lineHeight": 1.45,
-                      "fontFamily": "Inter",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "fr_3x4",
-                      "name": "Relations Row 2",
-                      "gap": 6,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "fr_3x1",
-                          "name": "Thought 2 Pill",
-                          "fill": "#F0FDF4",
-                          "cornerRadius": 8,
-                          "stroke": "#BBF7D0",
-                          "strokeWidth": 1,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "tx_3x0",
-                              "name": "Th 2 Txt",
-                              "fill": "#15803D",
-                              "content": "💭 Erros pontuais não anulam competência",
-                              "fontFamily": "Inter",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "fr_3x3",
-                          "name": "Reaction 2 Pill",
-                          "fill": "#FFFBEB",
-                          "cornerRadius": 8,
-                          "stroke": "#FDE68A",
-                          "strokeWidth": 1,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "tx_3x2",
-                              "name": "Re 2 Txt",
-                              "fill": "#B45309",
-                              "content": "⚡ Pausa ativa (café)",
-                              "fontFamily": "Inter",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "fr_3xd",
-                      "name": "Post 2 Actions Bar",
-                      "width": "fill_container",
-                      "stroke": "#F4F4F5",
-                      "strokeWidth": 1,
-                      "padding": [
-                        8,
-                        4,
-                        2,
-                        4
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "fr_3xb",
-                          "name": "Left Actions 2",
-                          "gap": 16,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "fr_3x7",
-                              "name": "Like 2 (liked: false)",
-                              "gap": 5,
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "icon",
-                                  "id": "ic_3x5",
-                                  "name": "Heart Icon 2",
-                                  "width": 16,
-                                  "height": 16,
-                                  "icon": "heart",
-                                  "library": "lucide",
-                                  "fill": "#71717A"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "tx_3x6",
-                                  "name": "Like 2 Txt",
-                                  "fill": "#71717A",
-                                  "content": "Curtir",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 11,
                                   "fontWeight": "normal"
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "fr_3xa",
-                              "name": "Reply 2",
-                              "gap": 5,
+                              "id": "l4d2dA",
+                              "name": "Reply Relations Instance",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "u7a1I",
+                                  "name": "Thoughts Tags Row",
+                                  "gap": 6,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "oVXfH",
+                                      "name": "Thought Tag",
+                                      "fill": "#FEF2F2",
+                                      "cornerRadius": 8,
+                                      "stroke": "#FECACA",
+                                      "strokeWidth": 1,
+                                      "padding": [
+                                        3,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "kH8o7",
+                                          "name": "Thought Tag Text",
+                                          "fill": "#B91C1C",
+                                          "content": "💭 Erros pontuais não anulam competência",
+                                          "fontFamily": "Inter",
+                                          "fontSize": 10,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "CucFh",
+                                  "name": "Emotions & Reactions Tags Row",
+                                  "gap": 6,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "CyhYF",
+                                      "name": "Emotion Tag",
+                                      "fill": "#F0FDF4",
+                                      "cornerRadius": 8,
+                                      "stroke": "#BBF7D0",
+                                      "strokeWidth": 1,
+                                      "padding": [
+                                        3,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "H64De",
+                                          "name": "Emotion Tag Text",
+                                          "fill": "#15803D",
+                                          "content": "❤️ Tranquilidade",
+                                          "fontFamily": "Inter",
+                                          "fontSize": 10,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "k2y1kj",
+                                      "name": "Reaction Tag",
+                                      "fill": "#FFFBEB",
+                                      "cornerRadius": 8,
+                                      "stroke": "#FDE68A",
+                                      "strokeWidth": 1,
+                                      "padding": [
+                                        3,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "apZog",
+                                          "name": "Reaction Tag Text",
+                                          "fill": "#B45309",
+                                          "content": "⚡ Pausa ativa (café)",
+                                          "fontFamily": "Inter",
+                                          "fontSize": 10,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "tKESF",
+                              "name": "Reply Actions Instance",
+                              "width": "fill_container",
+                              "padding": [
+                                4,
+                                0
+                              ],
+                              "justifyContent": "space_between",
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "icon",
-                                  "id": "ic_3x8",
-                                  "name": "Reply Icon 2",
-                                  "width": 16,
-                                  "height": 16,
-                                  "icon": "message-circle",
-                                  "library": "lucide",
-                                  "fill": "#71717A"
+                                  "type": "frame",
+                                  "id": "o4FGV",
+                                  "name": "Action Reply",
+                                  "gap": 5,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "QuDWe",
+                                      "name": "Reply Icon",
+                                      "width": 15,
+                                      "height": 15,
+                                      "icon": "message-circle",
+                                      "library": "lucide",
+                                      "fill": "#71717A"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "vGrGt",
+                                      "name": "Reply Label",
+                                      "fill": "#71717A",
+                                      "content": "Refletir",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 },
                                 {
-                                  "type": "text",
-                                  "id": "tx_3x9",
-                                  "name": "Reply 2 Txt",
-                                  "fill": "#71717A",
-                                  "content": "Refletir",
-                                  "fontFamily": "Inter",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
+                                  "type": "frame",
+                                  "id": "JtiLd",
+                                  "name": "Action Repost",
+                                  "gap": 5,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "qd4BA",
+                                      "name": "Repost Icon",
+                                      "width": 15,
+                                      "height": 15,
+                                      "icon": "repeat",
+                                      "library": "lucide",
+                                      "fill": "#71717A"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "kbEGh",
+                                      "name": "Repost Label",
+                                      "fill": "#71717A",
+                                      "content": "Reavaliar",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "HBt8b",
+                                  "name": "Action Like",
+                                  "gap": 5,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "P3GXkd",
+                                      "name": "Like Icon",
+                                      "width": 15,
+                                      "height": 15,
+                                      "icon": "heart",
+                                      "library": "lucide",
+                                      "fill": "#71717A"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "CyR3V",
+                                      "name": "Like Label",
+                                      "fill": "#71717A",
+                                      "content": "Curtir",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "eLuEn",
+                                  "name": "Action Bookmark",
+                                  "gap": 5,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "x3d2w2",
+                                      "name": "Bookmark Icon",
+                                      "width": 15,
+                                      "height": 15,
+                                      "icon": "bookmark",
+                                      "library": "lucide",
+                                      "fill": "#71717A"
+                                    }
+                                  ]
                                 }
                               ]
                             }
                           ]
-                        },
-                        {
-                          "type": "icon",
-                          "id": "ic_3xc",
-                          "name": "More Menu 2",
-                          "width": 16,
-                          "height": 16,
-                          "icon": "more-horizontal",
-                          "library": "lucide",
-                          "fill": "#A1A1AA"
                         }
                       ]
                     }
@@ -11946,7 +12049,7 @@
           "id": "tx_41b",
           "name": "Note Title",
           "fill": "#09090B",
-          "content": "08. FEED SOCIAL CONTÍNUO & SCHEMA DRIZZLE",
+          "content": "08. FEED TWITTER-STYLE & COMPONENTES ISOLADOS",
           "fontFamily": "JetBrains Mono",
           "fontSize": 12,
           "fontWeight": "700"
@@ -11958,7 +12061,7 @@
           "fill": "#52525B",
           "textGrowth": "fixed-width",
           "width": "fill_container",
-          "content": "• Alinhamento Direto ao Schema: Cada card no feed mapeia 1:1 a tabela 'journalEntries' (content, date, liked, entryType: 'post' | 'reply' | 'repost' e moodId -> moods).\n• Relações Pivot no Card: 'entryThoughts' (pensamentos com 💭), 'entryEmotions' (emoções com ❤️) e 'entryReactions' (reações/ações com ⚡).\n• Sem Truncamento: O conteúdo é totalmente legível no fluxo contínuo. A psicóloga desliza o feed sem tocar para abrir telas filhas e sem perder a posição de scroll.\n• Filtros no Topo: Pílulas que filtram por moods, thoughts, emotions, reactions ou liked diretamente no SQLite local.",
+          "content": "• Arquitetura Modular Isolada: O post foi decomposto em 4 componentes reutilizáveis independentes (Header, Content, Relations, Actions) reunidos no Post Item Twitter-style.\n• Layout Twitter/X: Avatar e linha de thread na coluna esquerda; cabeçalho (@handle, timestamp, mood badge), texto do pensamento, pílulas TCC (💭 pensamentos, ❤️ emoções, ⚡ reações) e barra de interações (Refletir, Reavaliar, Curtir, Salvar) na coluna direita.\n• Encadeamento em Thread: O Post 2 funciona como resposta encadeada ao Post 1 (reavaliação cognitiva TCC), simulando threads do Twitter.\n• Fidelidade ao Schema SQLite: Mapeamento direto de journalEntries, entryThoughts, entryEmotions e entryReactions.",
           "lineHeight": 1.5,
           "fontFamily": "Inter",
           "fontSize": 12,
@@ -22738,7 +22841,8 @@
                           "fill": "#16181D",
                           "content": "Taquicardia",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -22773,7 +22877,8 @@
                           "fill": "#16181D",
                           "content": "Nó na garganta",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -22800,7 +22905,8 @@
                           "fill": "#16181D",
                           "content": "Tensão muscular",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -22855,7 +22961,8 @@
                           "fill": "#16181D",
                           "content": "Isolamento",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -22882,7 +22989,8 @@
                           "fill": "#16181D",
                           "content": "Respiração 4-7-8",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -24199,7 +24307,8 @@
                           "fill": "#16181D",
                           "content": "Comportamental",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -27559,7 +27668,8 @@
                           "fill": "#16181D",
                           "content": "Catastrofização",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
