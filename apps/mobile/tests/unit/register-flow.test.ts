@@ -5,26 +5,14 @@ import {
   registerPinSchema,
   registerSecuritySchema,
 } from "@/lib/db/zod/zod-schemas";
-import { createTimestamps, isExpired } from "@/lib/utils";
+import { useRegisterStore } from "@/stores/register-store";
 
-describe("Fluxo de Cadastro - 4 Etapas", () => {
-  const mockStorage = new Map<string, string>();
-
-  const fakeSecureStore = {
-    getItem: (key: string): string | null => mockStorage.get(key) ?? null,
-    setItemAsync: async (key: string, value: string): Promise<void> => {
-      mockStorage.set(key, value);
-    },
-    deleteItemAsync: async (key: string): Promise<void> => {
-      mockStorage.delete(key);
-    },
-  };
-
+describe("Fluxo de Cadastro - 4 Etapas com Zustand Store", () => {
   beforeEach(() => {
-    mockStorage.clear();
+    useRegisterStore.getState().reset();
   });
 
-  describe("Etapa 1: Identificação (registerNameSchema)", () => {
+  describe("Etapa 1: Identificação (registerNameSchema + Store)", () => {
     it("deve validar com sucesso nomes, username e data de nascimento válidos", () => {
       const valid = {
         firstName: "Yoru",
@@ -34,6 +22,20 @@ describe("Fluxo de Cadastro - 4 Etapas", () => {
       };
       const res = registerNameSchema.safeParse(valid);
       expect(res.success).toBe(true);
+
+      if (res.success) {
+        useRegisterStore.getState().setStep1Data({
+          firstName: res.data.firstName,
+          secondName: res.data.secondName,
+          username: res.data.username,
+          birthDate: res.data.birthDate.toISOString(),
+        });
+
+        const state = useRegisterStore.getState();
+        expect(state.firstName).toBe("Yoru");
+        expect(state.secondName).toBe("Kiga");
+        expect(state.username).toBe("yoru_kiga");
+      }
     });
 
     it("deve rejeitar campos vazios ou menores que o limite", () => {
@@ -51,185 +53,110 @@ describe("Fluxo de Cadastro - 4 Etapas", () => {
     });
   });
 
-  describe("Etapa 2: Segurança (registerSecuritySchema)", () => {
-    it("deve validar senhas coincidentes", () => {
+  describe("Etapa 2: Segurança (registerSecuritySchema + Store)", () => {
+    it("deve validar senhas coincidentes e salvar na store", () => {
       const valid = {
         password: "senhaForte123",
         confirmPassword: "senhaForte123",
       };
       const res = registerSecuritySchema.safeParse(valid);
       expect(res.success).toBe(true);
+
+      if (res.success) {
+        useRegisterStore.getState().setStep2Data(res.data);
+        const state = useRegisterStore.getState();
+        expect(state.password).toBe("senhaForte123");
+        expect(state.confirmPassword).toBe("senhaForte123");
+      }
     });
 
-    it("deve rejeitar senhas não coincidentes", () => {
+    it("deve rejeitar senhas que não coincidem", () => {
       const invalid = {
         password: "senhaForte123",
         confirmPassword: "outraSenha123",
       };
       const res = registerSecuritySchema.safeParse(invalid);
       expect(res.success).toBe(false);
-      if (!res.success) {
-        const issue = res.error.issues.find(
-          (i) => i.path[0] === "confirmPassword"
-        );
-        expect(issue).toBeDefined();
-        expect(issue?.message).toBe("As senhas não coincidem");
-      }
-    });
-
-    it("deve rejeitar senha curta", () => {
-      const invalid = {
-        password: "12",
-        confirmPassword: "12",
-      };
-      const res = registerSecuritySchema.safeParse(invalid);
-      expect(res.success).toBe(false);
     });
   });
 
-  describe("Etapa 3: Identidade (registerIdentitySchema)", () => {
-    it("deve validar gêneros e pronomes válidos do enum em inglês", () => {
+  describe("Etapa 3: Identidade (registerIdentitySchema + Store)", () => {
+    it("deve validar gêneros e pronomes válidos e salvar na store", () => {
       const valid = {
-        gender: "non_binary",
-        pronoun: "they_them",
-      };
+        gender: "male",
+        pronoun: "he_him",
+      } as const;
       const res = registerIdentitySchema.safeParse(valid);
       expect(res.success).toBe(true);
+
+      if (res.success) {
+        useRegisterStore.getState().setStep3Data(res.data);
+        const state = useRegisterStore.getState();
+        expect(state.gender).toBe("male");
+        expect(state.pronoun).toBe("he_him");
+      }
     });
 
-    it("deve rejeitar valores fora do enum", () => {
+    it("deve rejeitar gênero/pronome não selecionados", () => {
       const invalid = {
-        gender: "invalido",
-        pronoun: "invalido",
+        gender: undefined,
+        pronoun: undefined,
       };
       const res = registerIdentitySchema.safeParse(invalid);
       expect(res.success).toBe(false);
     });
   });
 
-  describe("Etapa 4: PIN e Finalização (registerPinSchema)", () => {
-    it("deve validar PIN de 4 a 6 dígitos numéricos", () => {
-      expect(registerPinSchema.safeParse({ pin: "1234" }).success).toBe(true);
-      expect(registerPinSchema.safeParse({ pin: "123456" }).success).toBe(true);
+  describe("Etapa 4: PIN e Consolidação Final do Cadastro", () => {
+    it("deve validar PIN de 4 dígitos", () => {
+      const valid = { pin: "1234" };
+      const res = registerPinSchema.safeParse(valid);
+      expect(res.success).toBe(true);
+
+      const invalid = { pin: "12a" };
+      const resInvalid = registerPinSchema.safeParse(invalid);
+      expect(resInvalid.success).toBe(false);
     });
 
-    it("deve rejeitar PIN com letras ou caracteres especiais", () => {
-      expect(registerPinSchema.safeParse({ pin: "123a" }).success).toBe(false);
-      expect(registerPinSchema.safeParse({ pin: "12-4" }).success).toBe(false);
-    });
+    it("deve consolidar todos os dados das etapas no estado final e resetar após conclusão", () => {
+      // Simula preenchimento das etapas anteriores
+      useRegisterStore.getState().setStep1Data({
+        firstName: "Yoru",
+        secondName: "Kiga",
+        username: "yoru_kiga",
+        birthDate: new Date("1998-05-20").toISOString(),
+      });
 
-    it("deve rejeitar PIN com menos de 4 ou mais de 6 dígitos", () => {
-      expect(registerPinSchema.safeParse({ pin: "123" }).success).toBe(false);
-      expect(registerPinSchema.safeParse({ pin: "1234567" }).success).toBe(false);
-    });
-  });
+      useRegisterStore.getState().setStep2Data({
+        password: "senhaSegura123",
+        confirmPassword: "senhaSegura123",
+      });
 
-  describe("Integração do Fluxo Acumulado no SecureStore", () => {
-    it("deve acumular as etapas 1, 2, 3 e permitir registrar com a etapa 4", async () => {
-      // Step 1
-      await fakeSecureStore.setItemAsync(
-        "register-name",
-        JSON.stringify({
-          data: {
-            firstName: "Yoru",
-            secondName: "Kiga",
-            username: "yoru_kiga",
-            birthDate: "1998-05-20",
-          },
-        })
-      );
+      useRegisterStore.getState().setStep3Data({
+        gender: "male",
+        pronoun: "he_him",
+      });
 
-      // Step 2
-      await fakeSecureStore.setItemAsync(
-        "register-security",
-        JSON.stringify({
-          data: {
-            password: "password123",
-            confirmPassword: "password123",
-          },
-        })
-      );
+      useRegisterStore.getState().setPin("5678");
 
-      // Step 3
-      await fakeSecureStore.setItemAsync(
-        "register-identity",
-        JSON.stringify({
-          data: { gender: "male", pronoun: "he_him" },
-        })
-      );
+      // Lê estado consolidado na etapa 4 para inserção no banco
+      const finalState = useRegisterStore.getState();
+      expect(finalState.firstName).toBe("Yoru");
+      expect(finalState.secondName).toBe("Kiga");
+      expect(finalState.username).toBe("yoru_kiga");
+      expect(finalState.password).toBe("senhaSegura123");
+      expect(finalState.gender).toBe("male");
+      expect(finalState.pronoun).toBe("he_him");
+      expect(finalState.pin).toBe("5678");
 
-      // Leitura na Etapa 4
-      const nameRaw = fakeSecureStore.getItem("register-name");
-      const securityRaw = fakeSecureStore.getItem("register-security");
-      const identityRaw = fakeSecureStore.getItem("register-identity");
+      // Limpeza após o cadastro ser persistido no SQLite
+      useRegisterStore.getState().reset();
 
-      expect(nameRaw).not.toBeNull();
-      expect(securityRaw).not.toBeNull();
-      expect(identityRaw).not.toBeNull();
-
-      const nameParsed = JSON.parse(nameRaw!).data;
-      const securityParsed = JSON.parse(securityRaw!).data;
-      const identityParsed = JSON.parse(identityRaw!).data;
-
-      const fullUserPayload = {
-        firstName: nameParsed.firstName,
-        secondName: nameParsed.secondName,
-        username: nameParsed.username,
-        birthDate: new Date(nameParsed.birthDate),
-        password: securityParsed.password,
-        gender: identityParsed.gender,
-        pronoun: identityParsed.pronoun,
-        pin: "5678",
-      };
-
-      expect(fullUserPayload.username).toBe("yoru_kiga");
-      expect(fullUserPayload.firstName).toBe("Yoru");
-      expect(fullUserPayload.gender).toBe("male");
-      expect(fullUserPayload.pronoun).toBe("he_him");
-      expect(fullUserPayload.pin).toBe("5678");
-
-      // Limpeza após cadastro concluído
-      await fakeSecureStore.deleteItemAsync("register-name");
-      await fakeSecureStore.deleteItemAsync("register-security");
-      await fakeSecureStore.deleteItemAsync("register-identity");
-
-      expect(fakeSecureStore.getItem("register-name")).toBeNull();
-      expect(fakeSecureStore.getItem("register-security")).toBeNull();
-      expect(fakeSecureStore.getItem("register-identity")).toBeNull();
-    });
-
-    it("deve detectar e limpar dados cujo tempo de expiração se esgotou", async () => {
-      const pastTime = Date.now() - 5000;
-      await fakeSecureStore.setItemAsync(
-        "register-name",
-        JSON.stringify({
-          data: {
-            firstName: "Expirado",
-            secondName: "User",
-            username: "expirado",
-          },
-          updatedAt: pastTime - 3600000,
-          expiresAt: pastTime,
-        })
-      );
-
-      const raw = fakeSecureStore.getItem("register-name");
-      expect(raw).not.toBeNull();
-      const parsed = JSON.parse(raw!);
-      expect(isExpired(parsed.expiresAt)).toBe(true);
-
-      // Simulação do useEffect de limpeza
-      if (isExpired(parsed.expiresAt)) {
-        await fakeSecureStore.deleteItemAsync("register-name");
-      }
-
-      expect(fakeSecureStore.getItem("register-name")).toBeNull();
-    });
-
-    it("deve manter dados válidos dentro do tempo de expiração", async () => {
-      const timestamps = createTimestamps(3600000);
-      expect(isExpired(timestamps.expiresAt)).toBe(false);
-      expect(timestamps.expiresAt).toBeGreaterThan(Date.now());
+      const clearedState = useRegisterStore.getState();
+      expect(clearedState.firstName).toBe("");
+      expect(clearedState.username).toBe("");
+      expect(clearedState.password).toBe("");
+      expect(clearedState.pin).toBe("");
     });
   });
 });

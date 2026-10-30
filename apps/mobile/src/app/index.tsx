@@ -3,18 +3,15 @@ import { VStack } from "@/components/ui/vstack";
 import { Redirect, useRouter } from "expo-router";
 import { Text } from "react-native";
 import Logo from "@/components/Logo";
-import { SessionState, useAuthStore } from "@/stores/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { HStack } from "@/components/ui/hstack";
 import { ArrowRightIcon, UserIcon } from "lucide-react-native";
-import { getStoredItem } from "@/utils";
-
 
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
-  const sessionData = getStoredItem<SessionState>("session");
-  if (isAuthenticated || sessionData?.isAuthenticated) {
+  if (isAuthenticated) {
     return <Redirect href="/home" />;
   }
 

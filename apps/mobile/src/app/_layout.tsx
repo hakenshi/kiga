@@ -25,8 +25,6 @@ import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import migrations from "../../drizzle/migrations";
 import db from "../lib/db";
 import "../../global.css";
-import { getStoredItem } from "@/lib/utils";
-import { SessionState, useAuthStore } from "@/stores/auth-store";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
@@ -59,21 +57,12 @@ export default function RootLayout() {
   });
 
   const { success, error } = useMigrations(db, migrations);
-  const { setUser } = useAuthStore();
 
   useEffect(() => {
     if ((fontsLoaded || fontError) && (success || error)) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError, success, error]);
-
-  useEffect(() => {
-    const session = getStoredItem<SessionState>("session");
-    if (session?.isAuthenticated) {
-      const user = (session.user ?? session) as User;
-      setUser({ user, isAuthenticated: true });
-    }
-  }, [setUser]);
 
   if (error) {
     return (

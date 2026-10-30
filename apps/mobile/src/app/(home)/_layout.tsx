@@ -1,9 +1,8 @@
 import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { SessionState, useAuthStore } from "@/stores/auth-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { Link, Redirect, Stack, usePathname } from "expo-router";
-import { getStoredItem } from "@/lib/utils";
 import { Calendar, ChartBar, HomeIcon, PlusIcon, UserIcon } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -14,11 +13,9 @@ export default function HomeLayout() {
   const { bottom, top } = useSafeAreaInsets()
   const currentPath = usePathname()
 
-  const { isAuthenticated, user } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore();
 
-  const session = getStoredItem<SessionState>("session");
-
-  if (!isAuthenticated && !session?.isAuthenticated) {
+  if (!isAuthenticated) {
     return <Redirect href="/" />;
   }
 

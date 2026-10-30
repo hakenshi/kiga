@@ -11,12 +11,7 @@ import {
 } from "@/components/ui/form-control";
 import { VStack } from "@/components/ui/vstack";
 import { registerIdentitySchema } from "@/lib/db/zod/zod-schemas";
-import {
-  createTimestamps,
-  getStoredItem,
-  removeStoredItem,
-  setStoredItem,
-} from "@/lib/utils";
+import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
@@ -40,8 +35,7 @@ export const PRONOUN_OPTIONS = [
 export default function IdentityPage() {
   const router = useRouter();
 
-  const registerIdentityData =
-    getStoredItem<RegisterIdentitySchema>("register-identity");
+  const { gender, pronoun, setStep3Data } = useRegisterStore();
 
   const {
     control,
@@ -50,29 +44,23 @@ export default function IdentityPage() {
   } = useForm<RegisterIdentitySchema>({
     resolver: zodResolver(registerIdentitySchema),
     defaultValues: {
-      gender: registerIdentityData?.gender ?? undefined,
-      pronoun: registerIdentityData?.pronoun ?? undefined,
+      gender,
+      pronoun,
     },
   });
 
-  const submit = async (formData: RegisterIdentitySchema) => {
+  const submit = (formData: RegisterIdentitySchema) => {
     const validatedData = registerIdentitySchema.safeParse(formData);
 
     if (!validatedData.success) {
       return;
     }
 
-    const timestamps = createTimestamps();
-    await setStoredItem(
-      "register-identity",
-      validatedData.data,
-      timestamps.expiresAt
-    );
+    setStep3Data(validatedData.data);
     router.push("/(auth)/register/pin");
   };
 
-  const handleBack = async () => {
-    await removeStoredItem("register-identity");
+  const handleBack = () => {
     router.back();
   };
 

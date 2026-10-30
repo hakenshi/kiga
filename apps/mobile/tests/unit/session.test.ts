@@ -1,16 +1,13 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { useAuthStore } from "@/stores/auth-store";
+import { appStorage } from "@/lib/storage";
 
-describe("Persistência e Estrutura da Sessão", () => {
-  // Mock simulado do storage (chave-valor)
-  const mockStorage = new Map<string, string>();
-
+describe("Persistência e Estrutura da Sessão com Zustand Persist", () => {
   beforeEach(() => {
-    mockStorage.clear();
     useAuthStore.getState().logout();
   });
 
-  it("deve salvar corretamente a sessão do usuário com flag de autenticação", async () => {
+  it("deve salvar e persistir corretamente a sessão do usuário ao chamar setUser", () => {
     const mockUser: User = {
       id: 1,
       username: "yoru",
@@ -22,62 +19,50 @@ describe("Persistência e Estrutura da Sessão", () => {
       createdAt: new Date(),
     };
 
-    const sessionPayload = {
-      ...mockUser,
-      isAuthenticated: true,
-    };
+    useAuthStore.getState().setUser({ user: mockUser, isAuthenticated: true });
 
-    // Simula SecureStore.setItemAsync("session", ...)
-    mockStorage.set("session", JSON.stringify(sessionPayload));
+    // Valida estado na store
+    const state = useAuthStore.getState();
+    expect(state.isAuthenticated).toBe(true);
+    expect(state.user?.username).toBe("yoru");
+    expect(state.user?.id).toBe(1);
 
-    // Valida se foi gravado
-    expect(mockStorage.has("session")).toBe(true);
+    // Valida se o middleware persist gravou no storage
+    const rawPersisted = appStorage.getItem("auth-session") as string | null;
+    expect(rawPersisted).not.toBeNull();
 
-    // Valida se o conteúdo gravado é desserializado com todas as propriedades esperadas
-    const rawStored = mockStorage.get("session");
-    expect(rawStored).toBeDefined();
-
-    const parsedSession = JSON.parse(rawStored!);
-    expect(parsedSession.id).toBe(1);
-    expect(parsedSession.username).toBe("yoru");
-    expect(parsedSession.isAuthenticated).toBe(true);
+    const parsed = JSON.parse(rawPersisted!);
+    expect(parsed.state.isAuthenticated).toBe(true);
+    expect(parsed.state.user.username).toBe("yoru");
   });
 
-  it("deve restaurar a sessão do storage para o authStore com sucesso", () => {
-    const storedUserJson = JSON.stringify({
+  it("deve limpar tanto a store quanto a persistência ao deslogar", () => {
+    const mockUser: User = {
       id: 1,
       username: "yoru",
       firstName: "Yoru",
       secondName: "Kiga",
       birthDate: new Date("1998-01-01"),
+      gender: "male",
+      pronoun: "he_him",
       createdAt: new Date(),
-      isAuthenticated: true,
-    });
+    };
 
-    // Simula leitura do storage
-    const parsedUser = JSON.parse(storedUserJson);
+    useAuthStore.getState().setUser({ user: mockUser, isAuthenticated: true });
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
 
-    // Atualiza o store com a sessão restaurada
-    useAuthStore.getState().setUser({
-      user: parsedUser,
-      isAuthenticated: parsedUser.isAuthenticated,
-    });
-
-    const currentState = useAuthStore.getState();
-    expect(currentState.isAuthenticated).toBe(true);
-    expect(currentState.user?.username).toBe("yoru");
-    expect(currentState.user?.id).toBe(1);
-  });
-
-  it("deve limpar tanto a store quanto a sessão no storage ao deslogar", () => {
-    mockStorage.set("session", JSON.stringify({ username: "yoru", isAuthenticated: true }));
-
-    // Simula logout
+    // Executa logout
     useAuthStore.getState().logout();
-    mockStorage.delete("session");
 
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
     expect(useAuthStore.getState().user).toBeNull();
-    expect(mockStorage.get("session")).toBeUndefined();
+
+    // Valida se a chave persistida refletiu o estado deslogado
+    const rawPersisted = appStorage.getItem("auth-session") as string | null;
+    if (rawPersisted) {
+      const parsed = JSON.parse(rawPersisted);
+      expect(parsed.state.isAuthenticated).toBe(false);
+      expect(parsed.state.user).toBeNull();
+    }
   });
 });

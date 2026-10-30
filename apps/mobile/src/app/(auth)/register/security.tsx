@@ -11,12 +11,7 @@ import {
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import { registerSecuritySchema } from "@/lib/db/zod/zod-schemas";
-import {
-  createTimestamps,
-  getStoredItem,
-  removeStoredItem,
-  setStoredItem,
-} from "@/lib/utils";
+import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Eye, EyeOff, KeyRound, Lock } from "lucide-react-native";
@@ -28,10 +23,7 @@ export default function SecurityPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const registerSecurityData = getStoredItem<{
-    password: string;
-    confirmPassword: string;
-  }>("register-security");
+  const { password, confirmPassword, setStep2Data } = useRegisterStore();
 
   const {
     control,
@@ -40,26 +32,20 @@ export default function SecurityPage() {
   } = useForm<RegisterSecurityInput, any, RegisterSecuritySchema>({
     resolver: zodResolver(registerSecuritySchema),
     defaultValues: {
-      password: registerSecurityData?.password ?? "",
-      confirmPassword: registerSecurityData?.confirmPassword ?? "",
+      password,
+      confirmPassword,
     },
   });
 
-  const submit = async (formData: RegisterSecuritySchema) => {
-    const timestamps = createTimestamps();
-    await setStoredItem(
-      "register-security",
-      {
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-      },
-      timestamps.expiresAt
-    );
+  const submit = (formData: RegisterSecuritySchema) => {
+    setStep2Data({
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+    });
     router.push("/(auth)/register/identity");
   };
 
-  const handleBack = async () => {
-    await removeStoredItem("register-security");
+  const handleBack = () => {
     router.back();
   };
 

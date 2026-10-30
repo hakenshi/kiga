@@ -12,30 +12,17 @@ import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { registerNameSchema } from "@/lib/db/zod/zod-schemas";
-import {
-  clearRegisterStorage,
-  createTimestamps,
-  formatDateMask,
-  getStoredItem,
-  setStoredItem,
-  toMaskedDate,
-} from "@/lib/utils";
+import { formatDateMask, toMaskedDate } from "@/lib/utils";
+import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { AtSign, Calendar, User } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 
-export type RegisterNameData = {
-  firstName: string;
-  secondName: string;
-  username: string;
-  birthDate?: string;
-};
-
 export default function NamePage() {
   const router = useRouter();
-
-  const registerNameData = getStoredItem<RegisterNameData>("register-name");
+  const { firstName, secondName, username, birthDate, setStep1Data, reset } =
+    useRegisterStore();
 
   const {
     control,
@@ -44,30 +31,25 @@ export default function NamePage() {
   } = useForm<RegisterNameInput, any, RegisterNameSchema>({
     resolver: zodResolver(registerNameSchema),
     defaultValues: {
-      firstName: registerNameData?.firstName ?? "",
-      secondName: registerNameData?.secondName ?? "",
-      username: registerNameData?.username ?? "",
-      birthDate: registerNameData?.birthDate
-        ? toMaskedDate(registerNameData.birthDate)
-        : "",
+      firstName,
+      secondName,
+      username,
+      birthDate: birthDate ? toMaskedDate(birthDate) : "",
     },
   });
 
-  const submit = async (formData: RegisterNameSchema) => {
-    const timestamps = createTimestamps();
-    await setStoredItem(
-      "register-name",
-      {
-        ...formData,
-        birthDate: formData.birthDate.toISOString(),
-      },
-      timestamps.expiresAt
-    );
+  const submit = (formData: RegisterNameSchema) => {
+    setStep1Data({
+      firstName: formData.firstName,
+      secondName: formData.secondName,
+      username: formData.username,
+      birthDate: formData.birthDate.toISOString(),
+    });
     router.push("/(auth)/register/security");
   };
 
-  const handleBack = async () => {
-    await clearRegisterStorage();
+  const handleBack = () => {
+    reset();
     router.push("/");
   };
 

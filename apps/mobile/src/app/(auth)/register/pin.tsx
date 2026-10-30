@@ -16,14 +16,12 @@ import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { birthDateSchema, registerPinSchema } from "@/lib/db/zod/zod-schemas";
-import { clearRegisterStorage, getStoredItem } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
+import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { setItemAsync } from "expo-secure-store";
 import { Check, DeleteIcon } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
-import { RegisterNameData } from "./index";
 import { HStack } from "@/components/ui/hstack";
 
 export default function PinPage() {
@@ -44,14 +42,15 @@ export default function PinPage() {
   });
 
   const submit = async (formData: RegisterPinSchema) => {
-    const nameData = getStoredItem<RegisterNameData>("register-name");
-    const securityData =
-      getStoredItem<RegisterSecuritySchema>("register-security");
-    const identityData =
-      getStoredItem<RegisterIdentitySchema>("register-identity");
+    const registerState = useRegisterStore.getState();
 
-    if (!nameData || !securityData || !identityData) {
-      router.push("/")
+    if (
+      !registerState.firstName ||
+      !registerState.username ||
+      !registerState.password ||
+      !registerState.birthDate
+    ) {
+      router.push("/");
       return;
     }
 
@@ -59,13 +58,13 @@ export default function PinPage() {
       const [createdUser] = await db
         .insert(users)
         .values({
-          firstName: nameData.firstName,
-          secondName: nameData.secondName,
-          username: nameData.username,
-          password: securityData.password,
-          birthDate: birthDateSchema.parse(nameData.birthDate),
-          gender: identityData.gender,
-          pronoun: identityData.pronoun,
+          firstName: registerState.firstName,
+          secondName: registerState.secondName,
+          username: registerState.username,
+          password: registerState.password,
+          birthDate: birthDateSchema.parse(registerState.birthDate),
+          gender: registerState.gender,
+          pronoun: registerState.pronoun,
           pin: formData.pin,
         })
         .returning();
@@ -74,7 +73,7 @@ export default function PinPage() {
         throw new Error("Falha ao registrar usuário.");
       }
 
-      await clearRegisterStorage();
+      registerState.reset();
 
       const sessionUser: User = {
         id: createdUser.id,
@@ -86,11 +85,6 @@ export default function PinPage() {
         pronoun: createdUser.pronoun,
         createdAt: createdUser.createdAt,
       };
-
-      await setItemAsync(
-        "session",
-        JSON.stringify({ ...sessionUser, isAuthenticated: true })
-      );
 
       authStore.setUser({ user: sessionUser, isAuthenticated: true });
 

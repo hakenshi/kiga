@@ -19,7 +19,6 @@ import { useAuthStore } from "@/stores/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { eq } from "drizzle-orm";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { AtSign, Eye, EyeOff, Lock } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -83,11 +82,6 @@ export default function LoginPage() {
       });
       return;
     }
-
-    await SecureStore.setItemAsync(
-      "session",
-      JSON.stringify({ ...user, isAuthenticated: true })
-    );
 
     authStore.setUser({ user, isAuthenticated: true });
     router.navigate("/home");
