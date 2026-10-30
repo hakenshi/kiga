@@ -9,6 +9,9 @@ export type Pronoun = (typeof pronounEnum)[number];
 export const journalEntryType = ["post", "reply", "repost"] as const;
 export type JournalEntryType = (typeof journalEntryType)[number];
 
+export const categoryTypeEnum = ["emotion", "thought", "reaction"] as const;
+export type CategoryType = (typeof categoryTypeEnum)[number];
+
 export const users = sqliteTable("users", {
   id: integer().primaryKey({ autoIncrement: true }),
   firstName: text().notNull(),
@@ -28,6 +31,16 @@ export const profileImages = sqliteTable("profile_images", {
   url: text().notNull()
 });
 
+export const categories = sqliteTable("categories", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  userId: integer().references(() => users.id, { onDelete: "cascade" }),
+  type: text({ enum: categoryTypeEnum }).notNull(),
+  name: text().notNull(),
+  orderIndex: integer().notNull().default(0),
+  createdAt: integer({ mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  deletedAt: integer({ mode: "timestamp" }),
+});
+
 export const moods = sqliteTable("moods", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().references(() => users.id, { onDelete: "cascade" }),
@@ -38,21 +51,27 @@ export const moods = sqliteTable("moods", {
 export const thoughts = sqliteTable("thoughts", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().references(() => users.id, { onDelete: "cascade" }),
+  categoryId: integer().references(() => categories.id, { onDelete: "set null" }),
   name: text().notNull(),
+  orderIndex: integer().notNull().default(0),
   deletedAt: integer({ mode: "timestamp" }),
 });
 
 export const emotions = sqliteTable("emotions", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().references(() => users.id, { onDelete: "cascade" }),
+  categoryId: integer().references(() => categories.id, { onDelete: "set null" }),
   name: text().notNull(),
+  orderIndex: integer().notNull().default(0),
   deletedAt: integer({ mode: "timestamp" }),
 });
 
 export const reactions = sqliteTable("reactions", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().references(() => users.id, { onDelete: "cascade" }),
+  categoryId: integer().references(() => categories.id, { onDelete: "set null" }),
   name: text().notNull(),
+  orderIndex: integer().notNull().default(0),
   deletedAt: integer({ mode: "timestamp" }),
 });
 

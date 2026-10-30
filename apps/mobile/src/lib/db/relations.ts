@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  categories,
   emotions,
   entryEmotions,
   entryImages,
@@ -15,11 +16,22 @@ import {
 
 export const userRelation = relations(users, ({ many }) => ({
   profileImages: many(profileImages),
+  categories: many(categories),
   emotions: many(emotions),
   thoughts: many(thoughts),
   moods: many(moods),
   reactions: many(reactions),
   journalEntries: many(journalEntries),
+}));
+
+export const categoriesRelation = relations(categories, ({ one, many }) => ({
+  user: one(users, {
+    fields: [categories.userId],
+    references: [users.id],
+  }),
+  emotions: many(emotions),
+  thoughts: many(thoughts),
+  reactions: many(reactions),
 }));
 
 export const userProfileImagesRelation = relations(profileImages, ({ one }) => ({
@@ -34,6 +46,10 @@ export const emotionsRelation = relations(emotions, ({ one, many }) => ({
     fields: [emotions.userId],
     references: [users.id],
   }),
+  category: one(categories, {
+    fields: [emotions.categoryId],
+    references: [categories.id],
+  }),
   entryEmotions: many(entryEmotions),
 }));
 
@@ -41,6 +57,10 @@ export const thoughtsRelation = relations(thoughts, ({ one, many }) => ({
   user: one(users, {
     fields: [thoughts.userId],
     references: [users.id],
+  }),
+  category: one(categories, {
+    fields: [thoughts.categoryId],
+    references: [categories.id],
   }),
   entryThoughts: many(entryThoughts),
 }));
@@ -57,6 +77,10 @@ export const reactionsRelations = relations(reactions, ({ one, many }) => ({
   user: one(users, {
     fields: [reactions.userId],
     references: [users.id],
+  }),
+  category: one(categories, {
+    fields: [reactions.categoryId],
+    references: [categories.id],
   }),
   entryReactions: many(entryReactions),
 }));
