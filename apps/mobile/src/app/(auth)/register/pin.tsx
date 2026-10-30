@@ -1,7 +1,7 @@
 import { AuthButtonBack, AuthButtonsContainer } from "@/components/auth/auth-pages-buttons";
 import { AuthHeader, AuthSubtitle, AuthTitle } from "@/components/auth/auth-pages-header";
 import AuthPagesShell from "@/components/auth/auth-pages-shell";
-import { Button, ButtonGroup, ButtonText } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
   FormControlError,
@@ -23,6 +23,14 @@ import { useRouter } from "expo-router";
 import { Check, DeleteIcon } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import { HStack } from "@/components/ui/hstack";
+import { View } from "react-native";
+
+const KEYPAD_ROWS = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+  ["", 0, "backspace"],
+] as const;
 
 export default function PinPage() {
   const router = useRouter();
@@ -122,9 +130,16 @@ export default function PinPage() {
               <FormControlLabel>
                 <FormControlLabelText>PIN</FormControlLabelText>
               </FormControlLabel>
-              <HStack space="md" className="justify-center py-5">
+              <HStack space="md" className="justify-center py-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Input key={i} className="w-1/5">
+                  <Input
+                    key={i}
+                    className={`h-16 w-14 rounded-2xl items-center justify-center border ${
+                      field.value?.[i]
+                        ? "border-zinc-900 border-2 bg-zinc-50"
+                        : "border-zinc-200 bg-white"
+                    }`}
+                  >
                     <InputField
                       testID="register-pin-input"
                       keyboardType="numeric"
@@ -135,7 +150,7 @@ export default function PinPage() {
                       onBlur={field.onBlur}
                       editable={false}
                       style={{ textAlign: "center" }}
-                      className="h-20 px-5 text-4xl"
+                      className="h-full w-full text-center text-3xl font-bold p-0 text-zinc-900"
                     />
                   </Input>
                 ))}
@@ -151,22 +166,55 @@ export default function PinPage() {
             </FormControl>
           )}
         />
-        <ButtonGroup className="flex-1 flex-wrap justify-center items-center py-5">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0].map((item, i) => (
-            <Button key={i} className="w-32 h-20" variant="secondary" onPress={() => {
-              if (item !== "") {
-                setValue("pin", pin + item, { shouldValidate: true })
-              }
-            }}>
-              <ButtonText className="text-4xl text-center">
-                {item}
-              </ButtonText>
-            </Button>
+
+        {/* Teclado Numérico Responsivo (Grid 3x4 com flex-1) */}
+        <VStack space="md" className="w-full max-w-[340px] self-center py-2 flex-1 justify-center">
+          {KEYPAD_ROWS.map((row, rowIndex) => (
+            <HStack key={rowIndex} space="md" className="w-full justify-between">
+              {row.map((item, colIndex) => {
+                if (item === "") {
+                  return <View key={colIndex} className="flex-1" />;
+                }
+
+                if (item === "backspace") {
+                  return (
+                    <Button
+                      key={colIndex}
+                      variant="secondary"
+                      className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-zinc-200 active:opacity-60 active:scale-95"
+                      onPress={() =>
+                        setValue("pin", pin.slice(0, -1), {
+                          shouldValidate: true,
+                        })
+                      }
+                    >
+                      <DeleteIcon color="#16181D" size={24} />
+                    </Button>
+                  );
+                }
+
+                return (
+                  <Button
+                    key={colIndex}
+                    variant="secondary"
+                    className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-zinc-200 active:opacity-60 active:scale-95"
+                    onPress={() => {
+                      if (pin.length < 6) {
+                        setValue("pin", pin + item, {
+                          shouldValidate: true,
+                        });
+                      }
+                    }}
+                  >
+                    <ButtonText className="text-2xl sm:text-3xl font-bold text-center text-zinc-900">
+                      {item}
+                    </ButtonText>
+                  </Button>
+                );
+              })}
+            </HStack>
           ))}
-          <Button className="w-32 h-20" onPress={() => setValue("pin", pin.slice(0, -1), { shouldValidate: true })}>
-            <DeleteIcon key={20} color="white" />
-          </Button>
-        </ButtonGroup>
+        </VStack>
       </VStack>
       <AuthButtonsContainer>
         <AuthButtonBack variant="half">
