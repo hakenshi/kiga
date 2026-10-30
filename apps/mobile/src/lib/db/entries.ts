@@ -1,4 +1,3 @@
-import db from "./index";
 import {
   entryEmotions,
   entryReactions,
@@ -16,13 +15,26 @@ export interface CreateJournalEntryParams {
   reactions?: { id: number; name: string }[];
 }
 
-export async function createJournalEntry(params: CreateJournalEntryParams) {
+let defaultDb: any = null;
+function getDefaultDb() {
+  if (defaultDb) return defaultDb;
+  const mod = require("./index");
+  defaultDb = mod.default || mod.db;
+  return defaultDb;
+}
+
+export async function createJournalEntry(
+  params: CreateJournalEntryParams,
+  dbInstance?: any
+) {
   const content = params.content.trim();
   if (!content) {
     throw new Error("O conteúdo do post não pode estar vazio.");
   }
 
-  const [entry] = await db
+  const database = dbInstance ?? getDefaultDb();
+
+  const [entry] = await database
     .insert(journalEntries)
     .values({
       userId: params.userId,
@@ -39,7 +51,7 @@ export async function createJournalEntry(params: CreateJournalEntryParams) {
   }
 
   if (params.emotions && params.emotions.length > 0) {
-    await db.insert(entryEmotions).values(
+    await database.insert(entryEmotions).values(
       params.emotions.map((e) => ({
         entryId: entry.id,
         emotionId: e.id,
@@ -48,7 +60,7 @@ export async function createJournalEntry(params: CreateJournalEntryParams) {
   }
 
   if (params.thoughts && params.thoughts.length > 0) {
-    await db.insert(entryThoughts).values(
+    await database.insert(entryThoughts).values(
       params.thoughts.map((t) => ({
         entryId: entry.id,
         thoughtsId: t.id,
@@ -57,7 +69,7 @@ export async function createJournalEntry(params: CreateJournalEntryParams) {
   }
 
   if (params.reactions && params.reactions.length > 0) {
-    await db.insert(entryReactions).values(
+    await database.insert(entryReactions).values(
       params.reactions.map((r) => ({
         entryId: entry.id,
         reactionId: r.id,
