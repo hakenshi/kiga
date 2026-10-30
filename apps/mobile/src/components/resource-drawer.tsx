@@ -80,6 +80,13 @@ export const RESOURCE_TYPE_CONFIG: Record<
     singular: "reação",
     plural: "reações",
   },
+  behavior: {
+    title: "O que você fez naquela hora?",
+    searchPlaceholder: "Buscar ou criar comportamento...",
+    addLabel: "Novo comportamento",
+    singular: "comportamento",
+    plural: "comportamentos",
+  },
 };
 
 function getDefaultCategoryId(
@@ -229,6 +236,7 @@ export function ResourceDrawerRoot({
 
   useEffect(() => {
     if (isOpen) {
+      // oxlint-disable-next-line react/set-state-in-effect
       loadData();
       setSearchQuery("");
       setIsEditing(false);

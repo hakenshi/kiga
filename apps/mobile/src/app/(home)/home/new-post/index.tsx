@@ -8,6 +8,7 @@ import {
   Angry,
   Brain,
   Drama,
+  Footprints,
   Frown,
   Image as ImageIcon,
   Laugh,
@@ -15,14 +16,16 @@ import {
   Smile,
   X,
 } from "lucide-react-native";
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useMemo } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import NavButton from "../../_components/nav-button";
 import { ResourceDrawer } from "@/components/resource-drawer";
+import { BehaviorDrawer, getBehaviorIcon } from "@/components/behavior-drawer";
+import { EntryTextInput } from "@/components/entry-text-input";
 import { createJournalEntry } from "@/lib/db/entries";
 import {
   newPostSchema,
@@ -65,6 +68,7 @@ export default function NewPostPage() {
     control,
     handleSubmit,
     watch,
+    getValues,
     setValue,
     formState: { isSubmitting },
   } = useForm<NewPostInput, any, NewPostSchema>({
@@ -75,20 +79,23 @@ export default function NewPostPage() {
       emotions: [],
       thoughts: [],
       reactions: [],
+      behaviors: [],
     },
   });
 
+  // oxlint-disable-next-line react/incompatible-library
   const selectedMood = watch("moodId");
   const content = watch("content") ?? "";
   const selectedEmotions = watch("emotions") ?? [];
   const selectedThoughts = watch("thoughts") ?? [];
   const selectedReactions = watch("reactions") ?? [];
+  const selectedBehaviors = watch("behaviors") ?? [];
 
   const wordCount = useMemo(() => countWords(content), [content]);
 
   // Toggle selection handlers integrados ao react-hook-form
   const toggleEmotion = (id: number, name: string) => {
-    const current = watch("emotions") ?? [];
+    const current = getValues("emotions") ?? [];
     const next = current.some((item) => item.id === id)
       ? current.filter((item) => item.id !== id)
       : [...current, { id, name }];
@@ -96,7 +103,7 @@ export default function NewPostPage() {
   };
 
   const toggleThought = (id: number, name: string) => {
-    const current = watch("thoughts") ?? [];
+    const current = getValues("thoughts") ?? [];
     const next = current.some((item) => item.id === id)
       ? current.filter((item) => item.id !== id)
       : [...current, { id, name }];
@@ -104,11 +111,34 @@ export default function NewPostPage() {
   };
 
   const toggleReaction = (id: number, name: string) => {
-    const current = watch("reactions") ?? [];
+    const current = getValues("reactions") ?? [];
     const next = current.some((item) => item.id === id)
       ? current.filter((item) => item.id !== id)
       : [...current, { id, name }];
     setValue("reactions", next, { shouldValidate: true });
+  };
+
+  const toggleBehavior = (item: {
+    id?: number;
+    content: string;
+    icon?: string | null;
+  }) => {
+    const current = getValues("behaviors") ?? [];
+    const exists = current.some(
+      (b) =>
+        (item.id !== undefined && b.id === item.id) ||
+        b.content.toLowerCase() === item.content.toLowerCase()
+    );
+    const next = exists
+      ? current.filter(
+          (b) =>
+            !(
+              (item.id !== undefined && b.id === item.id) ||
+              b.content.toLowerCase() === item.content.toLowerCase()
+            )
+        )
+      : [...current, item];
+    setValue("behaviors", next, { shouldValidate: true });
   };
 
   // Salvar Post via Service
@@ -121,6 +151,7 @@ export default function NewPostPage() {
         emotions: formData.emotions,
         thoughts: formData.thoughts,
         reactions: formData.reactions,
+        behaviors: formData.behaviors,
         date: entryDate,
       });
 
@@ -133,7 +164,8 @@ export default function NewPostPage() {
   const hasSelectedChips =
     selectedEmotions.length > 0 ||
     selectedThoughts.length > 0 ||
-    selectedReactions.length > 0;
+    selectedReactions.length > 0 ||
+    selectedBehaviors.length > 0;
 
   return (
     <VStack className="flex-1 bg-white" style={{ paddingBottom: bottom }}>
@@ -211,35 +243,26 @@ export default function NewPostPage() {
             </HStack>
           </HStack>
 
-          {/* Text Editor Area controlado */}
-          <HStack className="flex-1 p-5 items-start overflow-hidden" space="md">
-            <Avatar>
-              <AvatarImage />
-              <AvatarFallbackText>{user?.firstName}</AvatarFallbackText>
-            </Avatar>
-            <VStack className="flex-1 h-full">
-              <Controller
-                name="content"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="O que está acontecendo agora?"
-                    placeholderTextColor="#9AA0AA"
-                    className="flex-1 p-0 text-base"
-                    style={{
-                      flex: 1,
-                      textAlignVertical: "top",
-                      color: "#16181D",
-                    }}
-                    multiline
-                    scrollEnabled
-                  />
-                )}
-              />
-            </VStack>
-          </HStack>
+          {/* Text Editor Area com componente reutilizável EntryTextInput */}
+          <View className="flex-1 overflow-hidden">
+            <Controller
+              name="content"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <EntryTextInput
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="O que está acontecendo agora?"
+                  avatar={
+                    <Avatar>
+                      <AvatarImage />
+                      <AvatarFallbackText>{user?.firstName}</AvatarFallbackText>
+                    </Avatar>
+                  }
+                />
+              )}
+            />
+          </View>
 
           {/* Selected Chips Strip */}
           {hasSelectedChips && (
@@ -285,6 +308,22 @@ export default function NewPostPage() {
                     <X size={12} color="#9CA3AF" />
                   </Pressable>
                 ))}
+                {selectedBehaviors.map((b, idx) => {
+                  const IconComp = getBehaviorIcon(b.icon);
+                  return (
+                    <Pressable
+                      key={`beh-${b.id ?? idx}`}
+                      onPress={() => toggleBehavior(b)}
+                      className="flex-row items-center bg-[#F3F4F6] border border-gray-200 rounded-full px-3 py-1.5 gap-1.5"
+                    >
+                      <IconComp size={12} color="#16181D" />
+                      <Text className="text-xs font-medium text-[#16181D]">
+                        {b.content}
+                      </Text>
+                      <X size={12} color="#9CA3AF" />
+                    </Pressable>
+                  );
+                })}
               </ScrollView>
             </View>
           )}
@@ -339,6 +378,18 @@ export default function NewPostPage() {
                 </NavButton>
               </ResourceDrawer.Trigger>
             </ResourceDrawer>
+
+            <BehaviorDrawer
+              selectedBehaviors={selectedBehaviors}
+              onToggleSelect={toggleBehavior}
+              userId={user?.id}
+            >
+              <BehaviorDrawer.Trigger>
+                <NavButton Icon={Footprints} badge={selectedBehaviors.length}>
+                  Comportamento
+                </NavButton>
+              </BehaviorDrawer.Trigger>
+            </BehaviorDrawer>
 
             <NavButton Icon={ImageIcon} onPress={() => {}}>
               Foto
