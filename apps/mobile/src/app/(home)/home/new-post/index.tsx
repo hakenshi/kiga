@@ -22,7 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import NavButton from "../../_components/nav-button";
-import { ResourcePicker } from "@/components/resource-drawer";
+import { ResourceDrawer } from "@/components/resource-drawer";
 import { createJournalEntry } from "@/lib/db/entries";
 import {
   newPostSchema,
@@ -43,11 +43,6 @@ export default function NewPostPage() {
   const router = useRouter();
   const { top, bottom } = useSafeAreaInsets();
   const { user } = useAuthStore();
-
-  // Active Bottom Sheet Drawer: "emotion" | "thought" | "reaction" | null
-  const [activeDrawer, setActiveDrawer] = useState<
-    "emotion" | "thought" | "reaction" | null
-  >(null);
 
   // Data/hora capturada no momento da montagem (sem re-renders e sem setInterval)
   const entryDate = useMemo(() => new Date(), []);
@@ -170,11 +165,10 @@ export default function NewPostPage() {
               <Pressable
                 onPress={handleSubmit(onSave)}
                 disabled={isSubmitting || !content.trim()}
-                className={`h-10 px-5 rounded-full items-center justify-center ${
-                  isSubmitting || !content.trim()
+                className={`h-10 px-5 rounded-full items-center justify-center ${isSubmitting || !content.trim()
                     ? "bg-gray-300"
                     : "bg-[#16181D] active:opacity-85"
-                }`}
+                  }`}
               >
                 <Text className="text-white font-semibold text-sm">
                   {isSubmitting ? "Salvando..." : "Salvar"}
@@ -202,11 +196,10 @@ export default function NewPostPage() {
                         shouldValidate: true,
                       })
                     }
-                    className={`w-[30px] h-[30px] rounded-full items-center justify-center active:opacity-70 ${
-                      isSelected
+                    className={`w-[30px] h-[30px] rounded-full items-center justify-center active:opacity-70 ${isSelected
                         ? "bg-white border-[1.5px] border-[#16181D]"
                         : "bg-[#F2F3F5]"
-                    }`}
+                      }`}
                   >
                     <Icon
                       size={18}
@@ -308,29 +301,44 @@ export default function NewPostPage() {
         {/* Bottom Toolbar */}
         <VStack>
           <HStack className="bg-white px-3 py-1 items-center justify-around w-full border-t border-gray-100">
-            <NavButton
-              Icon={Drama}
-              badge={selectedEmotions.length}
-              onPress={() => setActiveDrawer("emotion")}
+            <ResourceDrawer
+              type="emotion"
+              selectedIds={selectedEmotions.map((e) => e.id)}
+              onToggleSelect={toggleEmotion}
+              userId={user?.id}
             >
-              Emoções
-            </NavButton>
+              <ResourceDrawer.Trigger>
+                <NavButton Icon={Drama} badge={selectedEmotions.length}>
+                  Emoções
+                </NavButton>
+              </ResourceDrawer.Trigger>
+            </ResourceDrawer>
 
-            <NavButton
-              Icon={Brain}
-              badge={selectedThoughts.length}
-              onPress={() => setActiveDrawer("thought")}
+            <ResourceDrawer
+              type="thought"
+              selectedIds={selectedThoughts.map((t) => t.id)}
+              onToggleSelect={toggleThought}
+              userId={user?.id}
             >
-              Pensamentos
-            </NavButton>
+              <ResourceDrawer.Trigger>
+                <NavButton Icon={Brain} badge={selectedThoughts.length}>
+                  Pensamentos
+                </NavButton>
+              </ResourceDrawer.Trigger>
+            </ResourceDrawer>
 
-            <NavButton
-              Icon={Activity}
-              badge={selectedReactions.length}
-              onPress={() => setActiveDrawer("reaction")}
+            <ResourceDrawer
+              type="reaction"
+              selectedIds={selectedReactions.map((r) => r.id)}
+              onToggleSelect={toggleReaction}
+              userId={user?.id}
             >
-              Reações
-            </NavButton>
+              <ResourceDrawer.Trigger>
+                <NavButton Icon={Activity} badge={selectedReactions.length}>
+                  Reações
+                </NavButton>
+              </ResourceDrawer.Trigger>
+            </ResourceDrawer>
 
             <NavButton Icon={ImageIcon} onPress={() => {}}>
               Foto
@@ -338,49 +346,6 @@ export default function NewPostPage() {
           </HStack>
         </VStack>
       </KeyboardAvoidingView>
-
-      {/* Drawers de Recursos Declarativos */}
-      <ResourcePicker
-        isOpen={activeDrawer === "emotion"}
-        onClose={() => setActiveDrawer(null)}
-        type="emotion"
-        selectedIds={selectedEmotions.map((e) => e.id)}
-        onToggleSelect={toggleEmotion}
-        userId={user?.id}
-      >
-        <ResourcePicker.Header title="O que você está sentindo?" />
-        <ResourcePicker.Search placeholder="Buscar ou criar emoção" />
-        <ResourcePicker.Content addLabel="Nova emoção" />
-        <ResourcePicker.Footer />
-      </ResourcePicker>
-
-      <ResourcePicker
-        isOpen={activeDrawer === "thought"}
-        onClose={() => setActiveDrawer(null)}
-        type="thought"
-        selectedIds={selectedThoughts.map((t) => t.id)}
-        onToggleSelect={toggleThought}
-        userId={user?.id}
-      >
-        <ResourcePicker.Header title="Pensamentos automáticos" />
-        <ResourcePicker.Search placeholder="Buscar ou criar pensamento" />
-        <ResourcePicker.Content addLabel="Novo pensamento" />
-        <ResourcePicker.Footer />
-      </ResourcePicker>
-
-      <ResourcePicker
-        isOpen={activeDrawer === "reaction"}
-        onClose={() => setActiveDrawer(null)}
-        type="reaction"
-        selectedIds={selectedReactions.map((r) => r.id)}
-        onToggleSelect={toggleReaction}
-        userId={user?.id}
-      >
-        <ResourcePicker.Header title="Reações e sensações" />
-        <ResourcePicker.Search placeholder="Buscar ou criar reação corporal" />
-        <ResourcePicker.Content addLabel="Nova reação" />
-        <ResourcePicker.Footer />
-      </ResourcePicker>
     </VStack>
   );
 }

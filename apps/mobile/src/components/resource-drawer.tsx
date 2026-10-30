@@ -49,13 +49,37 @@ import {
 } from "@/lib/db/resources";
 import type { CategoryType } from "@/lib/db/schema";
 
-const RESOURCE_LABELS: Record<
+export const RESOURCE_TYPE_CONFIG: Record<
   CategoryType,
-  { singular: string; plural: string }
+  {
+    title: string;
+    searchPlaceholder: string;
+    addLabel: string;
+    singular: string;
+    plural: string;
+  }
 > = {
-  emotion: { singular: "emoção", plural: "emoções" },
-  thought: { singular: "pensamento", plural: "pensamentos" },
-  reaction: { singular: "reação", plural: "reações" },
+  emotion: {
+    title: "O que você está sentindo?",
+    searchPlaceholder: "Buscar ou criar emoção...",
+    addLabel: "Nova emoção",
+    singular: "emoção",
+    plural: "emoções",
+  },
+  thought: {
+    title: "Pensamentos automáticos",
+    searchPlaceholder: "Buscar ou criar pensamento...",
+    addLabel: "Novo pensamento",
+    singular: "pensamento",
+    plural: "pensamentos",
+  },
+  reaction: {
+    title: "Reações e sensações",
+    searchPlaceholder: "Buscar ou criar reação corporal...",
+    addLabel: "Nova reação",
+    singular: "reação",
+    plural: "reações",
+  },
 };
 
 function getDefaultCategoryId(
@@ -70,11 +94,13 @@ function getDefaultCategoryId(
 
 // ─── CONTEXT ─────────────────────────────────────────────────────────────
 
-interface ResourcePickerContextValue {
+interface ResourceDrawerContextValue {
   type: CategoryType;
   selectedIds: number[];
   onToggleSelect: (id: number, name: string) => void;
   userId?: number;
+  isOpen: boolean;
+  open: () => void;
   onClose: () => void;
 
   categories: ResourceCategory[];
@@ -118,25 +144,27 @@ interface ResourcePickerContextValue {
   handleMoveToNextCategory: (item: ResourceItem) => Promise<void>;
 }
 
-const ResourcePickerContext = createContext<ResourcePickerContextValue | null>(
+const ResourceDrawerContext = createContext<ResourceDrawerContextValue | null>(
   null
 );
 
-export function useResourcePickerContext() {
-  const context = useContext(ResourcePickerContext);
+export function useResourceDrawerContext() {
+  const context = useContext(ResourceDrawerContext);
   if (!context) {
     throw new Error(
-      "ResourcePicker compound components must be rendered inside <ResourcePicker />"
+      "ResourceDrawer compound components must be rendered inside <ResourceDrawer />"
     );
   }
   return context;
 }
 
+export const useResourcePickerContext = useResourceDrawerContext;
+
 // ─── ROOT COMPONENT ──────────────────────────────────────────────────────
 
-export interface ResourcePickerProps {
-  isOpen: boolean;
-  onClose: () => void;
+export interface ResourceDrawerProps {
+  isOpen?: boolean;
+  onClose?: () => void;
   type: CategoryType;
   selectedIds: number[];
   onToggleSelect: (id: number, name: string) => void;
@@ -144,15 +172,31 @@ export interface ResourcePickerProps {
   children: React.ReactNode;
 }
 
-export function ResourcePicker({
-  isOpen,
+export function ResourceDrawerRoot({
+  isOpen: controlledIsOpen,
   onClose,
   type,
   selectedIds,
   onToggleSelect,
   userId,
   children,
-}: ResourcePickerProps) {
+}: ResourceDrawerProps) {
+  const isControlled = controlledIsOpen !== undefined;
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isOpen = isControlled ? Boolean(controlledIsOpen) : uncontrolledOpen;
+
+  const handleClose = useCallback(() => {
+    if (!isControlled) {
+      setUncontrolledOpen(false);
+    }
+    onClose?.();
+  }, [isControlled, onClose]);
+
+  const handleOpen = useCallback(() => {
+    if (!isControlled) {
+      setUncontrolledOpen(true);
+    }
+  }, [isControlled]);
   const [categories, setCategories] = useState<ResourceCategory[]>([]);
   const [uncategorized, setUncategorized] = useState<ResourceItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -355,12 +399,14 @@ export function ResourcePicker({
       };
     }, [categories, uncategorized, searchQuery]);
 
-  const contextValue: ResourcePickerContextValue = {
+  const contextValue: ResourceDrawerContextValue = {
     type,
     selectedIds,
     onToggleSelect,
     userId,
-    onClose,
+    isOpen,
+    open: handleOpen,
+    onClose: handleClose,
     categories,
     uncategorized,
     filteredCategories,
@@ -390,15 +436,95 @@ export function ResourcePicker({
     handleMoveToNextCategory,
   };
 
+  let hasTrigger = false;
+  let hasExplicitContent = false;
+
+  React.Children.forEach(children, (child) => {
+    if (React.isValidElement(child)) {
+      if (
+        child.type === ResourceDrawerTrigger ||
+        (child.type as any)?.displayName === "ResourceDrawerTrigger"
+      ) {
+        hasTrigger = true;
+      }
+      if (
+        child.type === ResourceDrawerContent ||
+        (child.type as any)?.displayName === "ResourceDrawerContent"
+      ) {
+        hasExplicitContent = true;
+      }
+    }
+  });
+
   return (
-    <ResourcePickerContext.Provider value={contextValue}>
-      <NativeBottomSheet isOpen={isOpen} onClose={onClose}>
-        {children}
-        <ResourcePickerDeleteDialog />
-      </NativeBottomSheet>
-    </ResourcePickerContext.Provider>
+    <ResourceDrawerContext.Provider value={contextValue}>
+      {hasTrigger ? (
+        <>
+          {children}
+          {!hasExplicitContent && <ResourceDrawerContent />}
+        </>
+      ) : (
+        <NativeBottomSheet isOpen={isOpen} onClose={handleClose}>
+          {children}
+          <ResourcePickerDeleteDialog />
+        </NativeBottomSheet>
+      )}
+    </ResourceDrawerContext.Provider>
   );
 }
+
+// ─── COMPOUND: TRIGGER ───────────────────────────────────────────────────
+
+export interface ResourceDrawerTriggerProps {
+  children: React.ReactElement<any>;
+}
+
+export function ResourceDrawerTrigger({
+  children,
+}: ResourceDrawerTriggerProps) {
+  const { open } = useResourceDrawerContext();
+
+  if (React.isValidElement(children)) {
+    const child = children as React.ReactElement<{ onPress?: () => void }>;
+    return React.cloneElement(child, {
+      onPress: () => {
+        child.props.onPress?.();
+        open();
+      },
+    });
+  }
+
+  return <Pressable onPress={open}>{children}</Pressable>;
+}
+ResourceDrawerTrigger.displayName = "ResourceDrawerTrigger";
+
+// ─── COMPOUND: CONTENT ───────────────────────────────────────────────────
+
+export interface ResourceDrawerContentProps {
+  children?: React.ReactNode;
+}
+
+export function ResourceDrawerContent({
+  children,
+}: ResourceDrawerContentProps) {
+  const { isOpen, onClose, type } = useResourceDrawerContext();
+  const config = RESOURCE_TYPE_CONFIG[type];
+
+  return (
+    <NativeBottomSheet isOpen={isOpen} onClose={onClose}>
+      {children ?? (
+        <>
+          <ResourcePickerHeader title={config.title} />
+          <ResourcePickerSearch placeholder={config.searchPlaceholder} />
+          <ResourcePickerContent addLabel={config.addLabel} />
+          <ResourcePickerFooter />
+        </>
+      )}
+      <ResourcePickerDeleteDialog />
+    </NativeBottomSheet>
+  );
+}
+ResourceDrawerContent.displayName = "ResourceDrawerContent";
 
 // ─── COMPOUND: HEADER ────────────────────────────────────────────────────
 
@@ -411,7 +537,8 @@ export function ResourcePickerHeader({
   title,
   children,
 }: ResourcePickerHeaderProps) {
-  const { isEditing, setIsEditing, onClose } = useResourcePickerContext();
+  const { isEditing, setIsEditing, onClose, type } = useResourceDrawerContext();
+  const displayTitle = title ?? RESOURCE_TYPE_CONFIG[type].title;
 
   return (
     <View style={styles.header}>
@@ -420,7 +547,7 @@ export function ResourcePickerHeader({
           {children ? (
             children
           ) : (
-            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.title}>{displayTitle}</Text>
           )}
           {isEditing && (
             <View style={styles.editingBadge}>
@@ -455,14 +582,16 @@ export interface ResourcePickerSearchProps {
 }
 
 export function ResourcePickerSearch({
-  placeholder = "Buscar ou criar...",
+  placeholder,
 }: ResourcePickerSearchProps) {
   const {
+    type,
     searchQuery,
     setSearchQuery,
     exactMatchExists,
     handleInstantCreateFromSearch,
   } = useResourcePickerContext();
+  const defaultPlaceholder = RESOURCE_TYPE_CONFIG[type].searchPlaceholder;
 
   return (
     <View style={styles.searchSection}>
@@ -471,7 +600,7 @@ export function ResourcePickerSearch({
         <TextInput
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder={placeholder}
+          placeholder={placeholder ?? defaultPlaceholder}
           placeholderTextColor="#9CA3AF"
           style={styles.searchInput}
           returnKeyType="done"
@@ -502,7 +631,7 @@ export interface ResourcePickerContentProps {
 }
 
 export function ResourcePickerContent({
-  addLabel = "Novo item",
+  addLabel,
 }: ResourcePickerContentProps) {
   const {
     type,
@@ -531,6 +660,8 @@ export function ResourcePickerContent({
     handleMoveItem,
     handleMoveToNextCategory,
   } = useResourcePickerContext();
+
+  const label = addLabel ?? RESOURCE_TYPE_CONFIG[type].addLabel;
 
   return (
     <ScrollView
@@ -800,7 +931,7 @@ export function ResourcePickerContent({
           style={styles.addItemActionBtn}
         >
           <Plus size={16} color="#16181D" />
-          <Text style={styles.addItemActionText}>{addLabel}</Text>
+          <Text style={styles.addItemActionText}>{label}</Text>
         </Pressable>
 
         {type !== "thought" && (
@@ -838,7 +969,7 @@ export function ResourcePickerFooter({
 
   const handlePress = onConfirm ?? onClose;
   const count = selectedIds.length;
-  const labels = RESOURCE_LABELS[type];
+  const labels = RESOURCE_TYPE_CONFIG[type];
   const unitLabel = count === 1 ? labels.singular : labels.plural;
   const text =
     confirmLabel ?? (count > 0 ? `Adicionar ${count} ${unitLabel}` : "Pronto");
@@ -909,10 +1040,23 @@ function ResourcePickerDeleteDialog() {
 
 // ─── ATTACH COMPOUND COMPONENTS ──────────────────────────────────────────
 
-ResourcePicker.Header = ResourcePickerHeader;
-ResourcePicker.Search = ResourcePickerSearch;
-ResourcePicker.Content = ResourcePickerContent;
-ResourcePicker.Footer = ResourcePickerFooter;
+export const ResourceDrawer = Object.assign(ResourceDrawerRoot, {
+  Trigger: ResourceDrawerTrigger,
+  Content: ResourceDrawerContent,
+  Header: ResourcePickerHeader,
+  Search: ResourcePickerSearch,
+  Body: ResourcePickerContent,
+  Footer: ResourcePickerFooter,
+});
+
+export const ResourcePicker = ResourceDrawer;
+
+export {
+  ResourcePickerHeader as ResourceDrawerHeader,
+  ResourcePickerSearch as ResourceDrawerSearch,
+  ResourcePickerContent as ResourceDrawerBody,
+  ResourcePickerFooter as ResourceDrawerFooter,
+};
 
 // ─── STYLES ──────────────────────────────────────────────────────────────
 
