@@ -196,6 +196,15 @@ export const newPostSchema = z.object({
   reactions: z
     .array(z.object({ id: z.number(), name: z.string() }))
     .default([]),
+  behaviors: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        content: z.string(),
+        icon: z.string().nullable().optional(),
+      })
+    )
+    .default([]),
 });
 
 export type NewPostInput = z.input<typeof newPostSchema>;

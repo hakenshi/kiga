@@ -1,4 +1,6 @@
 import {
+  behaviors,
+  entryBehaviors,
   entryEmotions,
   entryReactions,
   entryThoughts,
@@ -13,6 +15,7 @@ export interface CreateJournalEntryParams {
   emotions?: { id: number; name: string }[];
   thoughts?: { id: number; name: string }[];
   reactions?: { id: number; name: string }[];
+  behaviors?: { id?: number; content: string }[];
 }
 
 let defaultDb: any = null;
@@ -75,6 +78,29 @@ export async function createJournalEntry(
         reactionId: r.id,
       }))
     );
+  }
+
+  if (params.behaviors && params.behaviors.length > 0) {
+    for (const b of params.behaviors) {
+      let bId = b.id;
+      if (!bId && b.content?.trim()) {
+        const [createdB] = await database
+          .insert(behaviors)
+          .values({
+            userId: params.userId,
+            content: b.content.trim(),
+            orderIndex: Date.now(),
+          })
+          .returning();
+        bId = createdB?.id;
+      }
+      if (bId) {
+        await database.insert(entryBehaviors).values({
+          entryId: entry.id,
+          behaviorId: bId,
+        });
+      }
+    }
   }
 
   return entry;

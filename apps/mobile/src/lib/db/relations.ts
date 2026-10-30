@@ -1,7 +1,9 @@
 import { relations } from "drizzle-orm";
 import {
+  behaviors,
   categories,
   emotions,
+  entryBehaviors,
   entryEmotions,
   entryImages,
   entryReactions,
@@ -21,6 +23,7 @@ export const userRelation = relations(users, ({ many }) => ({
   thoughts: many(thoughts),
   moods: many(moods),
   reactions: many(reactions),
+  behaviors: many(behaviors),
   journalEntries: many(journalEntries),
 }));
 
@@ -32,6 +35,7 @@ export const categoriesRelation = relations(categories, ({ one, many }) => ({
   emotions: many(emotions),
   thoughts: many(thoughts),
   reactions: many(reactions),
+  behaviors: many(behaviors),
 }));
 
 export const userProfileImagesRelation = relations(profileImages, ({ one }) => ({
@@ -97,6 +101,7 @@ export const journalEntriesRelations = relations(journalEntries, ({ one, many })
   entryReactions: many(entryReactions),
   entryThoughts: many(entryThoughts),
   entryEmotions: many(entryEmotions),
+  entryBehaviors: many(entryBehaviors),
   entryImages: many(entryImages),
 }));
 
@@ -138,4 +143,27 @@ export const entryImagesRelations = relations(entryImages, ({ one }) => ({
     fields: [entryImages.entryId],
     references: [journalEntries.id],
   }),
-}))
+}));
+
+export const behaviorsRelations = relations(behaviors, ({ one, many }) => ({
+  user: one(users, {
+    fields: [behaviors.userId],
+    references: [users.id],
+  }),
+  category: one(categories, {
+    fields: [behaviors.categoryId],
+    references: [categories.id],
+  }),
+  entryBehaviors: many(entryBehaviors),
+}));
+
+export const entryBehaviorsRelations = relations(entryBehaviors, ({ one }) => ({
+  entry: one(journalEntries, {
+    fields: [entryBehaviors.entryId],
+    references: [journalEntries.id],
+  }),
+  behavior: one(behaviors, {
+    fields: [entryBehaviors.behaviorId],
+    references: [behaviors.id],
+  }),
+}));

@@ -1,0 +1,156 @@
+{
+  "moods": [
+    { "name": "Muito Mal" },
+    { "name": "Mal" },
+    { "name": "Neutro" },
+    { "name": "Bem" },
+    { "name": "Muito Bem" }
+  ],
+  "categories": [
+    {
+      "type": "emotion",
+      "name": "Medo",
+      "items": [
+        { "name": "Ansiedade" },
+        { "name": "Insegurança" },
+        { "name": "Preocupação" },
+        { "name": "Vergonha" },
+        { "name": "Pânico" }
+      ]
+    },
+    {
+      "type": "emotion",
+      "name": "Tristeza",
+      "items": [
+        { "name": "Tristeza" },
+        { "name": "Solidão" },
+        { "name": "Culpa" },
+        { "name": "Desânimo" },
+        { "name": "Desamparo" }
+      ]
+    },
+    {
+      "type": "emotion",
+      "name": "Raiva",
+      "items": [
+        { "name": "Raiva" },
+        { "name": "Frustração" },
+        { "name": "Irritação" },
+        { "name": "Ressentimento" }
+      ]
+    },
+    {
+      "type": "emotion",
+      "name": "Sobrecarga",
+      "items": [
+        { "name": "Sobrecarga" },
+        { "name": "Esgotamento" },
+        { "name": "Pressão" },
+        { "name": "Confusão" }
+      ]
+    },
+    {
+      "type": "emotion",
+      "name": "Alegria & Alívio",
+      "items": [
+        { "name": "Calma" },
+        { "name": "Gratidão" },
+        { "name": "Esperança" },
+        { "name": "Alívio" }
+      ]
+    },
+    {
+      "type": "reaction",
+      "name": "Fisiológicas / Corporais",
+      "items": [
+        { "name": "Aperto no peito" },
+        { "name": "Taquicardia" },
+        { "name": "Nó na garganta" },
+        { "name": "Tensão muscular" },
+        { "name": "Sudorese" },
+        { "name": "Respiração curta" },
+        { "name": "Formigamento nas mãos" },
+        { "name": "Tremores" },
+        { "name": "Fadiga" }
+      ]
+    },
+    {
+      "type": "reaction",
+      "name": "Comportamentais",
+      "items": [
+        { "name": "Isolamento" },
+        { "name": "Procrastinação" },
+        { "name": "Respiração 4-7-8" },
+        { "name": "Roer unhas" },
+        { "name": "Checar celular compulsivamente" },
+        { "name": "Caminhada" },
+        { "name": "Beber água gelada" }
+      ]
+    },
+    {
+      "type": "behavior",
+      "name": "Social & Apoio",
+      "items": [
+        { "content": "Telefonar para amigos ou família", "icon": "phone" },
+        { "content": "Conversar / Desabafar com alguém", "icon": "phone" },
+        { "content": "Pedir ajuda ou apoio", "icon": "heart" },
+        { "content": "Sair com pessoas próximas", "icon": "sparkles" }
+      ]
+    },
+    {
+      "type": "behavior",
+      "name": "Autocuidado & Enfrentamento",
+      "items": [
+        { "content": "Praticar caminhada / Exercício", "icon": "footprints" },
+        { "content": "Exercício de respiração / Pausa", "icon": "wind" },
+        { "content": "Tomar um banho relaxante", "icon": "sparkles" },
+        { "content": "Beber água / Tomar café com calma", "icon": "coffee" },
+        { "content": "Alimentar-se com atenção", "icon": "utensils" },
+        { "content": "Escrever / Registrar pensamentos", "icon": "book-open" }
+      ]
+    },
+    {
+      "type": "behavior",
+      "name": "Esquiva & Isolamento",
+      "items": [
+        { "content": "Isolar-se no quarto", "icon": "door-closed" },
+        { "content": "Ficar na cama / Não levantar", "icon": "bed" },
+        { "content": "Evitar contato / Não responder mensagens", "icon": "smartphone" },
+        { "content": "Cancelar compromissos", "icon": "door-closed" },
+        { "content": "Desistir da tarefa / Evitar situação", "icon": "door-closed" }
+      ]
+    },
+    {
+      "type": "behavior",
+      "name": "Distração & Fuga",
+      "items": [
+        { "content": "Rolar redes sociais compulsivamente", "icon": "smartphone" },
+        { "content": "Assistir séries / TV em excesso", "icon": "tv" },
+        { "content": "Procrastinar atividades", "icon": "bed" },
+        { "content": "Jogar videogame", "icon": "sparkles" },
+        { "content": "Ouvir música para se desligar", "icon": "headphones" }
+      ]
+    },
+    {
+      "type": "behavior",
+      "name": "Autodestrutivo & Risco",
+      "items": [
+        { "content": "Compulsão alimentar / Comer por ansiedade", "icon": "utensils" },
+        { "content": "Consumir álcool ou substâncias", "icon": "flame" },
+        { "content": "Gastos por impulso", "icon": "sparkles" },
+        { "content": "Comportamento de risco / Impulso", "icon": "flame" },
+        { "content": "Autocrítica destrutiva / Punição", "icon": "flame" }
+      ]
+    }
+  ],
+  "thoughts": [
+    "Não vou dar conta",
+    "Ele achou meu trabalho ruim",
+    "Vão achar que eu não sei o que estou fazendo",
+    "Eu sempre estrago tudo",
+    "Algo terrível vai acontecer",
+    "Não vai ter volta",
+    "Se não for perfeito, foi um fracasso",
+    "Eles estão me julgando"
+  ]
+}

@@ -7,6 +7,7 @@ import {
   thoughts,
   type CategoryType,
 } from "./schema";
+import { installSystemData } from "./install-system-data";
 
 export interface ResourceItem {
   id: number;
@@ -25,144 +26,11 @@ export interface ResourceCategory {
   items: ResourceItem[];
 }
 
-const DEFAULT_CATEGORIES: Partial<
-  Record<CategoryType, { name: string; items: string[] }[]>
-> = {
-  emotion: [
-    {
-      name: "Medo",
-      items: ["Ansiedade", "Insegurança", "Preocupação", "Vergonha", "Pânico"],
-    },
-    {
-      name: "Tristeza",
-      items: ["Tristeza", "Solidão", "Culpa", "Desânimo", "Desamparo"],
-    },
-    {
-      name: "Raiva",
-      items: ["Raiva", "Frustração", "Irritação", "Ressentimento"],
-    },
-    {
-      name: "Sobrecarga",
-      items: ["Sobrecarga", "Esgotamento", "Pressão", "Confusão"],
-    },
-    {
-      name: "Alegria & Alívio",
-      items: ["Calma", "Gratidão", "Esperança", "Alívio"],
-    },
-  ],
-  reaction: [
-    {
-      name: "Fisiológicas / Corporais",
-      items: [
-        "Aperto no peito",
-        "Taquicardia",
-        "Nó na garganta",
-        "Tensão muscular",
-        "Sudorese",
-        "Respiração curta",
-        "Formigamento nas mãos",
-        "Tremores",
-        "Fadiga",
-      ],
-    },
-    {
-      name: "Comportamentais",
-      items: [
-        "Isolamento",
-        "Procrastinação",
-        "Respiração 4-7-8",
-        "Roer unhas",
-        "Checar celular compulsivamente",
-        "Caminhada",
-        "Beber água gelada",
-      ],
-    },
-  ],
-};
-
-const DEFAULT_THOUGHTS = [
-  "Não vou dar conta",
-  "Ele achou meu trabalho ruim",
-  "Vão achar que eu não sei o que estou fazendo",
-  "Eu sempre estrago tudo",
-  "Algo terrível vai acontecer",
-  "Não vai ter volta",
-  "Se não for perfeito, foi um fracasso",
-  "Eles estão me julgando",
-];
-
-let seedingPromise: Promise<void> | null = null;
-
-export async function ensureDefaultResourcesSeeded(_userId?: number) {
-  if (seedingPromise) return seedingPromise;
-
-  seedingPromise = (async () => {
-    try {
-      // Seed categories and items for emotion and reaction independently
-      for (const [typeKey, catList] of Object.entries(DEFAULT_CATEGORIES)) {
-        const type = typeKey as CategoryType;
-        const existingCats = await db
-          .select()
-          .from(categories)
-          .where(eq(categories.type, type))
-          .limit(1);
-
-        if (existingCats.length === 0) {
-          for (let cIdx = 0; cIdx < catList.length; cIdx++) {
-            const catData = catList[cIdx];
-            const [insertedCat] = await db
-              .insert(categories)
-              .values({
-                name: catData.name,
-                type,
-                orderIndex: cIdx,
-                userId: null,
-              })
-              .returning();
-
-            if (!insertedCat) continue;
-
-            const itemsToInsert = catData.items.map((name, iIdx) => ({
-              name,
-              categoryId: insertedCat.id,
-              orderIndex: iIdx,
-              userId: null,
-            }));
-
-            if (type === "emotion") {
-              await db.insert(emotions).values(itemsToInsert);
-            } else if (type === "reaction") {
-              await db.insert(reactions).values(itemsToInsert);
-            }
-          }
-        }
-      }
-
-      // Seed default free thoughts if thoughts table is empty
-      const existingThoughts = await db.select().from(thoughts).limit(1);
-      if (existingThoughts.length === 0) {
-        await db.insert(thoughts).values(
-          DEFAULT_THOUGHTS.map((name, idx) => ({
-            name,
-            categoryId: null,
-            orderIndex: idx,
-            userId: null,
-          }))
-        );
-      }
-    } catch (e) {
-      console.error("Error seeding default resources:", e);
-    }
-  })();
-
-  return seedingPromise;
-}
-
 export async function getResourcesGrouped(
   type: CategoryType,
   userId?: number
 ): Promise<{ categories: ResourceCategory[]; uncategorized: ResourceItem[] }> {
-  await ensureDefaultResourcesSeeded(userId);
+  await installSystemData();
 
   const userCondition = userId
     ? or(isNull(categories.userId), eq(categories.userId, userId))

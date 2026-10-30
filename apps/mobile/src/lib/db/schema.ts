@@ -9,7 +9,7 @@ export type Pronoun = (typeof pronounEnum)[number];
 export const journalEntryType = ["post", "reply", "repost"] as const;
 export type JournalEntryType = (typeof journalEntryType)[number];
 
-export const categoryTypeEnum = ["emotion", "thought", "reaction"] as const;
+export const categoryTypeEnum = ["emotion", "thought", "reaction", "behavior"] as const;
 export type CategoryType = (typeof categoryTypeEnum)[number];
 
 export const users = sqliteTable("users", {
@@ -91,11 +91,8 @@ export const journalEntries = sqliteTable("journal_entries", {
 
 export const entryReactions = sqliteTable("entry_reactions", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
-  reactionId: integer().notNull().references(() => reactions.id, { onDelete: "cascade" }),
-}, (t) => [
-  unique().on(t.entryId, t.reactionId),
-]);
+  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }), reactionId: integer().notNull().references(() => reactions.id, { onDelete: "cascade" }),
+}, (t) => [unique().on(t.entryId, t.reactionId),]);
 
 export const entryEmotions = sqliteTable("entry_emotions", {
   id: integer().primaryKey({ autoIncrement: true }),
@@ -118,3 +115,20 @@ export const entryImages = sqliteTable("entry_images", {
   entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
   imageUrl: text().notNull(),
 });
+
+export const behaviors = sqliteTable("behaviors", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  userId: integer().references(() => users.id),
+  categoryId: integer().references(() => categories.id, { onDelete: "set null" }),
+  content: text(),
+  icon: text(),
+  orderIndex: integer().notNull().default(0),
+  deletedAt: integer({ mode: "timestamp" }),
+  createdAt: integer({ mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const entryBehaviors = sqliteTable("entry_behaviors", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  behaviorId: integer().notNull().references(() => behaviors.id),
+}, (t) => [unique().on(t.behaviorId, t.entryId)])
