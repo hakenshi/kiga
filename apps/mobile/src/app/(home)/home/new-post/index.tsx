@@ -2,7 +2,6 @@ import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar"
 import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { TEXT_DATA } from "@/lib/text-data";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "expo-router";
 import {
@@ -17,19 +16,20 @@ import {
   Smile,
   X,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import NavButton from "../../_components/nav-button";
 import { ResourcePicker } from "@/components/resource-drawer";
-import db from "@/lib/db";
+import { createJournalEntry } from "@/lib/db/entries";
 import {
-  entryEmotions,
-  entryReactions,
-  entryThoughts,
-  journalEntries,
-} from "@/lib/db/schema";
+  newPostSchema,
+  type NewPostInput,
+  type NewPostSchema,
+} from "@/lib/db/zod/zod-schemas";
 import { countWords } from "@/lib/utils";
 
 const MOOD_OPTIONS = [
@@ -69,125 +69,94 @@ export default function NewPostPage() {
   const { top, bottom } = useSafeAreaInsets();
   const { user } = useAuthStore();
 
-  const [selectedMood, setSelectedMood] = useState<number | null>(null);
-  const [content, setContent] = useState(TEXT_DATA);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Selected Resources State
-  const [selectedEmotions, setSelectedEmotions] = useState<
-    { id: number; name: string }[]
-  >([]);
-  const [selectedThoughts, setSelectedThoughts] = useState<
-    { id: number; name: string }[]
-  >([]);
-  const [selectedReactions, setSelectedReactions] = useState<
-    { id: number; name: string }[]
-  >([]);
-
   // Active Bottom Sheet Drawer: "emotion" | "thought" | "reaction" | null
   const [activeDrawer, setActiveDrawer] = useState<
     "emotion" | "thought" | "reaction" | null
   >(null);
 
-  const [time, setTime] = useState(() => new Date());
+  // Data/hora capturada no momento da montagem (sem re-renders e sem setInterval)
+  const entryDate = useMemo(() => new Date(), []);
 
-  useEffect(() => {
-    const clock = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-    return () => clearInterval(clock);
-  }, []);
-
-  const weekday = time
+  const weekday = entryDate
     .toLocaleDateString("pt-BR", { weekday: "long" })
     .replace("-feira", "");
-  const dayAndMonth = time.toLocaleDateString("pt-BR", {
+  const dayAndMonth = entryDate.toLocaleDateString("pt-BR", {
     day: "numeric",
     month: "long",
   });
   const formattedDate = `${weekday.charAt(0).toUpperCase() + weekday.slice(1)}, ${dayAndMonth}`;
-  const formattedTime = time.toLocaleTimeString("pt-BR", {
+  const formattedTime = entryDate.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
   });
 
+  // Formulário padronizado com React Hook Form + Zod
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<NewPostInput, any, NewPostSchema>({
+    resolver: zodResolver(newPostSchema),
+    defaultValues: {
+      content: "",
+      moodId: null,
+      emotions: [],
+      thoughts: [],
+      reactions: [],
+    },
+  });
+
+  const selectedMood = watch("moodId");
+  const content = watch("content") ?? "";
+  const selectedEmotions = watch("emotions") ?? [];
+  const selectedThoughts = watch("thoughts") ?? [];
+  const selectedReactions = watch("reactions") ?? [];
+
   const wordCount = useMemo(() => countWords(content), [content]);
 
-  // Toggle selection handlers
+  // Toggle selection handlers integrados ao react-hook-form
   const toggleEmotion = (id: number, name: string) => {
-    setSelectedEmotions((prev) =>
-      prev.some((item) => item.id === id)
-        ? prev.filter((item) => item.id !== id)
-        : [...prev, { id, name }]
-    );
+    const current = watch("emotions") ?? [];
+    const next = current.some((item) => item.id === id)
+      ? current.filter((item) => item.id !== id)
+      : [...current, { id, name }];
+    setValue("emotions", next, { shouldValidate: true });
   };
 
   const toggleThought = (id: number, name: string) => {
-    setSelectedThoughts((prev) =>
-      prev.some((item) => item.id === id)
-        ? prev.filter((item) => item.id !== id)
-        : [...prev, { id, name }]
-    );
+    const current = watch("thoughts") ?? [];
+    const next = current.some((item) => item.id === id)
+      ? current.filter((item) => item.id !== id)
+      : [...current, { id, name }];
+    setValue("thoughts", next, { shouldValidate: true });
   };
 
   const toggleReaction = (id: number, name: string) => {
-    setSelectedReactions((prev) =>
-      prev.some((item) => item.id === id)
-        ? prev.filter((item) => item.id !== id)
-        : [...prev, { id, name }]
-    );
+    const current = watch("reactions") ?? [];
+    const next = current.some((item) => item.id === id)
+      ? current.filter((item) => item.id !== id)
+      : [...current, { id, name }];
+    setValue("reactions", next, { shouldValidate: true });
   };
 
-  // Save Post to SQLite
-  const handleSave = async () => {
-    if (!content.trim() || isSaving) return;
-
-    setIsSaving(true);
+  // Salvar Post via Service
+  const onSave = async (formData: NewPostSchema) => {
     try {
-      const [entry] = await db
-        .insert(journalEntries)
-        .values({
-          userId: user?.id ?? 1,
-          moodId: selectedMood,
-          liked: false,
-          entryType: "post",
-          content: content.trim(),
-          date: new Date(),
-        })
-        .returning();
-
-      if (entry) {
-        if (selectedEmotions.length > 0) {
-          await db.insert(entryEmotions).values(
-            selectedEmotions.map((e) => ({
-              entryId: entry.id,
-              emotionId: e.id,
-            }))
-          );
-        }
-        if (selectedThoughts.length > 0) {
-          await db.insert(entryThoughts).values(
-            selectedThoughts.map((t) => ({
-              entryId: entry.id,
-              thoughtsId: t.id,
-            }))
-          );
-        }
-        if (selectedReactions.length > 0) {
-          await db.insert(entryReactions).values(
-            selectedReactions.map((r) => ({
-              entryId: entry.id,
-              reactionId: r.id,
-            }))
-          );
-        }
-      }
+      await createJournalEntry({
+        userId: user?.id ?? 1,
+        content: formData.content,
+        moodId: formData.moodId,
+        emotions: formData.emotions,
+        thoughts: formData.thoughts,
+        reactions: formData.reactions,
+        date: entryDate,
+      });
 
       router.push("/(home)/home");
     } catch (err) {
       console.error("Error saving journal entry:", err);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -213,7 +182,7 @@ export default function NewPostPage() {
               </Pressable>
             </HStack>
 
-            {/* Center Date & Time: perfectly centered */}
+            {/* Center Date & Time: fixo e estático por montagem */}
             <VStack className="items-center justify-center flex-1">
               <Text className="font-semibold text-sm text-[#16181D]">
                 {formattedDate}
@@ -224,16 +193,16 @@ export default function NewPostPage() {
             {/* Right Slot: 96px */}
             <HStack className="w-24 items-center justify-end">
               <Pressable
-                onPress={handleSave}
-                disabled={isSaving || !content.trim()}
+                onPress={handleSubmit(onSave)}
+                disabled={isSubmitting || !content.trim()}
                 className={`h-10 px-5 rounded-full items-center justify-center ${
-                  isSaving || !content.trim()
+                  isSubmitting || !content.trim()
                     ? "bg-gray-300"
                     : "bg-[#16181D] active:opacity-85"
                 }`}
               >
                 <Text className="text-white font-semibold text-sm">
-                  {isSaving ? "Salvando..." : "Salvar"}
+                  {isSubmitting ? "Salvando..." : "Salvar"}
                 </Text>
               </Pressable>
             </HStack>
@@ -253,7 +222,11 @@ export default function NewPostPage() {
                 return (
                   <Pressable
                     key={value}
-                    onPress={() => setSelectedMood(isSelected ? null : value)}
+                    onPress={() =>
+                      setValue("moodId", isSelected ? null : value, {
+                        shouldValidate: true,
+                      })
+                    }
                     className={`w-[30px] h-[30px] rounded-full items-center justify-center active:opacity-70 ${
                       isSelected
                         ? "bg-white border-[1.5px] border-[#16181D]"
@@ -270,29 +243,37 @@ export default function NewPostPage() {
             </HStack>
           </HStack>
 
-          {/* Text Editor Area */}
+          {/* Text Editor Area controlado */}
           <HStack className="flex-1 p-5 items-start overflow-hidden" space="md">
             <Avatar>
               <AvatarImage />
               <AvatarFallbackText>{user?.firstName}</AvatarFallbackText>
             </Avatar>
             <VStack className="flex-1 h-full">
-              <TextInput
-                value={content}
-                onChangeText={setContent}
-                className="flex-1 p-0 text-base"
-                style={{
-                  flex: 1,
-                  textAlignVertical: "top",
-                  color: "#16181D",
-                }}
-                multiline
-                scrollEnabled
+              <Controller
+                name="content"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="O que está acontecendo agora?"
+                    placeholderTextColor="#9AA0AA"
+                    className="flex-1 p-0 text-base"
+                    style={{
+                      flex: 1,
+                      textAlignVertical: "top",
+                      color: "#16181D",
+                    }}
+                    multiline
+                    scrollEnabled
+                  />
+                )}
               />
             </VStack>
           </HStack>
 
-          {/* Selected Chips Strip (Frames 13 & 14 from Design) */}
+          {/* Selected Chips Strip */}
           {hasSelectedChips && (
             <View className="px-4 pb-2">
               <ScrollView
@@ -342,8 +323,8 @@ export default function NewPostPage() {
 
           {/* Metadata bar: Word Count & Status */}
           <HStack className="justify-between px-5 py-2 border-t border-gray-50 items-center">
-            <Text className="text-xs text-[#9CA3AF]">{wordCount} palavras</Text>
-            <Text className="text-xs text-[#9CA3AF]">
+            <Text className="text-xs text-[#9AA0AA]">{wordCount} palavras</Text>
+            <Text className="text-xs text-[#9AA0AA]">
               Salvo no banco de dados local
             </Text>
           </HStack>

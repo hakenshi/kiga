@@ -180,3 +180,23 @@ export const registerSchema = userInsertBaseSchema
       path: ["confirmPassword"],
     }
   );
+
+export const newPostSchema = z.object({
+  content: z
+    .string()
+    .trim()
+    .min(1, "O conteúdo do post não pode ficar em branco"),
+  moodId: z.number().nullable().optional(),
+  emotions: z
+    .array(z.object({ id: z.number(), name: z.string() }))
+    .default([]),
+  thoughts: z
+    .array(z.object({ id: z.number(), name: z.string() }))
+    .default([]),
+  reactions: z
+    .array(z.object({ id: z.number(), name: z.string() }))
+    .default([]),
+});
+
+export type NewPostInput = z.input<typeof newPostSchema>;
+export type NewPostSchema = z.output<typeof newPostSchema>;
