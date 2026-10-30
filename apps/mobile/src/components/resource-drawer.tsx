@@ -49,6 +49,25 @@ import {
 } from "@/lib/db/resources";
 import type { CategoryType } from "@/lib/db/schema";
 
+const RESOURCE_LABELS: Record<
+  CategoryType,
+  { singular: string; plural: string }
+> = {
+  emotion: { singular: "emoção", plural: "emoções" },
+  thought: { singular: "pensamento", plural: "pensamentos" },
+  reaction: { singular: "reação", plural: "reações" },
+};
+
+function getDefaultCategoryId(
+  type: CategoryType,
+  categories: ResourceCategory[]
+): number | null {
+  if (type === "thought" || categories.length === 0) {
+    return null;
+  }
+  return categories[0].id;
+}
+
 // ─── CONTEXT ─────────────────────────────────────────────────────────────
 
 interface ResourcePickerContextValue {
@@ -179,12 +198,7 @@ export function ResourcePicker({
     if (!trimmed) return;
 
     try {
-      const targetCatId =
-        type === "thought"
-          ? null
-          : categories.length > 0
-          ? categories[0].id
-          : null;
+      const targetCatId = getDefaultCategoryId(type, categories);
       const created = await createResourceItem(
         type,
         trimmed,
@@ -781,13 +795,7 @@ export function ResourcePickerContent({
         <Pressable
           onPress={() => {
             setIsAddingNew(true);
-            setSelectedTargetCategoryId(
-              type === "thought"
-                ? null
-                : categories.length > 0
-                ? categories[0].id
-                : null
-            );
+            setSelectedTargetCategoryId(getDefaultCategoryId(type, categories));
           }}
           style={styles.addItemActionBtn}
         >
@@ -812,11 +820,41 @@ export function ResourcePickerContent({
 // ─── COMPOUND: FOOTER ────────────────────────────────────────────────────
 
 export interface ResourcePickerFooterProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  onConfirm?: () => void;
+  confirmLabel?: string;
 }
 
-export function ResourcePickerFooter({ children }: ResourcePickerFooterProps) {
-  return <View style={styles.bottomBar}>{children}</View>;
+export function ResourcePickerFooter({
+  children,
+  onConfirm,
+  confirmLabel,
+}: ResourcePickerFooterProps) {
+  const { type, selectedIds, onClose } = useResourcePickerContext();
+
+  if (children) {
+    return <View style={styles.bottomBar}>{children}</View>;
+  }
+
+  const handlePress = onConfirm ?? onClose;
+  const count = selectedIds.length;
+  const labels = RESOURCE_LABELS[type];
+  const unitLabel = count === 1 ? labels.singular : labels.plural;
+  const text =
+    confirmLabel ?? (count > 0 ? `Adicionar ${count} ${unitLabel}` : "Pronto");
+
+  return (
+    <View style={styles.bottomBar}>
+      <Button
+        className="w-full rounded-2xl bg-[#16181D] py-3.5"
+        onPress={handlePress}
+      >
+        <ButtonText className="text-white font-semibold text-center text-base">
+          {text}
+        </ButtonText>
+      </Button>
+    </View>
+  );
 }
 
 // ─── INTERNAL: DELETE DIALOG ─────────────────────────────────────────────

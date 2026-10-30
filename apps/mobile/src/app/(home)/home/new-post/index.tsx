@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
-import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useAuthStore } from "@/stores/auth-store";
@@ -39,30 +38,6 @@ const MOOD_OPTIONS = [
   { value: 4, label: "Bem", Icon: Smile },
   { value: 5, label: "Muito Bem", Icon: Laugh },
 ] as const;
-
-const DRAWER_CONFIGS = {
-  emotion: {
-    title: "O que você está sentindo?",
-    searchPlaceholder: "Buscar ou criar emoção",
-    addLabel: "Nova emoção",
-    singularLabel: "emoção",
-    pluralLabel: "emoções",
-  },
-  thought: {
-    title: "Pensamentos automáticos",
-    searchPlaceholder: "Buscar ou criar pensamento",
-    addLabel: "Novo pensamento",
-    singularLabel: "pensamento",
-    pluralLabel: "pensamentos",
-  },
-  reaction: {
-    title: "Reações e sensações",
-    searchPlaceholder: "Buscar ou criar reação corporal",
-    addLabel: "Nova reação",
-    singularLabel: "reação",
-    pluralLabel: "reações",
-  },
-} as const;
 
 export default function NewPostPage() {
   const router = useRouter();
@@ -364,60 +339,48 @@ export default function NewPostPage() {
         </VStack>
       </KeyboardAvoidingView>
 
-      {/* Composable Resource Drawer */}
-      {activeDrawer && (
-        <ResourcePicker
-          isOpen={true}
-          onClose={() => setActiveDrawer(null)}
-          type={activeDrawer}
-          selectedIds={
-            activeDrawer === "emotion"
-              ? selectedEmotions.map((e) => e.id)
-              : activeDrawer === "thought"
-              ? selectedThoughts.map((t) => t.id)
-              : selectedReactions.map((r) => r.id)
-          }
-          onToggleSelect={
-            activeDrawer === "emotion"
-              ? toggleEmotion
-              : activeDrawer === "thought"
-              ? toggleThought
-              : toggleReaction
-          }
-          userId={user?.id}
-        >
-          <ResourcePicker.Header title={DRAWER_CONFIGS[activeDrawer].title} />
-          <ResourcePicker.Search
-            placeholder={DRAWER_CONFIGS[activeDrawer].searchPlaceholder}
-          />
-          <ResourcePicker.Content
-            addLabel={DRAWER_CONFIGS[activeDrawer].addLabel}
-          />
-          <ResourcePicker.Footer>
-            {(() => {
-              const count =
-                activeDrawer === "emotion"
-                  ? selectedEmotions.length
-                  : activeDrawer === "thought"
-                  ? selectedThoughts.length
-                  : selectedReactions.length;
-              const config = DRAWER_CONFIGS[activeDrawer];
-              const label = count === 1 ? config.singularLabel : config.pluralLabel;
+      {/* Drawers de Recursos Declarativos */}
+      <ResourcePicker
+        isOpen={activeDrawer === "emotion"}
+        onClose={() => setActiveDrawer(null)}
+        type="emotion"
+        selectedIds={selectedEmotions.map((e) => e.id)}
+        onToggleSelect={toggleEmotion}
+        userId={user?.id}
+      >
+        <ResourcePicker.Header title="O que você está sentindo?" />
+        <ResourcePicker.Search placeholder="Buscar ou criar emoção" />
+        <ResourcePicker.Content addLabel="Nova emoção" />
+        <ResourcePicker.Footer />
+      </ResourcePicker>
 
-              return (
-                <Button
-                  className="w-full rounded-2xl bg-[#16181D] py-3.5"
-                  onPress={() => setActiveDrawer(null)}
-                >
-                  <ButtonText className="text-white font-semibold text-center text-base">
-                    {count > 0 ? `Adicionar ${count} ${label}` : "Pronto"}
-                  </ButtonText>
-                </Button>
-              );
-            })()}
-          </ResourcePicker.Footer>
-        </ResourcePicker>
-      )}
+      <ResourcePicker
+        isOpen={activeDrawer === "thought"}
+        onClose={() => setActiveDrawer(null)}
+        type="thought"
+        selectedIds={selectedThoughts.map((t) => t.id)}
+        onToggleSelect={toggleThought}
+        userId={user?.id}
+      >
+        <ResourcePicker.Header title="Pensamentos automáticos" />
+        <ResourcePicker.Search placeholder="Buscar ou criar pensamento" />
+        <ResourcePicker.Content addLabel="Novo pensamento" />
+        <ResourcePicker.Footer />
+      </ResourcePicker>
+
+      <ResourcePicker
+        isOpen={activeDrawer === "reaction"}
+        onClose={() => setActiveDrawer(null)}
+        type="reaction"
+        selectedIds={selectedReactions.map((r) => r.id)}
+        onToggleSelect={toggleReaction}
+        userId={user?.id}
+      >
+        <ResourcePicker.Header title="Reações e sensações" />
+        <ResourcePicker.Search placeholder="Buscar ou criar reação corporal" />
+        <ResourcePicker.Content addLabel="Nova reação" />
+        <ResourcePicker.Footer />
+      </ResourcePicker>
     </VStack>
   );
 }
