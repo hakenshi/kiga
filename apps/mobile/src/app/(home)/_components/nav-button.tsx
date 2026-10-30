@@ -8,9 +8,10 @@ interface Props extends PropsWithChildren {
   path?: string;
   className?: string;
   onPress?: VoidFunction;
+  badge?: number;
 }
 
-export default function NavButton({ Icon, onPress, path, className, children }: Props) {
+export default function NavButton({ Icon, onPress, path, className, children, badge }: Props) {
   const currentPath = usePathname();
   const isActive = path ? currentPath.includes(path) : false;
 
@@ -20,8 +21,15 @@ export default function NavButton({ Icon, onPress, path, className, children }: 
       className={`flex-1 items-center justify-center py-2 px-2 rounded-2xl active:opacity-70 ${isActive ? "bg-sky-100" : ""
         } ${className ?? ""}`}
     >
-      <View className="w-6 h-6 items-center justify-center">
+      <View className="w-6 h-6 items-center justify-center relative">
         <Icon size={20} color={isActive ? "#0084D1" : "#16181D"} />
+        {badge !== undefined && badge > 0 && (
+          <View className="absolute -top-1.5 -right-2 bg-[#16181D] min-w-[16px] h-4 px-1 rounded-full items-center justify-center">
+            <Text className="text-[10px] text-white font-bold leading-none">
+              {badge}
+            </Text>
+          </View>
+        )}
       </View>
       <Text
         className={`text-[11px] mt-1 ${isActive ? "text-[#0084D1] font-semibold" : "text-[#5A606B] font-normal"

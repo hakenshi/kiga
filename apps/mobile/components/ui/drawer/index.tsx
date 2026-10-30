@@ -1,7 +1,7 @@
 'use client';
-import { createModal as createDrawer } from '@gluestack-ui/core/modal/creator';
+import { createModal as createDrawer, ModalContext } from '@gluestack-ui/core/modal/creator';
 import React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import {
@@ -50,7 +50,6 @@ const UIDrawer: any = createDrawer({
 });
 
 const UIDrawerRoot = UIDrawer as any;
-const UIDrawerBackdrop = UIDrawer.Backdrop as any;
 const UIDrawerContent = UIDrawer.Content as any;
 const UIDrawerHeader = UIDrawer.Header as any;
 const UIDrawerBody = UIDrawer.Body as any;
@@ -222,7 +221,7 @@ type IDrawerCloseButtonProps = React.ComponentProps<typeof Pressable> &
   VariantProps<typeof drawerCloseButtonStyle> & { className?: string; children?: React.ReactNode };
 
 const Drawer = React.forwardRef<any, IDrawerProps>(function Drawer(
-  { className, size = 'md', anchor = 'left', ...props },
+  { className, size = 'md', anchor = 'left', style, ...props },
   ref
 ) {
   return (
@@ -230,6 +229,7 @@ const Drawer = React.forwardRef<any, IDrawerProps>(function Drawer(
       ref={ref}
       {...props}
       pointerEvents="box-none"
+      style={[StyleSheet.absoluteFill, style]}
       className={drawerStyle({ size, anchor, class: className })}
       context={{ size, anchor }}
     />
@@ -237,17 +237,31 @@ const Drawer = React.forwardRef<any, IDrawerProps>(function Drawer(
 });
 
 const DrawerBackdrop = React.forwardRef<any, IDrawerBackdropProps>(
-  function DrawerBackdrop({ className, ...props }, ref) {
+  function DrawerBackdrop({ className, style, ...props }, ref) {
+    const { closeOnOverlayClick, handleClose } = React.useContext(ModalContext);
+
     return (
-      <UIDrawerBackdrop
+      <Animated.View
         ref={ref}
         entering={FadeIn.duration(200).easing(Easing.in(Easing.cubic))}
         exiting={FadeOut.duration(150)}
-        {...props}
-        className={drawerBackdropStyle({
-          class: className,
-        })}
-      />
+        className={className}
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+          style as any,
+        ]}
+      >
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => {
+            if (closeOnOverlayClick) {
+              handleClose();
+            }
+          }}
+          {...props}
+        />
+      </Animated.View>
     );
   }
 );
