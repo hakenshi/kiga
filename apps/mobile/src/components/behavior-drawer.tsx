@@ -664,11 +664,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#16181D",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
   subtitle: {
     fontSize: 13,
     color: "#6B7280",
     marginTop: 2,
+    fontFamily: "Inter_400Regular",
   },
   closeButton: {
     padding: 6,

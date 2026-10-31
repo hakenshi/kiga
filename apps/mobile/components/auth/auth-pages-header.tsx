@@ -36,7 +36,7 @@ export interface AuthSubtitleProps extends PropsWithChildren, TextProps {
 
 export function AuthSubtitle({
   children,
-  className = "text-zinc-600 font-body",
+  className = "text-zinc-600 font-subtitle",
   ...props
 }: AuthSubtitleProps) {
   return (

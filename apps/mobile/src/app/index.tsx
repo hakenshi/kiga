@@ -22,10 +22,10 @@ export default function Index() {
         <Text className="text-2xl text-center font-heading">
           Bem-vindo ao Kiga!
         </Text>
-        <Text className="text-lg text-zinc-600 text-center font-body">
+        <Text className="text-lg text-zinc-600 text-center font-subtitle">
           Seu diário privado para registrar pensamentos, emoções e humor.
         </Text>
-        <Text className="text-lg text-zinc-600 text-center font-body">
+        <Text className="text-lg text-zinc-600 text-center font-subtitle">
           100% offline
         </Text>
       </VStack>

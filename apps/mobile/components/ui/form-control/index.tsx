@@ -23,7 +23,7 @@ const formControlErrorStyle = tva({
 });
 
 const formControlErrorTextStyle = tva({
-  base: 'text-destructive text-xs font-body',
+  base: 'text-destructive text-xs font-sans font-medium',
   variants: {
     isTruncated: {
       true: 'web:truncate',
@@ -85,7 +85,7 @@ const formControlLabelStyle = tva({
 });
 
 const formControlLabelTextStyle = tva({
-  base: 'font-medium text-foreground text-base font-body',
+  base: 'font-sans font-medium text-foreground text-sm',
   variants: {
     isTruncated: {
       true: 'web:truncate',

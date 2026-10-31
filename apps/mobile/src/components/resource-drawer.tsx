@@ -1190,11 +1190,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#16181D",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   createSearchSubtitle: {
     fontSize: 12,
     color: "#6B7280",
     marginTop: 2,
+    fontFamily: "Inter_400Regular",
   },
   inlineAddContainer: {
     backgroundColor: "#F9FAFB",

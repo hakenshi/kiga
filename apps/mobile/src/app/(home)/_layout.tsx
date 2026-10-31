@@ -27,8 +27,8 @@ export default function HomeLayout() {
             <AvatarImage />
             <AvatarFallbackText className="text-2xl ">{user?.firstName}</AvatarFallbackText>
           </Avatar>
-          <View className="text-lg font-jakarta">
-            <Text>
+          <View>
+            <Text className="text-base font-semibold text-foreground">
               {user?.firstName}
             </Text>
             <Text className="text-gray-500 text-sm">

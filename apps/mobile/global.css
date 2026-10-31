@@ -40,14 +40,62 @@
   --font-jakarta-bold: PlusJakartaSans_700Bold;
   --font-jakarta-extrabold: PlusJakartaSans_800ExtraBold;
 
-  --font-sans: Inter_400Regular;
-  --font-body: Inter_400Regular;
+  /* Tipografia global padrão: Plus Jakarta Sans para tudo (corpo, inputs, labels, botões) */
+  --font-sans: PlusJakartaSans_400Regular;
+  --font-body: PlusJakartaSans_400Regular;
+
+  /* Tipografia dedicada para subtítulos: Inter */
+  --font-subtitle: Inter_400Regular;
+  --font-subtitle-medium: Inter_500Medium;
+  --font-subtitle-semibold: Inter_600SemiBold;
+  --font-subtitle-bold: Inter_700Bold;
+
   --font-inter: Inter_400Regular;
   --font-inter-regular: Inter_400Regular;
   --font-inter-medium: Inter_500Medium;
   --font-inter-semibold: Inter_600SemiBold;
   --font-inter-bold: Inter_700Bold;
   --font-inter-extrabold: Inter_800ExtraBold;
+}
+
+/* Mapeamento de peso para as fontes carregadas no React Native */
+.font-sans,
+.font-body,
+.font-normal {
+  font-family: PlusJakartaSans_400Regular;
+}
+
+.font-medium {
+  font-family: PlusJakartaSans_500Medium;
+}
+
+.font-semibold {
+  font-family: PlusJakartaSans_600SemiBold;
+}
+
+.font-bold {
+  font-family: PlusJakartaSans_700Bold;
+}
+
+.font-extrabold {
+  font-family: PlusJakartaSans_800ExtraBold;
+}
+
+/* Subtítulos usam Inter */
+.font-subtitle {
+  font-family: Inter_400Regular;
+}
+
+.font-subtitle-medium {
+  font-family: Inter_500Medium;
+}
+
+.font-subtitle-semibold {
+  font-family: Inter_600SemiBold;
+}
+
+.font-subtitle-bold {
+  font-family: Inter_700Bold;
 }
 
 :root {
