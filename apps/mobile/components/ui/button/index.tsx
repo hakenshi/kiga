@@ -46,21 +46,21 @@ const buttonStyle = tva({
   },
 });
 const buttonTextStyle = tva({
-  base: 'web:select-none font-sans font-semibold',
+  base: 'web:select-none font-sans',
   parentVariants: {
     variant: {
-      default: 'text-primary-foreground font-bold text-3xl',
+      default: 'text-primary-foreground',
       destructive: 'text-white',
       outline: 'text-foreground data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
       secondary: 'text-secondary-foreground',
-      tertiary: 'text-tertiary-foreground font-semibold',
+      tertiary: 'text-tertiary-foreground',
       ghost: 'text-foreground ',
       link: 'text-primary data-[hover=true]:underline data-[active=true]:underline',
     },
     size: {
       default: 'text-sm',
       sm: 'text-xs',
-      lg: 'text-sm',
+      lg: 'text-base',
       icon: 'text-sm',
     },
   },
@@ -146,12 +146,22 @@ type IButtonTextProps = React.ComponentPropsWithoutRef<typeof UIButton.Text> &
 const ButtonText = React.forwardRef<
   React.ElementRef<typeof UIButton.Text>,
   IButtonTextProps
->(({ className, size, ...props }, ref) => {
+>(({ className, size, style, ...props }, ref) => {
   const { size: parentSize, variant: parentVariant } = useStyleContext(SCOPE);
+  const isBold = className?.includes('font-bold') || className?.includes('font-heading');
   return (
     <UIButton.Text
       ref={ref}
       {...props}
+      style={[
+        {
+          fontFamily: isBold
+            ? 'PlusJakartaSans_700Bold'
+            : 'PlusJakartaSans_600SemiBold',
+          fontWeight: 'normal',
+        },
+        style,
+      ]}
       className={buttonTextStyle({
         parentVariants: {
           size: parentSize,

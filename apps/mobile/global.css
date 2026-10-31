@@ -63,39 +63,48 @@
 .font-body,
 .font-normal {
   font-family: PlusJakartaSans_400Regular;
+  font-weight: normal;
 }
 
 .font-medium {
   font-family: PlusJakartaSans_500Medium;
+  font-weight: normal;
 }
 
 .font-semibold {
   font-family: PlusJakartaSans_600SemiBold;
+  font-weight: normal;
 }
 
 .font-bold {
   font-family: PlusJakartaSans_700Bold;
+  font-weight: normal;
 }
 
 .font-extrabold {
   font-family: PlusJakartaSans_800ExtraBold;
+  font-weight: normal;
 }
 
 /* Subtítulos usam Inter */
 .font-subtitle {
   font-family: Inter_400Regular;
+  font-weight: normal;
 }
 
 .font-subtitle-medium {
   font-family: Inter_500Medium;
+  font-weight: normal;
 }
 
 .font-subtitle-semibold {
   font-family: Inter_600SemiBold;
+  font-weight: normal;
 }
 
 .font-subtitle-bold {
   font-family: Inter_700Bold;
+  font-weight: normal;
 }
 
 :root {

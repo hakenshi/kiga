@@ -213,12 +213,19 @@ type IFormControlErrorTextProps = React.ComponentProps<
 const FormControlErrorText = React.forwardRef<
   React.ComponentRef<typeof UIFormControl.Error.Text>,
   IFormControlErrorTextProps
->(function FormControlErrorText({ className, ...props }, ref) {
+>(function FormControlErrorText({ className, style, ...props }, ref) {
   return (
     <UIFormControl.Error.Text
       className={formControlErrorTextStyle({
         class: className,
       })}
+      style={[
+        {
+          fontFamily: 'PlusJakartaSans_500Medium',
+          fontWeight: 'normal',
+        },
+        style,
+      ]}
       ref={ref}
       {...props}
     />
@@ -270,12 +277,19 @@ type IFormControlLabelTextProps = React.ComponentProps<
 const FormControlLabelText = React.forwardRef<
   React.ComponentRef<typeof UIFormControl.Label.Text>,
   IFormControlLabelTextProps
->(function FormControlLabelText({ className, ...props }, ref) {
+>(function FormControlLabelText({ className, style, ...props }, ref) {
   return (
     <UIFormControl.Label.Text
       className={formControlLabelTextStyle({
         class: className,
       })}
+      style={[
+        {
+          fontFamily: 'PlusJakartaSans_500Medium',
+          fontWeight: 'normal',
+        },
+        style,
+      ]}
       ref={ref}
       {...props}
     />

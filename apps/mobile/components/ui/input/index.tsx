@@ -95,11 +95,18 @@ type IInputFieldProps = React.ComponentProps<typeof UIInput.Input> &
 const InputField = React.forwardRef<
   React.ComponentRef<typeof UIInput.Input>,
   IInputFieldProps
->(function InputField({ className, ...props }, ref) {
+>(function InputField({ className, style, ...props }, ref) {
   return (
     <UIInput.Input
       ref={ref}
       {...props}
+      style={[
+        {
+          fontFamily: 'PlusJakartaSans_400Regular',
+          fontWeight: 'normal',
+        },
+        style,
+      ]}
       className={inputFieldStyle({
         class: className,
       })}

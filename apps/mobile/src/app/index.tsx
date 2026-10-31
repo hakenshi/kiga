@@ -1,7 +1,7 @@
 import { Button, ButtonText } from "@/components/ui/button";
 import { VStack } from "@/components/ui/vstack";
 import { Redirect, useRouter } from "expo-router";
-import { Text } from "react-native";
+import { Text } from "@/components/ui/text";
 import Logo from "@/components/Logo";
 import { useAuthStore } from "@/stores/auth-store";
 import { HStack } from "@/components/ui/hstack";
@@ -41,8 +41,8 @@ export default function Index() {
             Fazer login com o Google
           </ButtonText>
         </Button>
-        <HStack className="items-center justify-center pt-8">
-          <Text>
+        <HStack className="items-center justify-center pt-8 gap-1">
+          <Text className="text-zinc-600 text-sm">
             Já possui uma conta?
           </Text>
           <Button variant="ghost" className="shadow-none" onPress={() => router.push("/(auth)/login")}>
