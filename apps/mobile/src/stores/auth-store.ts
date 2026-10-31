@@ -9,6 +9,7 @@ export type SessionState = {
 
 export type SessionActions = {
   setUser: ({ user, isAuthenticated }: SessionState) => void;
+  updateUser: (data: Partial<User>) => void;
   logout: () => void;
 };
 
@@ -17,8 +18,8 @@ export const useAuthStore = create<SessionState & SessionActions>()(
     (set) => ({
       isAuthenticated: false,
       user: null,
-      setUser: ({ user, isAuthenticated }: SessionState) =>
-        set({ user, isAuthenticated }),
+      setUser: ({ user, isAuthenticated }: SessionState) => set({ user, isAuthenticated }),
+      updateUser: data => set(s => (s.user ? { user: { ...s.user, ...data } } : s)),
       logout: () => set({ user: null, isAuthenticated: false }),
     }),
     {

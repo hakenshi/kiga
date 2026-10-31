@@ -51,4 +51,32 @@ describe("useAuthStore", () => {
     expect(useAuthStore.getState().user).toBeNull();
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
   });
+
+  it("deve atualizar campos parciais do usuário logado com updateUser", () => {
+    const mockUser: User = {
+      id: 1,
+      username: "johndoe",
+      firstName: "John",
+      secondName: "Doe",
+      birthDate: new Date("1995-05-15"),
+      gender: "male",
+      pronoun: "he_him",
+      createdAt: new Date(),
+    };
+
+    useAuthStore.getState().setUser({ user: mockUser, isAuthenticated: true });
+
+    // Atualização com objeto parcial
+    useAuthStore.getState().updateUser({ firstName: "Johnny" });
+    expect(useAuthStore.getState().user?.firstName).toBe("Johnny");
+    expect(useAuthStore.getState().user?.username).toBe("johndoe");
+
+    // Atualização de outro campo parcial
+    useAuthStore.getState().updateUser({
+      emotions: [{ id: 10, name: "Empolgação", categoryId: null, orderIndex: 1, deletedAt: null, userId: 1 }],
+    });
+
+    expect(useAuthStore.getState().user?.emotions?.length).toBe(1);
+    expect(useAuthStore.getState().user?.emotions?.[0].name).toBe("Empolgação");
+  });
 });
