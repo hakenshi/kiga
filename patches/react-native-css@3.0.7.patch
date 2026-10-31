@@ -1,0 +1,78 @@
+diff --git a/dist/commonjs/components/TextInput.js b/dist/commonjs/components/TextInput.js
+index 17fb786d42bca8926e5d60be23de68b87245e205..b9dacf985555b281167e5afbf3e1126ca42ba58f 100644
+--- a/dist/commonjs/components/TextInput.js
++++ b/dist/commonjs/components/TextInput.js
+@@ -11,7 +11,7 @@ const mapping = {
+   className: {
+     target: "style",
+     nativeStyleMapping: {
+-      textAlign: true
++      textAlign: "textAlign"
+     }
+   }
+ };
+diff --git a/dist/commonjs/native/styles/index.js b/dist/commonjs/native/styles/index.js
+index 222296d6bd95a69dd87af100d8387753c54d2095..5e6eb1f41167e9dee06442b8efff5ecbb48e4e19 100644
+--- a/dist/commonjs/native/styles/index.js
++++ b/dist/commonjs/native/styles/index.js
+@@ -373,7 +373,7 @@ function nativeStyleMapping(config, props) {
+       continue;
+     }
+     let target = props;
+-    const tokens = path.split(".");
++    const tokens = typeof path === "string" ? path.split(".") : [key];
+     const lastToken = tokens.pop();
+     for (const token of tokens) {
+       target[token] ??= {};
+diff --git a/dist/module/components/TextInput.js b/dist/module/components/TextInput.js
+index 7b0c562b77a142b49f2a8dc2fd4a2b4508efb72a..d08a2b225941d278cee47b4e253b22126a5595c9 100644
+--- a/dist/module/components/TextInput.js
++++ b/dist/module/components/TextInput.js
+@@ -7,7 +7,7 @@ const mapping = {
+   className: {
+     target: "style",
+     nativeStyleMapping: {
+-      textAlign: true
++      textAlign: "textAlign"
+     }
+   }
+ };
+diff --git a/dist/module/native/styles/index.js b/dist/module/native/styles/index.js
+index 067f8edb6459cf6b15258df079c541746f233af5..d4b193817514dc67bfe483b0266f42912319f219 100644
+--- a/dist/module/native/styles/index.js
++++ b/dist/module/native/styles/index.js
+@@ -369,7 +369,7 @@ function nativeStyleMapping(config, props) {
+       continue;
+     }
+     let target = props;
+-    const tokens = path.split(".");
++    const tokens = typeof path === "string" ? path.split(".") : [key];
+     const lastToken = tokens.pop();
+     for (const token of tokens) {
+       target[token] ??= {};
+diff --git a/src/components/TextInput.tsx b/src/components/TextInput.tsx
+index fb58a966b0e0436920e545ecbbec1855b615a3a9..d49b10ab6aa7c907a898a7e052cb8d225d7192cc 100644
+--- a/src/components/TextInput.tsx
++++ b/src/components/TextInput.tsx
+@@ -12,7 +12,7 @@ const mapping: StyledConfiguration<typeof RNTextInput> = {
+   className: {
+     target: "style",
+     nativeStyleMapping: {
+-      textAlign: true,
++      textAlign: "textAlign",
+     },
+   },
+ };
+diff --git a/src/native/styles/index.ts b/src/native/styles/index.ts
+index 9ac5cc4d7c532cd9f6686d4b9d5909d5a76e8aab..85724fd0ad88bc4969c2c2674305e2dd3c86001f 100644
+--- a/src/native/styles/index.ts
++++ b/src/native/styles/index.ts
+@@ -504,7 +504,7 @@ function nativeStyleMapping(
+     }
+ 
+     let target = props;
+-    const tokens = path.split(".");
++    const tokens = typeof path === "string" ? path.split(".") : [key];
+     const lastToken = tokens.pop();
+     for (const token of tokens) {
+       target[token] ??= {};

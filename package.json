@@ -34,5 +34,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "patchedDependencies": {
+    "react-native-css@3.0.7": "patches/react-native-css@3.0.7.patch"
+  }
 }
