@@ -985,10 +985,10 @@ export function ResourcePickerFooter({
   return (
     <View style={styles.bottomBar}>
       <Button
-        className="w-full rounded-2xl bg-[#16181D] py-3.5"
+        className="w-full rounded-2xl bg-primary py-3.5"
         onPress={handlePress}
       >
-        <ButtonText className="text-white font-semibold text-center text-base">
+        <ButtonText className="text-primary-foreground font-semibold text-center text-base">
           {text}
         </ButtonText>
       </Button>
@@ -1011,7 +1011,7 @@ function ResourcePickerDeleteDialog() {
       <AlertDialogBackdrop />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <Text className="text-lg font-bold text-[#16181D]">
+          <Text className="text-lg font-bold text-foreground">
             Excluir {itemToDelete?.isCategory ? "categoria" : "item"}?
           </Text>
           <AlertDialogCloseButton>

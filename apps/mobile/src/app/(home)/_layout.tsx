@@ -1,4 +1,4 @@
-import { Button, ButtonText } from "@/components/ui/button";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useAuthStore } from "@/stores/auth-store";
@@ -20,8 +20,8 @@ export default function HomeLayout() {
   }
 
   return (
-    <VStack className="flex-1">
-      <HStack space="md" className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} items-center justify-between bg-white p-5`} style={{ paddingTop: top, }}>
+    <VStack className="flex-1 bg-background">
+      <HStack space="md" className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} items-center justify-between bg-background border-b border-border p-5`} style={{ paddingTop: top, }}>
         <HStack className="items-center" space="md">
           <Avatar className="">
             <AvatarImage />
@@ -31,22 +31,20 @@ export default function HomeLayout() {
             <Text className="text-base font-semibold text-foreground">
               {user?.firstName}
             </Text>
-            <Text className="text-gray-500 text-sm">
+            <Text className="text-muted-foreground text-sm">
               @{user?.username}
             </Text>
           </View>
         </HStack>
 
         <Link href="/home/new-post" asChild>
-          <Button size="icon" className="rounded-full p-3" variant="tertiary">
-            <ButtonText>
-              <PlusIcon color="white" size={16} />
-            </ButtonText>
+          <Button size="icon" className="rounded-full p-3">
+            <ButtonIcon as={PlusIcon} size="md" />
           </Button>
         </Link>
       </HStack>
       <Stack screenOptions={{ headerShown: false, animation: "none" }} />
-      <HStack className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} bg-white py-5 px-4 w-full justify-around`} style={{ paddingBottom: bottom }}>
+      <HStack className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} bg-background border-t border-border py-5 px-4 w-full justify-around`} style={{ paddingBottom: bottom }}>
         <NavLinkButton Icon={HomeIcon} path="/home">
           Feed
         </NavLinkButton>

@@ -1,7 +1,7 @@
 import { AuthButtonBack, AuthButtonsContainer } from "@/components/auth/auth-pages-buttons";
 import { AuthHeader, AuthSubtitle, AuthTitle } from "@/components/auth/auth-pages-header";
 import AuthPagesShell from "@/components/auth/auth-pages-shell";
-import { Button, ButtonText } from "@/components/ui/button";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
   FormControlError,
@@ -136,8 +136,8 @@ export default function PinPage() {
                     key={i}
                     className={`h-16 w-14 rounded-2xl items-center justify-center border ${
                       field.value?.[i]
-                        ? "border-zinc-900 border-2 bg-zinc-50"
-                        : "border-zinc-200 bg-white"
+                        ? "border-foreground border-2 bg-secondary"
+                        : "border-border bg-background"
                     }`}
                   >
                     <InputField
@@ -150,7 +150,7 @@ export default function PinPage() {
                       onBlur={field.onBlur}
                       editable={false}
                       style={{ textAlign: "center" }}
-                      className="h-full w-full text-center text-3xl font-bold p-0 text-zinc-900"
+                      className="h-full w-full text-center text-3xl font-bold p-0 text-foreground"
                     />
                   </Input>
                 ))}
@@ -181,14 +181,14 @@ export default function PinPage() {
                     <Button
                       key={colIndex}
                       variant="secondary"
-                      className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-zinc-200 active:opacity-60 active:scale-95"
+                      className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-95"
                       onPress={() =>
                         setValue("pin", pin.slice(0, -1), {
                           shouldValidate: true,
                         })
                       }
                     >
-                      <DeleteIcon color="#16181D" size={24} />
+                      <ButtonIcon as={DeleteIcon} size="lg" />
                     </Button>
                   );
                 }
@@ -197,7 +197,7 @@ export default function PinPage() {
                   <Button
                     key={colIndex}
                     variant="secondary"
-                    className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-zinc-200 active:opacity-60 active:scale-95"
+                    className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-95"
                     onPress={() => {
                       if (pin.length < 6) {
                         setValue("pin", pin + item, {
@@ -206,7 +206,7 @@ export default function PinPage() {
                       }
                     }}
                   >
-                    <ButtonText className="text-2xl sm:text-3xl font-bold text-center text-zinc-900">
+                    <ButtonText className="text-2xl sm:text-3xl font-bold text-center text-foreground">
                       {item}
                     </ButtonText>
                   </Button>
@@ -227,7 +227,7 @@ export default function PinPage() {
           onPress={handleSubmit(submit)}
         >
           <ButtonText>Concluir Cadastro</ButtonText>
-          <Check color="white" size={16} />
+          <ButtonIcon as={Check} size="sm" />
         </Button>
       </AuthButtonsContainer>
     </AuthPagesShell >

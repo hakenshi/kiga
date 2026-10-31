@@ -23,24 +23,25 @@ const UIButton = createButton({
   Icon: StyledUIIcon,
 });
 const buttonStyle = tva({
-  base: 'rounded-xl flex-row items-center shadow-xl justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2 h-fit',
+  base: 'rounded-xl flex-row items-center justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2 h-fit',
   variants: {
     variant: {
-      tertiary: 'bg-primary data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
-      navgiation: 'bg-tertiary/20 data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
-      destructive:
-        'bg-destructive data-[hover=true]:bg-destructive/90 data-[active=true]:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+      default: 'bg-primary data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
+      secondary: 'border border-border bg-secondary text-secondary-foreground data-[hover=true]:bg-secondary/80 data-[active=true]:bg-secondary/80',
       outline:
         'border border-border bg-background shadow-xs data-[hover=true]:bg-accent data-[active=true]:bg-accent dark:bg-input/[0.045] dark:border-border/90 dark:data-[hover=true]:bg-input/[0.075] dark:data-[active=true]:bg-input/[0.075]',
-      secondary: 'border-zinc-300 border bg-secondary text-secondary-foreground data-[hover=true]:bg-secondary/80 data-[active=true]:bg-secondary/80',
-      default: 'bg-tertiary data-[hover=true]:bg-tertiary/90 data-[active=true]:bg-tertiary/90',
       ghost: 'data-[hover=true]:bg-accent data-[active=true]:bg-accent dark:data-[hover=true]:bg-accent/50 dark:data-[active=true]:bg-accent/50',
+      destructive:
+        'bg-destructive data-[hover=true]:bg-destructive/90 data-[active=true]:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+      tertiary: 'bg-muted data-[hover=true]:bg-muted/80 data-[active=true]:bg-muted/80',
+      navigation: 'bg-secondary data-[hover=true]:bg-accent data-[active=true]:bg-accent',
       link: 'text-primary underline-offset-4 data-[hover=true]:underline data-[active=true]:underline',
     },
     size: {
       md: 'px-4 py-2',
       sm: 'min-h-8 rounded-md px-3 text-xs',
       default: 'min-h-12 px-8',
+      lg: 'min-h-12 px-8',
       icon: 'min-h-9 min-w-9',
     },
   },
@@ -50,16 +51,18 @@ const buttonTextStyle = tva({
   parentVariants: {
     variant: {
       default: 'text-primary-foreground',
-      destructive: 'text-white',
-      outline: 'text-foreground data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
       secondary: 'text-secondary-foreground',
-      tertiary: 'text-tertiary-foreground',
-      ghost: 'text-foreground ',
+      outline: 'text-foreground data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
+      ghost: 'text-foreground',
+      destructive: 'text-destructive-foreground',
+      tertiary: 'text-muted-foreground',
+      navigation: 'text-foreground',
       link: 'text-primary data-[hover=true]:underline data-[active=true]:underline',
     },
     size: {
       default: 'text-sm',
       sm: 'text-xs',
+      md: 'text-sm',
       lg: 'text-base',
       icon: 'text-sm',
     },
@@ -83,17 +86,20 @@ const buttonIconStyle = tva({
   parentVariants: {
     variant: {
       default: 'text-primary-foreground',
-      destructive: 'text-white',
+      secondary: 'text-secondary-foreground',
       outline:
         'text-foreground data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
-      secondary: 'text-secondary-foreground',
       ghost:
         'text-foreground data-[hover=true]:text-accent-foreground data-[active=true]:text-accent-foreground',
+      destructive: 'text-destructive-foreground',
+      tertiary: 'text-muted-foreground',
+      navigation: 'text-foreground',
       link: 'text-primary',
     },
     size: {
       default: 'h-4 w-4',
       sm: 'h-3 w-3',
+      md: 'h-4 w-4',
       lg: 'h-5 w-5',
       icon: 'h-4 w-4',
     },

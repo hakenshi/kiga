@@ -183,10 +183,10 @@ export default function NewPostPage() {
 
             {/* Center Date & Time: fixo e estático por montagem */}
             <VStack className="items-center justify-center flex-1">
-              <Text className="font-semibold text-sm text-[#16181D]">
+              <Text className="font-semibold text-sm text-foreground">
                 {formattedDate}
               </Text>
-              <Text className="text-xs text-[#5A606B]">{formattedTime}</Text>
+              <Text className="text-xs text-muted-foreground">{formattedTime}</Text>
             </VStack>
 
             {/* Right Slot: 96px */}
@@ -195,11 +195,11 @@ export default function NewPostPage() {
                 onPress={handleSubmit(onSave)}
                 disabled={isSubmitting || !content.trim()}
                 className={`h-10 px-5 rounded-full items-center justify-center ${isSubmitting || !content.trim()
-                    ? "bg-gray-300"
-                    : "bg-[#16181D] active:opacity-85"
+                    ? "bg-muted"
+                    : "bg-primary active:opacity-85"
                   }`}
               >
-                <Text className="text-white font-semibold text-sm">
+                <Text className="text-primary-foreground font-semibold text-sm">
                   {isSubmitting ? "Salvando..." : "Salvar"}
                 </Text>
               </Pressable>
@@ -210,8 +210,8 @@ export default function NewPostPage() {
         {/* Conteúdo Principal */}
         <VStack className="flex-1">
           {/* Mood Selector Row */}
-          <HStack className="justify-between px-4 py-3 items-center border-b border-gray-100">
-            <Text className="text-[13px] text-[#5A606B] font-normal">
+          <HStack className="justify-between px-4 py-3 items-center border-b border-border">
+            <Text className="text-[13px] text-muted-foreground font-normal">
               Como você está?
             </Text>
             <HStack className="items-center" space="xs">
@@ -226,13 +226,13 @@ export default function NewPostPage() {
                       })
                     }
                     className={`w-[30px] h-[30px] rounded-full items-center justify-center active:opacity-70 ${isSelected
-                        ? "bg-white border-[1.5px] border-[#16181D]"
-                        : "bg-[#F2F3F5]"
+                        ? "bg-background border-[1.5px] border-foreground"
+                        : "bg-secondary"
                       }`}
                   >
                     <Icon
                       size={18}
-                      color={isSelected ? "#16181D" : "#9AA0AA"}
+                      color={isSelected ? "#18181b" : "#9AA0AA"}
                     />
                   </Pressable>
                 );
@@ -273,9 +273,9 @@ export default function NewPostPage() {
                   <Pressable
                     key={`em-${e.id}`}
                     onPress={() => toggleEmotion(e.id, e.name)}
-                    className="flex-row items-center bg-[#F3F4F6] border border-gray-200 rounded-full px-3 py-1.5 gap-1.5"
+                    className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
                   >
-                    <Text className="text-xs font-medium text-[#16181D]">
+                    <Text className="text-xs font-medium text-foreground">
                       {e.name}
                     </Text>
                     <X size={12} color="#9CA3AF" />
@@ -285,9 +285,9 @@ export default function NewPostPage() {
                   <Pressable
                     key={`th-${t.id}`}
                     onPress={() => toggleThought(t.id, t.name)}
-                    className="flex-row items-center bg-[#F3F4F6] border border-gray-200 rounded-full px-3 py-1.5 gap-1.5"
+                    className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
                   >
-                    <Text className="text-xs font-medium text-[#16181D]">
+                    <Text className="text-xs font-medium text-foreground">
                       “{t.name}”
                     </Text>
                     <X size={12} color="#9CA3AF" />
@@ -297,9 +297,9 @@ export default function NewPostPage() {
                   <Pressable
                     key={`re-${r.id}`}
                     onPress={() => toggleReaction(r.id, r.name)}
-                    className="flex-row items-center bg-[#F3F4F6] border border-gray-200 rounded-full px-3 py-1.5 gap-1.5"
+                    className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
                   >
-                    <Text className="text-xs font-medium text-[#16181D]">
+                    <Text className="text-xs font-medium text-foreground">
                       {r.name}
                     </Text>
                     <X size={12} color="#9CA3AF" />
@@ -311,10 +311,10 @@ export default function NewPostPage() {
                     <Pressable
                       key={`beh-${b.id ?? idx}`}
                       onPress={() => toggleBehavior(b)}
-                      className="flex-row items-center bg-[#F3F4F6] border border-gray-200 rounded-full px-3 py-1.5 gap-1.5"
+                      className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
                     >
-                      <IconComp size={12} color="#16181D" />
-                      <Text className="text-xs font-medium text-[#16181D]">
+                      <IconComp size={12} color="#18181b" />
+                      <Text className="text-xs font-medium text-foreground">
                         {b.content}
                       </Text>
                       <X size={12} color="#9CA3AF" />

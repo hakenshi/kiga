@@ -18,14 +18,14 @@ export default function NavLinkButton({ Icon, onPress, path, className, children
     <Link href={path as Href} asChild>
       <Pressable
         onPress={onPress}
-        className={`flex-1 items-center justify-center py-2 px-2 rounded-2xl active:opacity-70 ${isActive ? "bg-sky-100" : ""
+        className={`flex-1 items-center justify-center py-2 px-2 rounded-2xl active:opacity-70 ${isActive ? "bg-secondary" : ""
           } ${className ?? ""}`}
       >
         <View className="w-6 h-6 items-center justify-center">
-          <Icon size={20} color={isActive ? "#0084D1" : "#16181D"} />
+          <Icon size={20} color={isActive ? "#18181b" : "#71717a"} />
         </View>
         <Text
-          className={`text-[11px] mt-1 ${isActive ? "text-[#0084D1] font-semibold" : "text-[#5A606B] font-normal"
+          className={`text-[11px] mt-1 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground font-normal"
             }`}
         >
           {children}

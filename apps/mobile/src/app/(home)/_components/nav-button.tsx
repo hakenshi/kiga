@@ -18,21 +18,21 @@ export default function NavButton({ Icon, onPress, path, className, children, ba
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-1 items-center justify-center py-2 px-2 rounded-2xl active:opacity-70 ${isActive ? "bg-sky-100" : ""
+      className={`flex-1 items-center justify-center py-2 px-2 rounded-2xl active:opacity-70 ${isActive ? "bg-secondary" : ""
         } ${className ?? ""}`}
     >
       <View className="w-6 h-6 items-center justify-center relative">
-        <Icon size={20} color={isActive ? "#0084D1" : "#16181D"} />
+        <Icon size={20} color={isActive ? "#18181b" : "#71717a"} />
         {badge !== undefined && badge > 0 && (
-          <View className="absolute -top-1.5 -right-2 bg-[#16181D] min-w-[16px] h-4 px-1 rounded-full items-center justify-center">
-            <Text className="text-[10px] text-white font-bold leading-none">
+          <View className="absolute -top-1.5 -right-2 bg-primary min-w-[16px] h-4 px-1 rounded-full items-center justify-center">
+            <Text className="text-[10px] text-primary-foreground font-bold leading-none">
               {badge}
             </Text>
           </View>
         )}
       </View>
       <Text
-        className={`text-[11px] mt-1 ${isActive ? "text-[#0084D1] font-semibold" : "text-[#5A606B] font-normal"
+        className={`text-[11px] mt-1 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground font-normal"
           }`}
       >
         {children}
