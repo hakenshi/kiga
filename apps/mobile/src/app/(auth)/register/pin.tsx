@@ -181,7 +181,7 @@ export default function PinPage() {
                     <Button
                       key={colIndex}
                       variant="secondary"
-                      className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-95"
+                      className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
                       onPress={() =>
                         setValue("pin", pin.slice(0, -1), {
                           shouldValidate: true,
@@ -197,7 +197,7 @@ export default function PinPage() {
                   <Button
                     key={colIndex}
                     variant="secondary"
-                    className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-95"
+                    className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
                     onPress={() => {
                       if (pin.length < 6) {
                         setValue("pin", pin + item, {

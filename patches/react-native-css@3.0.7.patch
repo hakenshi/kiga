@@ -11,6 +11,35 @@ index 17fb786d42bca8926e5d60be23de68b87245e205..b9dacf985555b281167e5afbf3e1126c
      }
    }
  };
+diff --git a/dist/commonjs/native/styles/functions/transform-functions.js b/dist/commonjs/native/styles/functions/transform-functions.js
+index 9f776c60237cd9d1da58a6cd283e7c176a466650..f32817e91b6761520827a78b9476cf4979da1790 100644
+--- a/dist/commonjs/native/styles/functions/transform-functions.js
++++ b/dist/commonjs/native/styles/functions/transform-functions.js
+@@ -5,15 +5,21 @@ Object.defineProperty(exports, "__esModule", {
+ });
+ exports.translate = exports.scale = exports.rotate = void 0;
+ var _utilities = require("react-native-css/utilities");
++function toScaleNumber(val) {
++  if (typeof val === "string" && val.endsWith("%")) {
++    return parseFloat(val) / 100;
++  }
++  return val;
++}
+ const scale = (resolveValue, descriptor) => {
+   const args = descriptor[2];
+   if (!(0, _utilities.isStyleDescriptorArray)(args)) {
+     return {
+-      scale: resolveValue(args)
++      scale: toScaleNumber(resolveValue(args))
+     };
+   }
+-  const x = resolveValue(args[0]);
+-  const y = resolveValue(args[1]);
++  const x = toScaleNumber(resolveValue(args[0]));
++  const y = toScaleNumber(resolveValue(args[1]));
+   const isXValid = typeof x === "string" || typeof x === "number";
+   const isYValid = typeof y === "string" || typeof y === "number";
+   if (isXValid && isYValid) {
 diff --git a/dist/commonjs/native/styles/index.js b/dist/commonjs/native/styles/index.js
 index 222296d6bd95a69dd87af100d8387753c54d2095..5e6eb1f41167e9dee06442b8efff5ecbb48e4e19 100644
 --- a/dist/commonjs/native/styles/index.js
@@ -37,6 +66,35 @@ index 7b0c562b77a142b49f2a8dc2fd4a2b4508efb72a..d08a2b225941d278cee47b4e253b2212
      }
    }
  };
+diff --git a/dist/module/native/styles/functions/transform-functions.js b/dist/module/native/styles/functions/transform-functions.js
+index b2c9979d3d538bebc18c9afa4ed12e89e99877b4..1eda497c7bfe4cfed55d32a647dfc62125b716c9 100644
+--- a/dist/module/native/styles/functions/transform-functions.js
++++ b/dist/module/native/styles/functions/transform-functions.js
+@@ -1,15 +1,21 @@
+ "use strict";
+ 
+ import { isStyleDescriptorArray } from "react-native-css/utilities";
++function toScaleNumber(val) {
++  if (typeof val === "string" && val.endsWith("%")) {
++    return parseFloat(val) / 100;
++  }
++  return val;
++}
+ export const scale = (resolveValue, descriptor) => {
+   const args = descriptor[2];
+   if (!isStyleDescriptorArray(args)) {
+     return {
+-      scale: resolveValue(args)
++      scale: toScaleNumber(resolveValue(args))
+     };
+   }
+-  const x = resolveValue(args[0]);
+-  const y = resolveValue(args[1]);
++  const x = toScaleNumber(resolveValue(args[0]));
++  const y = toScaleNumber(resolveValue(args[1]));
+   const isXValid = typeof x === "string" || typeof x === "number";
+   const isYValid = typeof y === "string" || typeof y === "number";
+   if (isXValid && isYValid) {
 diff --git a/dist/module/native/styles/index.js b/dist/module/native/styles/index.js
 index 067f8edb6459cf6b15258df079c541746f233af5..d4b193817514dc67bfe483b0266f42912319f219 100644
 --- a/dist/module/native/styles/index.js
@@ -63,6 +121,36 @@ index fb58a966b0e0436920e545ecbbec1855b615a3a9..d49b10ab6aa7c907a898a7e052cb8d22
      },
    },
  };
+diff --git a/src/native/styles/functions/transform-functions.ts b/src/native/styles/functions/transform-functions.ts
+index c9826db68e0f187fcef0083e4ec6f3ea5a1c664e..08d8db723c3bab967e09974c2e19e1c0846a0055 100644
+--- a/src/native/styles/functions/transform-functions.ts
++++ b/src/native/styles/functions/transform-functions.ts
+@@ -2,15 +2,22 @@ import { isStyleDescriptorArray } from "react-native-css/utilities";
+ 
+ import type { StyleFunctionResolver } from "../resolve";
+ 
++function toScaleNumber(val: unknown): unknown {
++  if (typeof val === "string" && val.endsWith("%")) {
++    return parseFloat(val) / 100;
++  }
++  return val;
++}
++
+ export const scale: StyleFunctionResolver = (resolveValue, descriptor) => {
+   const args = descriptor[2];
+ 
+   if (!isStyleDescriptorArray(args)) {
+-    return { scale: resolveValue(args) };
++    return { scale: toScaleNumber(resolveValue(args)) };
+   }
+ 
+-  const x = resolveValue(args[0]);
+-  const y = resolveValue(args[1]);
++  const x = toScaleNumber(resolveValue(args[0]));
++  const y = toScaleNumber(resolveValue(args[1]));
+ 
+   const isXValid = typeof x === "string" || typeof x === "number";
+   const isYValid = typeof y === "string" || typeof y === "number";
 diff --git a/src/native/styles/index.ts b/src/native/styles/index.ts
 index 9ac5cc4d7c532cd9f6686d4b9d5909d5a76e8aab..85724fd0ad88bc4969c2c2674305e2dd3c86001f 100644
 --- a/src/native/styles/index.ts
