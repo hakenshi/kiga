@@ -27,11 +27,8 @@ import { ResourceDrawer } from "@/components/resource-drawer";
 import { BehaviorDrawer, getBehaviorIcon } from "@/components/behavior-drawer";
 import { EntryTextInput } from "@/components/entry-text-input";
 import { createJournalEntry } from "@/lib/db/entries";
-import {
-  newPostSchema,
-  type NewPostInput,
-  type NewPostSchema,
-} from "@/lib/db/zod/zod-schemas";
+import { newEntrySchema } from "@/lib/db/zod/zod-schemas";
+import type { NewEntryInput, NewEntrySchema } from "@/lib/db/zod/zod-types";
 import { countWords } from "@/lib/utils";
 
 const MOOD_OPTIONS = [
@@ -71,8 +68,8 @@ export default function NewPostPage() {
     getValues,
     setValue,
     formState: { isSubmitting },
-  } = useForm<NewPostInput, any, NewPostSchema>({
-    resolver: zodResolver(newPostSchema),
+  } = useForm<NewEntryInput, any, NewEntrySchema>({
+    resolver: zodResolver(newEntrySchema),
     defaultValues: {
       content: "",
       moodId: null,
@@ -141,8 +138,8 @@ export default function NewPostPage() {
     setValue("behaviors", next, { shouldValidate: true });
   };
 
-  // Salvar Post via Service
-  const onSave = async (formData: NewPostSchema) => {
+  // Salvar Entry via Service
+  const onSave = async (formData: NewEntrySchema) => {
     try {
       await createJournalEntry({
         userId: user?.id ?? 1,

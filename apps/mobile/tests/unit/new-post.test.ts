@@ -1,10 +1,9 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, it, mock } from "bun:test";
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
-import { newPostSchema } from "@/lib/db/zod/zod-schemas";
-import { createJournalEntry } from "@/lib/db/entries";
+import { newEntrySchema } from "@/lib/db/zod/zod-schemas";
 import * as schema from "@/lib/db/schema";
 import {
   emotions,
@@ -18,10 +17,35 @@ import {
 } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
-  // ─── 1. VALIDAÇÃO ZOD (newPostSchema) ───────────────────────────────────
-  describe("Validação de Schema (newPostSchema)", () => {
-    it("deve validar com sucesso um post válido com texto e humor", () => {
+let testDb: any = null;
+const dbProxy = new Proxy({}, {
+  get: (_, prop) => {
+    if (!testDb) return undefined;
+    const val = testDb[prop];
+    return typeof val === "function" ? val.bind(testDb) : val;
+  },
+});
+
+mock.module("@/lib/db", () => ({
+  default: dbProxy,
+  db: dbProxy,
+  expo: {},
+}));
+
+mock.module("expo-sqlite", () => ({
+  openDatabaseSync: () => ({
+    execSync: () => {},
+    getFirstSync: () => null,
+    runSync: () => {},
+  }),
+}));
+
+let createJournalEntry: typeof import("@/lib/db/entries").createJournalEntry;
+
+describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
+  // ─── 1. VALIDAÇÃO ZOD (newEntrySchema) ───────────────────────────────────
+  describe("Validação de Schema (newEntrySchema)", () => {
+    it("deve validar com sucesso uma entry válida com texto e humor", () => {
       const input = {
         content: "Hoje o dia foi produtivo e me sinto calmo.",
         moodId: 4,
@@ -30,7 +54,7 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
         reactions: [{ id: 3, name: "Respiração lenta" }],
       };
 
-      const res = newPostSchema.safeParse(input);
+      const res = newEntrySchema.safeParse(input);
       expect(res.success).toBe(true);
 
       if (res.success) {
@@ -44,7 +68,7 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
       }
     });
 
-    it("deve rejeitar posts com conteúdo vazio ou apenas espaços", () => {
+    it("deve rejeitar entries com conteúdo vazio ou apenas espaços", () => {
       const emptyInput = {
         content: "   ",
         moodId: null,
@@ -53,12 +77,12 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
         reactions: [],
       };
 
-      const res = newPostSchema.safeParse(emptyInput);
+      const res = newEntrySchema.safeParse(emptyInput);
       expect(res.success).toBe(false);
 
       if (!res.success) {
         expect(res.error.issues[0].message).toBe(
-          "O conteúdo do post não pode ficar em branco"
+          "O conteúdo do relato não pode ficar em branco"
         );
       }
     });
@@ -68,7 +92,7 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
         content: "Apenas um desabafo rápido.",
       };
 
-      const res = newPostSchema.safeParse(minimalInput);
+      const res = newEntrySchema.safeParse(minimalInput);
       expect(res.success).toBe(true);
 
       if (res.success) {
@@ -84,7 +108,7 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
         content: "   Texto com espaços nas pontas   ",
       };
 
-      const res = newPostSchema.safeParse(input);
+      const res = newEntrySchema.safeParse(input);
       expect(res.success).toBe(true);
 
       if (res.success) {
@@ -96,13 +120,15 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
   // ─── 2. SALVAMENTO NO BANCO SQLITE (ISOLADO EM MEMÓRIA COM LIMPEZA) ──────
   describe("Lógica de Inserção no SQLite (createJournalEntry)", () => {
     let sqlite: Database;
-    let testDb: ReturnType<typeof drizzle>;
     let testUserId: number;
     let emotionId: number;
     let thoughtId: number;
     let reactionId: number;
 
-    beforeAll(() => {
+    beforeAll(async () => {
+      const entriesMod = await import("@/lib/db/entries");
+      createJournalEntry = entriesMod.createJournalEntry;
+
       // Cria banco 100% isolado em memória RAM (NÃO toca no kiga.db do disco)
       sqlite = new Database(":memory:");
       sqlite.run("PRAGMA foreign_keys = ON;");
@@ -186,18 +212,15 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
 
       // 3. Executa a função do serviço
       const postDate = new Date("2026-10-30T10:00:00Z");
-      const entry = await createJournalEntry(
-        {
-          userId: testUserId,
-          content: "Registro completo de teste no SQLite",
-          moodId: m.id,
-          date: postDate,
-          emotions: [{ id: emotionId, name: "Alegria" }],
-          thoughts: [{ id: thoughtId, name: "Tudo vai dar certo" }],
-          reactions: [{ id: reactionId, name: "Sorriso involuntário" }],
-        },
-        testDb
-      );
+      const entry = await createJournalEntry({
+        userId: testUserId,
+        content: "Registro completo de teste no SQLite",
+        moodId: m.id,
+        date: postDate,
+        emotions: [{ id: emotionId, name: "Alegria" }],
+        thoughts: [{ id: thoughtId, name: "Tudo vai dar certo" }],
+        reactions: [{ id: reactionId, name: "Sorriso involuntário" }],
+      });
 
       expect(entry).toBeDefined();
       expect(entry.id).toBeGreaterThan(0);
@@ -245,16 +268,13 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
       // 2. Tenta salvar conteúdo vazio
       let errorThrown = false;
       try {
-        await createJournalEntry(
-          {
-            userId: u.id,
-            content: "   ",
-          },
-          testDb
-        );
+        await createJournalEntry({
+          userId: u.id,
+          content: "   ",
+        });
       } catch (err) {
         errorThrown = true;
-        expect((err as Error).message).toContain("não pode estar vazio");
+        expect((err as Error).message).toContain("não pode ficar em branco");
       }
 
       expect(errorThrown).toBe(true);
@@ -264,7 +284,7 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
       expect(allEntries.length).toBe(0);
     });
 
-    it("deve permitir salvar post sem humor e sem chips associados", async () => {
+    it("deve permitir salvar entry sem humor e sem chips associados", async () => {
       const [u] = await testDb
         .insert(users)
         .values({
@@ -277,13 +297,10 @@ describe("Tela de Novo Post - Validação e Salvamento no Banco", () => {
         })
         .returning();
 
-      const entry = await createJournalEntry(
-        {
-          userId: u.id,
-          content: "Post simples sem recursos adicionais",
-        },
-        testDb
-      );
+      const entry = await createJournalEntry({
+        userId: u.id,
+        content: "Entry simples sem recursos adicionais",
+      });
 
       expect(entry.id).toBeGreaterThan(0);
       expect(entry.moodId).toBeNull();

@@ -1,12 +1,48 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { genderEnum, pronounEnum, users } from "../schema";
+import {
+  behaviors,
+  categories,
+  emotions,
+  entryBehaviors,
+  entryEmotions,
+  entryImages,
+  entryReactions,
+  entryThoughts,
+  genderEnum,
+  journalEntries,
+  journalEntryType,
+  moods,
+  profileImages,
+  pronounEnum,
+  reactions,
+  thoughts,
+  users,
+} from "../schema";
 import { z } from "zod/v4";
 
+// ─── 1. TABELAS BASE (SELECT SCHEMAS VIA DRIZZLE-ZOD) ─────────────────────
 export const userSelectBaseSchema = createSelectSchema(users).omit({
   password: true,
   pin: true,
 });
 
+export const categorySelectSchema = createSelectSchema(categories);
+export const emotionSelectSchema = createSelectSchema(emotions);
+export const thoughtSelectSchema = createSelectSchema(thoughts);
+export const reactionSelectSchema = createSelectSchema(reactions);
+export const behaviorSelectSchema = createSelectSchema(behaviors);
+export const moodSelectSchema = createSelectSchema(moods);
+export const profileImageSelectSchema = createSelectSchema(profileImages);
+export const journalEntrySelectSchema = createSelectSchema(journalEntries);
+
+// Tabelas Pivot / Junções
+export const entryEmotionSelectSchema = createSelectSchema(entryEmotions);
+export const entryThoughtSelectSchema = createSelectSchema(entryThoughts);
+export const entryReactionSelectSchema = createSelectSchema(entryReactions);
+export const entryBehaviorSelectSchema = createSelectSchema(entryBehaviors);
+export const entryImageSelectSchema = createSelectSchema(entryImages);
+
+// ─── 2. TABELAS BASE (INSERT SCHEMAS VIA DRIZZLE-ZOD) ─────────────────────
 export const userInsertBaseSchema = createInsertSchema(users, {
   username: (s) =>
     s
@@ -19,7 +55,7 @@ export const userInsertBaseSchema = createInsertSchema(users, {
       .min(3, "A senha deve ter no mínimo 3 caracteres"),
   pin: (s) =>
     s
-      .min(1, "Informe o PIN")
+      .min(1, "Informe o PIN de segurança")
       .regex(/^\d+$/, "O PIN deve conter apenas números")
       .min(4, "O PIN deve ter no mínimo 4 dígitos")
       .max(6, "O PIN deve ter no máximo 6 dígitos"),
@@ -33,8 +69,8 @@ export const userInsertBaseSchema = createInsertSchema(users, {
       .trim()
       .min(1, "Informe o sobrenome")
       .min(2, "O sobrenome deve ter no mínimo 2 caracteres"),
-  gender: z.enum(genderEnum, { error: "Selecione um gênero válido" }),
-  pronoun: z.enum(pronounEnum, { error: "Selecione um pronome válido" }),
+  gender: z.enum(genderEnum, { error: "Selecione um gênero" }),
+  pronoun: z.enum(pronounEnum, { error: "Selecione um pronome" }),
 });
 
 export const userInsertSchema = userInsertBaseSchema.transform((data) => ({
@@ -45,18 +81,86 @@ export const userInsertSchema = userInsertBaseSchema.transform((data) => ({
   secondName: data.secondName.trim(),
 }));
 
-export const userInsterSchema = userInsertSchema;
+export const categoryInsertSchema = createInsertSchema(categories, {
+  name: (s) => s.trim().min(1, "Informe o nome da categoria"),
+});
+export const emotionInsertSchema = createInsertSchema(emotions, {
+  name: (s) => s.trim().min(1, "Informe o nome da emoção"),
+});
+export const thoughtInsertSchema = createInsertSchema(thoughts, {
+  name: (s) => s.trim().min(1, "Informe o pensamento"),
+});
+export const reactionInsertSchema = createInsertSchema(reactions, {
+  name: (s) => s.trim().min(1, "Informe a reação"),
+});
+export const behaviorInsertSchema = createInsertSchema(behaviors, {
+  content: z.string().trim().min(1, "Informe o comportamento"),
+});
+export const moodInsertSchema = createInsertSchema(moods, {
+  name: (s) => s.trim().min(1, "Informe o humor"),
+});
+export const profileImageInsertSchema = createInsertSchema(profileImages, {
+  url: (s) => s.min(1, "Informe o endereço da imagem"),
+});
+export const journalEntryInsertSchema = createInsertSchema(journalEntries, {
+  content: (s) =>
+    s
+      .trim()
+      .min(1, "O conteúdo do relato não pode ficar em branco"),
+  entryType: z.enum(journalEntryType).default("post"),
+});
 
-export const loginSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(1, "Informe o nome de usuário")
-    .min(3, "O nome de usuário deve ter no mínimo 3 caracteres"),
-  password: z
-    .string()
-    .min(1, "Informe a senha")
-    .min(3, "A senha deve ter no mínimo 3 caracteres"),
+// ─── 3. SCHEMAS COM RELACIONAMENTOS (DRIZZLE RELATIONS) ───────────────────
+export const entryEmotionWithRelationSchema = entryEmotionSelectSchema.extend({
+  emotion: emotionSelectSchema.optional(),
+});
+
+export const entryThoughtWithRelationSchema = entryThoughtSelectSchema.extend({
+  thought: thoughtSelectSchema.optional(),
+});
+
+export const entryReactionWithRelationSchema = entryReactionSelectSchema.extend({
+  reaction: reactionSelectSchema.optional(),
+});
+
+export const entryBehaviorWithRelationSchema = entryBehaviorSelectSchema.extend({
+  behavior: behaviorSelectSchema.optional(),
+});
+
+// Entry completo com todos os relacionamentos filhos
+export const journalEntryWithRelationsSchema = journalEntrySelectSchema.extend({
+  mood: moodSelectSchema.nullable().optional(),
+  entryEmotions: z.array(entryEmotionWithRelationSchema).optional(),
+  entryThoughts: z.array(entryThoughtWithRelationSchema).optional(),
+  entryReactions: z.array(entryReactionWithRelationSchema).optional(),
+  entryBehaviors: z.array(entryBehaviorWithRelationSchema).optional(),
+  entryImages: z.array(entryImageSelectSchema).optional(),
+});
+
+// Categoria com itens relacionados
+export const categoryWithItemsSchema = categorySelectSchema.extend({
+  emotions: z.array(emotionSelectSchema).optional(),
+  thoughts: z.array(thoughtSelectSchema).optional(),
+  reactions: z.array(reactionSelectSchema).optional(),
+  behaviors: z.array(behaviorSelectSchema).optional(),
+});
+
+// Usuário completo com todos os dados associados (Sessão / Login)
+export const userWithRelationsSchema = userSelectBaseSchema.extend({
+  categories: z.array(categorySelectSchema).optional(),
+  emotions: z.array(emotionSelectSchema).optional(),
+  thoughts: z.array(thoughtSelectSchema).optional(),
+  reactions: z.array(reactionSelectSchema).optional(),
+  behaviors: z.array(behaviorSelectSchema).optional(),
+  moods: z.array(moodSelectSchema).optional(),
+  profileImages: z.array(profileImageSelectSchema).optional(),
+  journalEntries: z.array(journalEntryWithRelationsSchema).optional(),
+});
+
+// ─── 4. SCHEMAS DE AUTENTICAÇÃO E CADASTRO (VIA DRIZZLE-ZOD) ──────────────
+export const loginSchema = userInsertBaseSchema.pick({
+  username: true,
+  password: true,
 });
 
 export const birthDateSchema = z
@@ -131,16 +235,21 @@ export const birthDateSchema = z
     return date;
   });
 
-export const registerNameSchema = z.object({
-  firstName: userInsertBaseSchema.shape.firstName,
-  secondName: userInsertBaseSchema.shape.secondName,
-  username: userInsertBaseSchema.shape.username,
-  birthDate: birthDateSchema,
-});
+export const registerNameSchema = userInsertBaseSchema
+  .pick({
+    firstName: true,
+    secondName: true,
+    username: true,
+  })
+  .extend({
+    birthDate: birthDateSchema,
+  });
 
-export const registerSecuritySchema = z
-  .object({
-    password: userInsertBaseSchema.shape.password,
+export const registerSecuritySchema = userInsertBaseSchema
+  .pick({
+    password: true,
+  })
+  .extend({
     confirmPassword: userInsertBaseSchema.shape.password,
   })
   .refine(
@@ -151,26 +260,18 @@ export const registerSecuritySchema = z
     }
   );
 
-export const registerIdentitySchema = z.object({
-  gender: z.enum(genderEnum, { error: "Selecione um gênero" }),
-  pronoun: z.enum(pronounEnum, { error: "Selecione um pronome" }),
+export const registerIdentitySchema = userInsertBaseSchema.pick({
+  gender: true,
+  pronoun: true,
 });
 
-export const registerPinSchema = z.object({
-  pin: z
-    .string()
-    .min(1, "Informe o PIN de segurança")
-    .regex(/^\d+$/, "O PIN deve conter apenas números")
-    .min(4, "O PIN deve ter no mínimo 4 dígitos")
-    .max(6, "O PIN deve ter no máximo 6 dígitos"),
+export const registerPinSchema = userInsertBaseSchema.pick({
+  pin: true,
 });
 
 export const registerSchema = userInsertBaseSchema
   .extend({
-    confirmPassword: z
-      .string()
-      .min(1, "Confirme a sua senha")
-      .min(3, "A senha deve ter no mínimo 3 caracteres"),
+    confirmPassword: userInsertBaseSchema.shape.password,
     birthDate: birthDateSchema,
   })
   .refine(
@@ -181,31 +282,46 @@ export const registerSchema = userInsertBaseSchema
     }
   );
 
-export const newPostSchema = z.object({
-  content: z
-    .string()
-    .trim()
-    .min(1, "O conteúdo do post não pode ficar em branco"),
-  moodId: z.number().nullable().optional(),
-  emotions: z
-    .array(z.object({ id: z.number(), name: z.string() }))
-    .default([]),
-  thoughts: z
-    .array(z.object({ id: z.number(), name: z.string() }))
-    .default([]),
-  reactions: z
-    .array(z.object({ id: z.number(), name: z.string() }))
-    .default([]),
-  behaviors: z
-    .array(
-      z.object({
-        id: z.number().optional(),
-        content: z.string(),
-        icon: z.string().nullable().optional(),
-      })
-    )
-    .default([]),
+// ─── 5. ITENS DAS RELAÇÕES DO DIÁRIO (DRIZZLE-ZOD) ──────────────────────
+export const entryEmotionItemSchema = emotionSelectSchema.pick({
+  id: true,
+  name: true,
 });
 
-export type NewPostInput = z.input<typeof newPostSchema>;
-export type NewPostSchema = z.output<typeof newPostSchema>;
+export const entryThoughtItemSchema = thoughtSelectSchema.pick({
+  id: true,
+  name: true,
+});
+
+export const entryReactionItemSchema = reactionSelectSchema.pick({
+  id: true,
+  name: true,
+});
+
+export const entryBehaviorItemSchema = behaviorInsertSchema
+  .pick({
+    content: true,
+    icon: true,
+  })
+  .extend({
+    id: behaviorSelectSchema.shape.id.optional(),
+  });
+
+// ─── 6. RELATO DO DIÁRIO (NOVA ENTRY / PERSISTÊNCIA VIA DRIZZLE-ZOD) ──────
+export const newEntrySchema = journalEntryInsertSchema
+  .pick({
+    content: true,
+    moodId: true,
+    entryType: true,
+  })
+  .extend({
+    emotions: z.array(entryEmotionItemSchema).default([]),
+    thoughts: z.array(entryThoughtItemSchema).default([]),
+    reactions: z.array(entryReactionItemSchema).default([]),
+    behaviors: z.array(entryBehaviorItemSchema).default([]),
+  });
+
+export const createJournalEntrySchema = newEntrySchema.extend({
+  userId: journalEntryInsertSchema.shape.userId,
+  date: journalEntryInsertSchema.shape.date.optional(),
+});
