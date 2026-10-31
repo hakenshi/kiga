@@ -1,12 +1,18 @@
 import { Avatar, AvatarFallback, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar"
+import { Drawer, DrawerBackdrop, DrawerBody, DrawerCloseButton, DrawerContent, DrawerHeader } from "@/components/ui/drawer"
 import { HStack } from "@/components/ui/hstack"
+import { CloseIcon, Icon } from "@/components/ui/icon"
 import { VStack } from "@/components/ui/vstack"
 import { useAuthStore } from "@/stores/auth-store"
-import { EllipsisVerticalIcon } from "lucide-react-native"
+import { EllipsisVerticalIcon, HeartIcon, PencilIcon, PinIcon, RefreshCcw, ReplyIcon, TrashIcon } from "lucide-react-native"
+import { useState } from "react"
 import { Pressable, Text } from "react-native"
 
 export default function EntryHeader() {
   const { user } = useAuthStore()
+
+  const [open, setOpen] = useState(false)
+
   return (
     <HStack className="justify-between" space="lg">
       <HStack space="md">
@@ -27,9 +33,65 @@ export default function EntryHeader() {
           </Text>
         </VStack>
       </HStack>
-      <Pressable>
+      <Pressable className="justify-center p-2" onPress={() => setOpen(true)}>
         <EllipsisVerticalIcon size={16} color="gray" />
       </Pressable>
-    </HStack>
+      {open && (
+        <Drawer anchor="bottom" isOpen={open} onClose={() => setOpen(false)} size="md">
+          <DrawerBackdrop />
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerCloseButton>
+                <Icon as={CloseIcon} className="stroke-foreground" />
+              </DrawerCloseButton>
+            </DrawerHeader>
+            <DrawerBody className="gap-1 pb-6">
+              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <PencilIcon size={20} color="gray" />
+                <Text className="font-semibold text-gray-900">
+                  Visualizar pensamento
+                </Text>
+              </Pressable>
+              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <ReplyIcon size={20} color="gray" />
+                <Text className="font-semibold text-gray-900">
+                  Responder
+                </Text>
+              </Pressable>
+              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <RefreshCcw size={20} color="gray" />
+                <Text className="font-semibold text-gray-900">
+                  Republicar
+                </Text>
+              </Pressable>
+              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <HeartIcon size={20} color="gray" />
+                <Text className="font-semibold text-gray-900">
+                  Favoritar
+                </Text>
+              </Pressable>
+              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <PinIcon size={20} color="gray" />
+                <Text className="font-semibold text-gray-900">
+                  Fixar
+                </Text>
+              </Pressable>
+              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <PencilIcon size={20} color="gray" />
+                <Text className="font-semibold text-gray-900">
+                  Editar
+                </Text>
+              </Pressable>
+              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <TrashIcon size={20} color="#ef4444" />
+                <Text className="font-semibold text-red-500">
+                  Excluir
+                </Text>
+              </Pressable>
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+      )}
+    </HStack >
   )
 }

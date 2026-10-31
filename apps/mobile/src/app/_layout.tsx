@@ -1,3 +1,5 @@
+import "../../global.css";
+
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -25,7 +27,6 @@ import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import migrations from "../../drizzle/migrations";
 import db from "../lib/db";
 import { installSystemData } from "../lib/db/install-system-data";
-import "../../global.css";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 SplashScreen.preventAutoHideAsync().catch(() => { });

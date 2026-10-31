@@ -4,6 +4,7 @@ let dbInstance: any = null;
 const memoryStore = new Map<string, string>();
 
 function getDatabase() {
+  if (process.env.NODE_ENV === "test") return null;
   if (dbInstance) return dbInstance;
   try {
     // Lazy require para não quebrar em ambientes de teste unitário sem módulos nativos do Expo
