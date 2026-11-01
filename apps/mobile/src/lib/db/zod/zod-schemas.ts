@@ -325,3 +325,5 @@ export const createJournalEntrySchema = newEntrySchema.extend({
   userId: journalEntryInsertSchema.shape.userId,
   date: journalEntryInsertSchema.shape.date.optional(),
 });
+
+export const journalEntryUpdateSchema = journalEntryInsertSchema.partial()

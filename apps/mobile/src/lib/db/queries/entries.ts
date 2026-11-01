@@ -92,7 +92,7 @@ export async function createJournalEntry(rawParams: CreateJournalEntryInput) {
 export async function getJournalEntries(
   userId: number,
   options: { limit?: number; offset?: number } = {}
-) {
+): Promise<JournalEntryWithRelations[]> {
   const { limit = 20, offset = 0 } = options;
 
   return db.query.journalEntries.findMany({

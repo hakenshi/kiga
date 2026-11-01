@@ -45,10 +45,11 @@ import type {
   userInsertSchema,
   userSelectBaseSchema,
   userWithRelationsSchema,
+  journalEntryUpdateSchema
 } from "./zod-schemas";
 
 declare global {
-  interface Buffer extends Uint8Array {}
+  interface Buffer extends Uint8Array { }
 
   // ─── 1. TABELAS BASE (SELECT VIA DRIZZLE-ZOD) ───────────────────────────
   type UserBase = z.infer<typeof userSelectBaseSchema>;
@@ -104,6 +105,8 @@ declare global {
   type CreateJournalEntryOutput = z.output<typeof createJournalEntrySchema>;
   type CreateJournalEntryInput = z.input<typeof createJournalEntrySchema>;
   type CreateJournalEntryParams = CreateJournalEntryInput;
+
+  type UpdateJournalEntryInput = z.input<typeof journalEntryUpdateSchema>;
 
   // ─── 6. AUTENTICAÇÃO E CADASTRO ──────────────────────────────────────────
   type LoginSchema = z.infer<typeof loginSchema>;
