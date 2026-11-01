@@ -1,63 +1,106 @@
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import Logo from "@/components/Logo";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useAuthStore } from "@/stores/auth-store";
-import { Link, Redirect, Stack, usePathname } from "expo-router";
-import { Calendar, ChartBar, HomeIcon, PlusIcon, UserIcon } from "lucide-react-native";
-import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
-import NavLinkButton from "./_components/nav-link-button";
+import { Redirect, Tabs, usePathname } from "expo-router";
+import { Calendar, ChartBar, HomeIcon, UserIcon } from "lucide-react-native";
+import { Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const TABS = [
+  { name: "home/index", path: "/home", label: "Feed", icon: HomeIcon },
+  { name: "history/index", path: "/history", label: "Histórico", icon: Calendar },
+  { name: "statistics/index", path: "/statistics", label: "Estatísticas", icon: ChartBar },
+  { name: "profile/index", path: "/profile", label: "Meu Kiga", icon: UserIcon },
+] as const;
 
 export default function HomeLayout() {
-  const { bottom, top } = useSafeAreaInsets()
-  const currentPath = usePathname()
+  const { bottom } = useSafeAreaInsets();
+  const currentPath = usePathname();
 
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   if (!isAuthenticated) {
     return <Redirect href="/" />;
   }
 
+  const isNewPost = currentPath.includes("/home/new-post");
+
   return (
     <VStack className="flex-1 bg-background">
-      <HStack space="md" className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} items-center justify-between bg-background border-b border-border p-5`} style={{ paddingTop: top, }}>
-        <HStack className="items-center" space="md">
-          <Avatar className="">
-            <AvatarImage />
-            <AvatarFallbackText className="text-2xl ">{user?.firstName}</AvatarFallbackText>
-          </Avatar>
-          <View>
-            <Text className="text-base font-semibold text-foreground">
-              {user?.firstName}
-            </Text>
-            <Text className="text-muted-foreground text-sm">
-              @{user?.username}
-            </Text>
-          </View>
-        </HStack>
+      <View className="p-2 bg-white border-b border-zinc-300">
+        <Logo size="sm" />
+      </View>
+      <Tabs
+        tabBar={({ state, navigation }) => {
+          if (isNewPost) {
+            return null;
+          }
 
-        <Link href="/home/new-post" asChild>
-          <Button size="icon" className="rounded-full p-3">
-            <ButtonIcon as={PlusIcon} size="md" />
-          </Button>
-        </Link>
-      </HStack>
-      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
-      <HStack className={`${currentPath.includes("/home/new-post") ? "hidden" : "flex"} bg-background border-t border-border py-5 px-4 w-full justify-around`} style={{ paddingBottom: bottom }}>
-        <NavLinkButton Icon={HomeIcon} path="/home">
-          Feed
-        </NavLinkButton>
-        <NavLinkButton Icon={Calendar} path="/history">
-          Histórico
-        </NavLinkButton>
-        <NavLinkButton Icon={ChartBar} path="/statistics">
-          Estatísticas
-        </NavLinkButton>
-        <NavLinkButton Icon={UserIcon} path="/profile">
-          Meu Kiga
-        </NavLinkButton>
-      </HStack>
+          const currentRouteName = state.routes[state.index]?.name;
+
+          return (
+            <HStack
+              className="bg-background border-t border-border py-5 px-4 w-full justify-around"
+              style={{ paddingBottom: bottom }}
+            >
+              {TABS.map((tab) => {
+                const isFocused = currentRouteName === tab.name || currentPath.startsWith(tab.path);
+                const route = state.routes.find((r) => r.name === tab.name);
+
+                const handlePress = () => {
+                  const event = route
+                    ? navigation.emit({
+                      type: "tabPress",
+                      target: route.key,
+                      canPreventDefault: true,
+                    })
+                    : undefined;
+
+                  if (!isFocused && !event?.defaultPrevented) {
+                    navigation.navigate(tab.name);
+                  }
+                };
+
+                return (
+                  <Pressable
+                    key={tab.name}
+                    onPress={handlePress}
+                    className={`flex-1 items-center justify-center py-2 px-2 rounded-2xl active:opacity-70 ${isFocused ? "bg-secondary" : ""
+                      }`}
+                  >
+                    <View className="w-6 h-6 items-center justify-center">
+                      <tab.icon size={20} color={isFocused ? "#18181b" : "#71717a"} />
+                    </View>
+                    <Text
+                      className={`text-[11px] mt-1 ${isFocused
+                        ? "text-foreground font-semibold"
+                        : "text-muted-foreground font-normal"
+                        }`}
+                    >
+                      {tab.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </HStack>
+          );
+        }}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Tabs.Screen name="home/index" options={{ title: "Feed" }} />
+        <Tabs.Screen name="history/index" options={{ title: "Histórico" }} />
+        <Tabs.Screen name="statistics/index" options={{ title: "Estatísticas" }} />
+        <Tabs.Screen name="profile/index" options={{ title: "Meu Kiga" }} />
+        <Tabs.Screen
+          name="home/new-post/index"
+          options={{
+            href: null,
+          }}
+        />
+      </Tabs>
     </VStack>
-  )
+  );
 }
