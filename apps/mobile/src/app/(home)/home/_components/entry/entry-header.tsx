@@ -4,13 +4,20 @@ import { HStack } from "@/components/ui/hstack"
 import { CloseIcon, Icon } from "@/components/ui/icon"
 import { VStack } from "@/components/ui/vstack"
 import { useAuthStore } from "@/stores/auth-store"
+import { useEntryStore } from "@/stores/journal-store"
 import { EllipsisVerticalIcon, HeartIcon, PencilIcon, PinIcon, RefreshCcw, ReplyIcon, TrashIcon } from "lucide-react-native"
 import { useState } from "react"
 import { Pressable, Text } from "react-native"
 
-export default function EntryHeader() {
-  const { user } = useAuthStore()
+interface Props {
+  entryId: number
+  liked: boolean
+}
 
+export default function EntryHeader({ entryId, liked }: Props) {
+  const { user } = useAuthStore()
+  const deleteEntry = useEntryStore(e => e.deleteEntry)
+  const updateEntry = useEntryStore(e => e.updateEntry)
   const [open, setOpen] = useState(false)
 
   return (
@@ -64,10 +71,12 @@ export default function EntryHeader() {
                   Republicar
                 </Text>
               </Pressable>
-              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
-                <HeartIcon size={20} color="gray" />
+              <Pressable onPress={() => updateEntry(entryId, { liked: !liked })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <HeartIcon fill={liked ? "black" : "none"}
+                  strokeWidth={liked ? 0 : 2}
+                  size={20} color="gray" />
                 <Text className="font-semibold text-gray-900">
-                  Favoritar
+                  {liked ? "Desfavoritar" : "Favoritar"}
                 </Text>
               </Pressable>
               <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
@@ -82,7 +91,7 @@ export default function EntryHeader() {
                   Editar
                 </Text>
               </Pressable>
-              <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+              <Pressable onPress={() => deleteEntry(entryId)} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
                 <TrashIcon size={20} color="#ef4444" />
                 <Text className="font-semibold text-red-500">
                   Excluir

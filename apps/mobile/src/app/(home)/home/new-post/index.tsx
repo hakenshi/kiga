@@ -30,6 +30,7 @@ import { createJournalEntry } from "@/lib/db/entries";
 import { newEntrySchema } from "@/lib/db/zod/zod-schemas";
 import type { NewEntryInput, NewEntrySchema } from "@/lib/db/zod/zod-types";
 import { countWords } from "@/lib/utils";
+import { useEntryStore } from "@/stores/journal-store";
 
 const MOOD_OPTIONS = [
   { value: 1, label: "Muito Mal", Icon: Angry },
@@ -43,8 +44,7 @@ export default function NewPostPage() {
   const router = useRouter();
   const { top, bottom } = useSafeAreaInsets();
   const { user } = useAuthStore();
-
-  // Data/hora capturada no momento da montagem (sem re-renders e sem setInterval)
+  const { addEntry } = useEntryStore()
   const entryDate = useMemo(() => new Date(), []);
 
   const weekday = entryDate
@@ -128,12 +128,12 @@ export default function NewPostPage() {
     );
     const next = exists
       ? current.filter(
-          (b) =>
-            !(
-              (item.id !== undefined && b.id === item.id) ||
-              b.content.toLowerCase() === item.content.toLowerCase()
-            )
-        )
+        (b) =>
+          !(
+            (item.id !== undefined && b.id === item.id) ||
+            b.content.toLowerCase() === item.content.toLowerCase()
+          )
+      )
       : [...current, item];
     setValue("behaviors", next, { shouldValidate: true });
   };
@@ -141,7 +141,7 @@ export default function NewPostPage() {
   // Salvar Entry via Service
   const onSave = async (formData: NewEntrySchema) => {
     try {
-      await createJournalEntry({
+      const newEntry = await createJournalEntry({
         userId: user?.id ?? 1,
         content: formData.content,
         moodId: formData.moodId,
@@ -151,6 +151,8 @@ export default function NewPostPage() {
         behaviors: formData.behaviors,
         date: entryDate,
       });
+
+      addEntry(newEntry)
 
       router.push("/(home)/home");
     } catch (err) {
@@ -195,8 +197,8 @@ export default function NewPostPage() {
                 onPress={handleSubmit(onSave)}
                 disabled={isSubmitting || !content.trim()}
                 className={`h-10 px-5 rounded-full items-center justify-center ${isSubmitting || !content.trim()
-                    ? "bg-muted"
-                    : "bg-primary active:opacity-85"
+                  ? "bg-muted"
+                  : "bg-primary active:opacity-85"
                   }`}
               >
                 <Text className="text-primary-foreground font-semibold text-sm">
@@ -225,9 +227,9 @@ export default function NewPostPage() {
                         shouldValidate: true,
                       })
                     }
-                    className={`w-[30px] h-[30px] rounded-full items-center justify-center active:opacity-70 ${isSelected
-                        ? "bg-background border-[1.5px] border-foreground"
-                        : "bg-secondary"
+                    className={`size-8 rounded-full items-center justify-center active:opacity-70 ${isSelected
+                      ? "bg-background border-[1.5px] border-foreground"
+                      : "bg-secondary"
                       }`}
                   >
                     <Icon
@@ -240,8 +242,12 @@ export default function NewPostPage() {
             </HStack>
           </HStack>
 
-          {/* Text Editor Area com componente reutilizável EntryTextInput */}
-          <View className="flex-1 overflow-hidden">
+          {/* Text Editor Area */}
+          <HStack className="flex-1 overflow-hidden p-5 gap-3 items-start">
+            <Avatar className="mt-0.5">
+              <AvatarImage />
+              <AvatarFallbackText>{user?.firstName}</AvatarFallbackText>
+            </Avatar>
             <Controller
               name="content"
               control={control}
@@ -250,16 +256,10 @@ export default function NewPostPage() {
                   value={value}
                   onChangeText={onChange}
                   placeholder="O que está acontecendo agora?"
-                  avatar={
-                    <Avatar>
-                      <AvatarImage />
-                      <AvatarFallbackText>{user?.firstName}</AvatarFallbackText>
-                    </Avatar>
-                  }
                 />
               )}
             />
-          </View>
+          </HStack>
 
           {/* Selected Chips Strip */}
           {hasSelectedChips && (
@@ -328,9 +328,6 @@ export default function NewPostPage() {
           {/* Metadata bar: Word Count & Status */}
           <HStack className="justify-between px-5 py-2 border-t border-gray-50 items-center">
             <Text className="text-xs text-[#9AA0AA]">{wordCount} palavras</Text>
-            <Text className="text-xs text-[#9AA0AA]">
-              Salvo no banco de dados local
-            </Text>
           </HStack>
         </VStack>
 
@@ -388,7 +385,7 @@ export default function NewPostPage() {
               </BehaviorDrawer.Trigger>
             </BehaviorDrawer>
 
-            <NavButton Icon={ImageIcon} onPress={() => {}}>
+            <NavButton Icon={ImageIcon} onPress={() => { }}>
               Foto
             </NavButton>
           </HStack>

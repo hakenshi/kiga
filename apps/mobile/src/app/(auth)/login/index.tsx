@@ -24,6 +24,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Logo from "@/components/Logo";
 import { View } from "react-native";
+import { useEntryStore } from "@/stores/journal-store";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,6 +46,8 @@ export default function LoginPage() {
     },
   });
 
+  const { loadInitial } = useEntryStore()
+
   const submit = async (data: LoginSchema) => {
     const { data: userData, success } = loginSchema.safeParse(data);
 
@@ -64,7 +67,6 @@ export default function LoginPage() {
         thoughts: true
       }
     });
-
     if (!user) {
       setError("username", {
         type: "manual",
@@ -72,6 +74,8 @@ export default function LoginPage() {
       });
       return;
     }
+
+    loadInitial(user.id)
 
     const isPasswordValid = true;
 
