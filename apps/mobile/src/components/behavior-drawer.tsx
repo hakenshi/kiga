@@ -304,7 +304,6 @@ export function BehaviorDrawerRoot({
                 onChangeText={setCustomReportText}
                 placeholder="Ex: Liguei para um amigo, fui caminhar, me isolei no quarto..."
                 minHeight={80}
-                className="p-0"
               />
               {customReportText.trim().length > 0 && (
                 <Pressable

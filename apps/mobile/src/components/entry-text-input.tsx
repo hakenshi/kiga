@@ -3,26 +3,18 @@ import {
   StyleProp,
   StyleSheet,
   TextInput,
+  TextInputProps,
   TextStyle,
-  View,
-  ViewStyle,
 } from "react-native";
 
-export interface EntryTextInputProps {
+export interface EntryTextInputProps extends Omit<TextInputProps, "style"> {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
   placeholderTextColor?: string;
-  avatar?: React.ReactNode;
   minHeight?: number;
-  autoFocus?: boolean;
-  multiline?: boolean;
-  scrollEnabled?: boolean;
-  maxLength?: number;
   className?: string;
-  inputClassName?: string;
-  style?: StyleProp<ViewStyle>;
-  inputStyle?: StyleProp<TextStyle>;
+  style?: StyleProp<TextStyle>;
 }
 
 export function EntryTextInput({
@@ -30,42 +22,29 @@ export function EntryTextInput({
   onChangeText,
   placeholder = "O que está acontecendo agora?",
   placeholderTextColor = "#9AA0AA",
-  avatar,
   minHeight,
   autoFocus = false,
   multiline = true,
   scrollEnabled = true,
   maxLength,
   className = "",
-  inputClassName = "",
   style,
-  inputStyle,
+  ...rest
 }: EntryTextInputProps) {
   return (
-    <View
-      className={`flex-row items-start ${avatar ? "p-5 gap-3" : "p-4"} ${className}`}
-      style={style}
-    >
-      {avatar && <View className="mt-0.5">{avatar}</View>}
-      <View className="flex-1 h-full">
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={placeholderTextColor}
-          multiline={multiline}
-          scrollEnabled={scrollEnabled}
-          autoFocus={autoFocus}
-          maxLength={maxLength}
-          className={`flex-1 p-0 text-base ${inputClassName}`}
-          style={[
-            styles.input,
-            minHeight ? { minHeight } : null,
-            inputStyle,
-          ]}
-        />
-      </View>
-    </View>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor={placeholderTextColor}
+      multiline={multiline}
+      scrollEnabled={scrollEnabled}
+      autoFocus={autoFocus}
+      maxLength={maxLength}
+      className={`flex-1 p-0 text-base ${className}`}
+      style={[styles.input, minHeight ? { minHeight } : null, style]}
+      {...rest}
+    />
   );
 }
 

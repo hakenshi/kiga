@@ -15,7 +15,7 @@ export default function NavLinkButton({ Icon, onPress, path, className, children
   const isActive = currentPath.includes(path);
 
   return (
-    <Link href={path as Href} asChild>
+    <Link href={path as Href} replace={false} push={false} asChild>
       <Pressable
         onPress={onPress}
         className={`flex-1 items-center justify-center py-2 px-2 rounded-2xl active:opacity-70 ${isActive ? "bg-secondary" : ""
