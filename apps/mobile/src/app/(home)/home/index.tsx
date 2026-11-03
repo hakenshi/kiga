@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function HomePage() {
   const { entries, loadInitial, loadMore, hasMore, isLoading } = useEntryStore();
   const { user } = useAuthStore();
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
 
   useEffect(() => {
     if (user?.id && entries.length === 0) {
@@ -27,7 +27,7 @@ export default function HomePage() {
       <FlatList
         data={entries}
         keyExtractor={(e) => String(e.id)}
-        contentContainerStyle={{ paddingTop: top + 12, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingTop: top, paddingBottom: bottom }}
         showsHorizontalScrollIndicator={false}
         initialNumToRender={20}
         maxToRenderPerBatch={20}
@@ -48,9 +48,9 @@ export default function HomePage() {
         }
         renderItem={({ item }) => (
           <EntryShell entryId={item.id}>
-            <EntryHeader liked={item.liked} entryId={item.id} />
+            <EntryHeader entry={item} liked={item.liked} entryId={item.id} />
             <EntryBody entry={item} />
-            <EntryBottom entryId={item.id} liked={item.liked} />
+            <EntryBottom entry={item} entryId={item.id} liked={item.liked} />
           </EntryShell>
         )}
       />
