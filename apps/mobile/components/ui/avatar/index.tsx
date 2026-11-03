@@ -19,7 +19,7 @@ const avatarStyle = tva({
 });
 
 const avatarFallbackTextStyle = tva({
-  base: 'text-foreground text-xs font-medium text-transform:uppercase',
+  base: 'text-foreground text-lg font-bold uppercase',
 });
 
 const avatarGroupStyle = tva({
@@ -70,22 +70,53 @@ const AvatarBadge = React.forwardRef<
   );
 });
 
+function extractText(children: React.ReactNode): string {
+  if (typeof children === 'string') return children.trim();
+  if (typeof children === 'number') return String(children);
+  if (Array.isArray(children)) {
+    return children.map(extractText).join('').trim();
+  }
+  if (React.isValidElement(children) && (children.props as any)?.children) {
+    return extractText((children.props as any).children);
+  }
+  return '';
+}
+
+function getInitials(str: string): string {
+  if (!str) return '';
+  const words = str.trim().split(/\s+/);
+  let result = '';
+  for (let i = 0; i < words.length; i++) {
+    if (words[i].length > 0) {
+      result += words[i].charAt(0);
+    }
+    if (result.length >= 2) break;
+  }
+  return result.toUpperCase();
+}
+
 type IAvatarFallbackTextProps = React.ComponentPropsWithoutRef<
-  typeof UIAvatar.FallbackText
+  typeof Text
 > &
   VariantProps<typeof avatarFallbackTextStyle>;
 const AvatarFallbackText = React.forwardRef<
-  React.ComponentRef<typeof UIAvatar.FallbackText>,
+  React.ComponentRef<typeof Text>,
   IAvatarFallbackTextProps
->(function AvatarFallbackText({ className, ...props }, ref) {
+>(function AvatarFallbackText({ className, children, ...props }, ref) {
+  const rawText = extractText(children);
+  const displayText = rawText.length <= 2 ? rawText.toUpperCase() : getInitials(rawText);
+
   return (
-    <UIAvatar.FallbackText
+    <Text
       ref={ref}
       {...props}
       className={avatarFallbackTextStyle({ class: className })}
-    />
+    >
+      {displayText}
+    </Text>
   );
 });
+AvatarFallbackText.displayName = 'AvatarFallbackText';
 
 type IAvatarImageProps = React.ComponentPropsWithoutRef<typeof UIAvatar.Image> &
   VariantProps<typeof avatarImageStyle>;
@@ -124,8 +155,25 @@ const AvatarGroup = React.forwardRef<
   );
 });
 
-// Alias for shadcn compatibility
-const AvatarFallback = AvatarFallbackText;
+// Compatibility component for shadcn-style wrapping or direct text
+const AvatarFallback = React.forwardRef<
+  React.ComponentRef<typeof Text>,
+  IAvatarFallbackTextProps
+>(function AvatarFallback({ className, children, ...props }, ref) {
+  if (
+    React.isValidElement(children) &&
+    ((children.type as any) === AvatarFallbackText ||
+      (children.type as any)?.displayName === 'AvatarFallbackText')
+  ) {
+    return children;
+  }
+  return (
+    <AvatarFallbackText ref={ref} className={className} {...props}>
+      {children}
+    </AvatarFallbackText>
+  );
+});
+AvatarFallback.displayName = 'AvatarFallback';
 
 export {
   Avatar,

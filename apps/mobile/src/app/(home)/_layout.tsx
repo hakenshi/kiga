@@ -28,7 +28,7 @@ export default function HomeLayout() {
 
   return (
     <VStack className="flex-1 bg-background">
-      <View className="p-2 bg-white border-b border-zinc-300">
+      <View className={currentPath.includes("/home/new-post") ? "hidden" : "flex"}>
         <Logo size="sm" />
       </View>
       <Tabs

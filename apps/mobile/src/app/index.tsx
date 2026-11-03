@@ -1,10 +1,10 @@
-import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
-import { VStack } from "@/components/ui/vstack";
-import { Redirect, useRouter } from "expo-router";
-import { Text } from "@/components/ui/text";
 import Logo from "@/components/Logo";
-import { useAuthStore } from "@/stores/auth-store";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
+import { useAuthStore } from "@/stores/auth-store";
+import { Redirect, useRouter } from "expo-router";
 import { ArrowRightIcon, UserIcon } from "lucide-react-native";
 
 export default function Index() {
