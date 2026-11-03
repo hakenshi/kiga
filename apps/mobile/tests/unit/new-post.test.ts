@@ -8,6 +8,7 @@ import * as schema from "@/lib/db/schema";
 import {
   emotions,
   entryEmotions,
+  entryImages,
   entryReactions,
   entryThoughts,
   journalEntries,
@@ -158,10 +159,13 @@ describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
 
     afterEach(async () => {
       // LIMPEZA GARANTIDA: remove todos os registros gerados durante os testes
+      await testDb.delete(entryImages);
+      await testDb.delete(schema.entryBehaviors);
       await testDb.delete(entryEmotions);
       await testDb.delete(entryThoughts);
       await testDb.delete(entryReactions);
       await testDb.delete(journalEntries);
+      await testDb.delete(schema.behaviors);
       await testDb.delete(emotions);
       await testDb.delete(thoughts);
       await testDb.delete(reactions);
@@ -220,13 +224,34 @@ describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
         emotions: [{ id: emotionId, name: "Alegria" }],
         thoughts: [{ id: thoughtId, name: "Tudo vai dar certo" }],
         reactions: [{ id: reactionId, name: "Sorriso involuntário" }],
+        behaviors: [{ content: "Caminhar ao ar livre", icon: "Footprints" }],
+        images: ["file:///storage/emulated/0/DCIM/Camera/IMG_001.jpg"],
       });
 
       expect(entry).toBeDefined();
       expect(entry.id).toBeGreaterThan(0);
       expect(entry.content).toBe("Registro completo de teste no SQLite");
       expect(entry.moodId).toBe(m.id);
+      expect(entry.mood?.name).toBe("Muito Bem");
       expect(entry.userId).toBe(testUserId);
+      expect(entry.entryEmotions?.[0]?.emotion?.name).toBe("Alegria");
+      expect(entry.entryThoughts?.[0]?.thought?.name).toBe("Tudo vai dar certo");
+      expect(entry.entryReactions?.[0]?.reaction?.name).toBe("Sorriso involuntário");
+      expect(entry.entryBehaviors?.[0]?.behavior?.content).toBe("Caminhar ao ar livre");
+      expect(entry.entryBehaviors?.[0]?.behavior?.icon).toBe("Footprints");
+      expect(entry.entryImages?.length).toBe(1);
+      expect(entry.entryImages?.[0].imageUrl).toBe(
+        "file:///storage/emulated/0/DCIM/Camera/IMG_001.jpg"
+      );
+
+      const savedImages = await testDb
+        .select()
+        .from(entryImages)
+        .where(eq(entryImages.entryId, entry.id));
+      expect(savedImages.length).toBe(1);
+      expect(savedImages[0].imageUrl).toBe(
+        "file:///storage/emulated/0/DCIM/Camera/IMG_001.jpg"
+      );
 
       // 4. Valida se as tabelas pivot registraram os relacionamentos
       const pivotEmotions = await testDb

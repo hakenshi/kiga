@@ -16,6 +16,7 @@ import type {
   entryEmotionSelectSchema,
   entryEmotionWithRelationSchema,
   entryEmotionItemSchema,
+  entryImageInsertSchema,
   entryImageSelectSchema,
   entryReactionSelectSchema,
   entryReactionWithRelationSchema,
@@ -45,7 +46,12 @@ import type {
   userInsertSchema,
   userSelectBaseSchema,
   userWithRelationsSchema,
-  journalEntryUpdateSchema
+  journalEntryUpdateSchema,
+  createCategoryFormSchema,
+  createEmotionFormSchema,
+  createThoughtFormSchema,
+  createReactionFormSchema,
+  createBehaviorFormSchema,
 } from "./zod-schemas";
 
 declare global {
@@ -72,6 +78,7 @@ declare global {
   type BehaviorInsert = z.infer<typeof behaviorInsertSchema>;
   type MoodInsert = z.infer<typeof moodInsertSchema>;
   type ProfileImageInsert = z.infer<typeof profileImageInsertSchema>;
+  type EntryImageInsert = z.infer<typeof entryImageInsertSchema>;
   type JournalEntryInsert = z.infer<typeof journalEntryInsertSchema>;
 
   // ─── 3. TABELAS PIVOT / JUNÇÃO ──────────────────────────────────────────
@@ -122,10 +129,17 @@ declare global {
   type RegisterPinSchema = z.infer<typeof registerPinSchema>;
 
   // ─── 7. UI / DRAWER VIEW HELPERS ────────────────────────────────────────
+  type CreateCategoryFormSchema = z.infer<typeof createCategoryFormSchema>;
+  type CreateEmotionFormSchema = z.infer<typeof createEmotionFormSchema>;
+  type CreateThoughtFormSchema = z.infer<typeof createThoughtFormSchema>;
+  type CreateReactionFormSchema = z.infer<typeof createReactionFormSchema>;
+  type CreateBehaviorFormSchema = z.infer<typeof createBehaviorFormSchema>;
+
   type ResourceItem = {
     id: number;
     name: string;
     categoryId: number | null;
+    categoryName?: string | null;
     orderIndex: number;
     userId: number | null;
   };
@@ -144,6 +158,7 @@ declare global {
     content: string;
     icon: string | null;
     categoryId: number | null;
+    categoryName?: string | null;
     userId: number | null;
     orderIndex: number;
   };
@@ -175,6 +190,7 @@ export type {
   MoodInsert,
   ProfileImage,
   ProfileImageInsert,
+  EntryImageInsert,
   JournalEntry,
   JournalEntryInsert,
   EntryEmotion,
@@ -206,6 +222,11 @@ export type {
   RegisterSecuritySchema,
   RegisterIdentitySchema,
   RegisterPinSchema,
+  CreateCategoryFormSchema,
+  CreateEmotionFormSchema,
+  CreateThoughtFormSchema,
+  CreateReactionFormSchema,
+  CreateBehaviorFormSchema,
   ResourceItem,
   ResourceCategory,
   BehaviorItem,

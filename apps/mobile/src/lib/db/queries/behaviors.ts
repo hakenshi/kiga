@@ -1,36 +1,15 @@
-import { and, asc, eq, isNull, or } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import db from "../index";
 import { behaviors, categories } from "../schema";
-import { installSystemData } from "../install-system-data";
+import { resolveCategoryId } from "./resources";
 import type { BehaviorCategory, BehaviorItem } from "../zod/zod-types";
 
 export type { BehaviorCategory, BehaviorItem };
 
-export async function getBehaviorsGrouped(
+export async function getUserBehaviors(
   userId?: number
-): Promise<{ categories: BehaviorCategory[]; uncategorized: BehaviorItem[] }> {
-  await installSystemData();
-
-  // Behavior categories are system-provided (userId is null) or user custom
-  const userCondition = userId
-    ? or(isNull(categories.userId), eq(categories.userId, userId))
-    : isNull(categories.userId);
-
-  const cats = await db
-    .select()
-    .from(categories)
-    .where(
-      and(
-        eq(categories.type, "behavior"),
-        isNull(categories.deletedAt),
-        userCondition
-      )
-    )
-    .orderBy(asc(categories.orderIndex), asc(categories.id));
-
-  const itemUserCondition = userId
-    ? or(isNull(behaviors.userId), eq(behaviors.userId, userId))
-    : isNull(behaviors.userId);
+): Promise<BehaviorItem[]> {
+  if (!userId) return [];
 
   const rawItems = await db
     .select({
@@ -38,63 +17,56 @@ export async function getBehaviorsGrouped(
       content: behaviors.content,
       icon: behaviors.icon,
       categoryId: behaviors.categoryId,
+      categoryName: categories.name,
       userId: behaviors.userId,
       orderIndex: behaviors.orderIndex,
     })
     .from(behaviors)
-    .where(and(isNull(behaviors.deletedAt), itemUserCondition))
+    .leftJoin(
+      categories,
+      and(eq(behaviors.categoryId, categories.id), isNull(categories.deletedAt))
+    )
+    .where(
+      and(
+        isNull(behaviors.deletedAt),
+        eq(behaviors.userId, userId),
+        isNotNull(behaviors.icon)
+      )
+    )
     .orderBy(asc(behaviors.orderIndex), asc(behaviors.id));
 
-  const catMap = new Map<number, BehaviorCategory>();
-  for (const cat of cats) {
-    catMap.set(cat.id, {
-      id: cat.id,
-      name: cat.name,
-      orderIndex: cat.orderIndex,
-      items: [],
-    });
-  }
-
-  const uncategorized: BehaviorItem[] = [];
-
-  for (const item of rawItems) {
-    const safeItem: BehaviorItem = {
-      id: item.id,
-      content: item.content || "",
-      icon: item.icon,
-      categoryId: item.categoryId,
-      userId: item.userId,
-      orderIndex: item.orderIndex,
-    };
-
-    if (item.categoryId && catMap.has(item.categoryId)) {
-      catMap.get(item.categoryId)!.items.push(safeItem);
-    } else {
-      uncategorized.push(safeItem);
-    }
-  }
-
-  return {
-    categories: Array.from(catMap.values()),
-    uncategorized,
-  };
+  return rawItems.map((item) => ({
+    id: item.id,
+    content: item.content || "",
+    icon: item.icon,
+    categoryId: item.categoryId,
+    categoryName: item.categoryName ?? null,
+    userId: item.userId,
+    orderIndex: item.orderIndex,
+  }));
 }
 
 export async function createBehavior(
   content: string,
   icon?: string | null,
-  categoryId?: number | null,
+  categoryNameOrId?: string | number | null,
   userId?: number
 ): Promise<BehaviorItem> {
   const trimmed = content.trim();
+  const resolvedCat = await resolveCategoryId(
+    "behavior",
+    categoryNameOrId,
+    userId
+  );
+
   const [inserted] = await db
     .insert(behaviors)
     .values({
       content: trimmed,
       icon: icon || null,
-      categoryId: categoryId || null,
+      categoryId: resolvedCat.id,
       orderIndex: Date.now(),
-      userId: userId ?? null,
+      userId: userId ?? 1,
     })
     .returning();
 
@@ -103,14 +75,16 @@ export async function createBehavior(
     content: inserted.content || "",
     icon: inserted.icon,
     categoryId: inserted.categoryId,
+    categoryName: resolvedCat.name,
     userId: inserted.userId,
     orderIndex: inserted.orderIndex,
   };
 }
 
-export async function deleteBehavior(id: number): Promise<void> {
+export async function deleteBehaviors(ids: number[]): Promise<void> {
+  if (ids.length === 0) return;
   await db
     .update(behaviors)
     .set({ deletedAt: new Date() })
-    .where(eq(behaviors.id, id));
+    .where(and(inArray(behaviors.id, ids), isNotNull(behaviors.userId)));
 }

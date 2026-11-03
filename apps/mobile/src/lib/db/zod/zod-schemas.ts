@@ -102,6 +102,9 @@ export const moodInsertSchema = createInsertSchema(moods, {
 export const profileImageInsertSchema = createInsertSchema(profileImages, {
   url: (s) => s.min(1, "Informe o endereço da imagem"),
 });
+export const entryImageInsertSchema = createInsertSchema(entryImages, {
+  imageUrl: (s) => s.trim().min(1, "Informe o endereço da imagem"),
+});
 export const journalEntryInsertSchema = createInsertSchema(journalEntries, {
   content: (s) =>
     s
@@ -283,20 +286,29 @@ export const registerSchema = userInsertBaseSchema
   );
 
 // ─── 5. ITENS DAS RELAÇÕES DO DIÁRIO (DRIZZLE-ZOD) ──────────────────────
-export const entryEmotionItemSchema = emotionSelectSchema.pick({
-  id: true,
-  name: true,
-});
+export const entryEmotionItemSchema = emotionSelectSchema
+  .pick({
+    name: true,
+  })
+  .extend({
+    id: emotionSelectSchema.shape.id.optional(),
+  });
 
-export const entryThoughtItemSchema = thoughtSelectSchema.pick({
-  id: true,
-  name: true,
-});
+export const entryThoughtItemSchema = thoughtSelectSchema
+  .pick({
+    name: true,
+  })
+  .extend({
+    id: thoughtSelectSchema.shape.id.optional(),
+  });
 
-export const entryReactionItemSchema = reactionSelectSchema.pick({
-  id: true,
-  name: true,
-});
+export const entryReactionItemSchema = reactionSelectSchema
+  .pick({
+    name: true,
+  })
+  .extend({
+    id: reactionSelectSchema.shape.id.optional(),
+  });
 
 export const entryBehaviorItemSchema = behaviorInsertSchema
   .pick({
@@ -319,6 +331,7 @@ export const newEntrySchema = journalEntryInsertSchema
     thoughts: z.array(entryThoughtItemSchema).default([]),
     reactions: z.array(entryReactionItemSchema).default([]),
     behaviors: z.array(entryBehaviorItemSchema).default([]),
+    images: z.array(entryImageInsertSchema.shape.imageUrl).default([]),
   });
 
 export const createJournalEntrySchema = newEntrySchema.extend({
@@ -326,4 +339,39 @@ export const createJournalEntrySchema = newEntrySchema.extend({
   date: journalEntryInsertSchema.shape.date.optional(),
 });
 
-export const journalEntryUpdateSchema = journalEntryInsertSchema.partial()
+export const journalEntryUpdateSchema = journalEntryInsertSchema.partial();
+
+// ─── 7. FORMULÁRIOS DOS DRAWERS (CRIAÇÃO DE ITENS E CATEGORIAS) ───────────
+export const createCategoryFormSchema = categoryInsertSchema.pick({
+  name: true,
+});
+
+export const createEmotionFormSchema = emotionInsertSchema
+  .pick({
+    name: true,
+  })
+  .extend({
+    categoryName: z.string().nullable().optional(),
+  });
+
+export const createThoughtFormSchema = thoughtInsertSchema.pick({
+  name: true,
+});
+
+export const createReactionFormSchema = reactionInsertSchema
+  .pick({
+    name: true,
+  })
+  .extend({
+    categoryName: z.string().nullable().optional(),
+  });
+
+export const createBehaviorFormSchema = behaviorInsertSchema
+  .pick({
+    content: true,
+    icon: true,
+  })
+  .extend({
+    categoryName: z.string().nullable().optional(),
+  });
+

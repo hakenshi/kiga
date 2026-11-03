@@ -1,11 +1,16 @@
 import db from "@/lib/db";
 import {
   behaviors,
+  emotions,
   entryBehaviors,
   entryEmotions,
+  entryImages,
   entryReactions,
   entryThoughts,
   journalEntries,
+  moods,
+  reactions,
+  thoughts,
 } from "../schema";
 import { createJournalEntrySchema } from "../zod/zod-schemas";
 import type {
@@ -17,8 +22,41 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 
 export type { CreateJournalEntryInput, CreateJournalEntryOutput, CreateJournalEntryParams };
 
-export async function createJournalEntry(rawParams: CreateJournalEntryInput) {
+const DEFAULT_MOOD_NAMES: Record<number, string> = {
+  1: "Muito Mal",
+  2: "Mal",
+  3: "Neutro",
+  4: "Bem",
+  5: "Muito Bem",
+};
+
+export async function createJournalEntry(
+  rawParams: CreateJournalEntryInput
+): Promise<JournalEntryWithRelations> {
   const params: CreateJournalEntryOutput = createJournalEntrySchema.parse(rawParams);
+
+  let moodRow: Mood | null = null;
+  if (params.moodId) {
+    const [existingMood] = await db
+      .select()
+      .from(moods)
+      .where(eq(moods.id, params.moodId))
+      .limit(1);
+
+    if (existingMood) {
+      moodRow = existingMood;
+    } else {
+      const [createdMood] = await db
+        .insert(moods)
+        .values({
+          id: params.moodId,
+          name: DEFAULT_MOOD_NAMES[params.moodId] ?? "Neutro",
+          userId: null,
+        })
+        .returning();
+      moodRow = createdMood ?? null;
+    }
+  }
 
   const [entry] = await db
     .insert(journalEntries)
@@ -36,57 +74,257 @@ export async function createJournalEntry(rawParams: CreateJournalEntryInput) {
     throw new Error("Falha ao registrar entry no banco de dados.");
   }
 
+  const insertedEmotions: EntryEmotionWithRelation[] = [];
   if (params.emotions && params.emotions.length > 0) {
-    await db.insert(entryEmotions).values(
-      params.emotions.map((e) => ({
-        entryId: entry.id,
-        emotionId: e.id,
-      }))
-    );
-  }
-
-  if (params.thoughts && params.thoughts.length > 0) {
-    await db.insert(entryThoughts).values(
-      params.thoughts.map((t) => ({
-        entryId: entry.id,
-        thoughtsId: t.id,
-      }))
-    );
-  }
-
-  if (params.reactions && params.reactions.length > 0) {
-    await db.insert(entryReactions).values(
-      params.reactions.map((r) => ({
-        entryId: entry.id,
-        reactionId: r.id,
-      }))
-    );
-  }
-
-  if (params.behaviors && params.behaviors.length > 0) {
-    for (const b of params.behaviors) {
-      let bId = b.id;
-      if (!bId && b.content?.trim()) {
-        const [createdB] = await db
-          .insert(behaviors)
+    for (const e of params.emotions) {
+      let emotionRow: Emotion | undefined;
+      if (e.id) {
+        const [found] = await db
+          .select()
+          .from(emotions)
+          .where(eq(emotions.id, e.id))
+          .limit(1);
+        emotionRow = found;
+      } else if (e.name.trim()) {
+        const [existing] = await db
+          .select()
+          .from(emotions)
+          .where(and(eq(emotions.name, e.name.trim()), isNull(emotions.userId)))
+          .limit(1);
+        if (existing) {
+          emotionRow = existing;
+        } else {
+          const [created] = await db
+            .insert(emotions)
+            .values({ name: e.name.trim(), userId: null })
+            .returning();
+          emotionRow = created;
+        }
+      }
+      const emotionId = emotionRow?.id ?? e.id;
+      if (emotionId) {
+        const [piv] = await db
+          .insert(entryEmotions)
           .values({
-            userId: params.userId,
-            content: b.content.trim(),
-            orderIndex: Date.now(),
+            entryId: entry.id,
+            emotionId,
           })
           .returning();
-        bId = createdB?.id;
-      }
-      if (bId) {
-        await db.insert(entryBehaviors).values({
-          entryId: entry.id,
-          behaviorId: bId,
-        });
+        if (piv) {
+          insertedEmotions.push({
+            ...piv,
+            emotion:
+              emotionRow ?? {
+                id: emotionId,
+                name: e.name.trim(),
+                userId: null,
+                categoryId: null,
+                orderIndex: 0,
+                deletedAt: null,
+              },
+          });
+        }
       }
     }
   }
 
-  return entry;
+  const insertedThoughts: EntryThoughtWithRelation[] = [];
+  if (params.thoughts && params.thoughts.length > 0) {
+    for (const t of params.thoughts) {
+      let thoughtRow: Thought | undefined;
+      if (t.id) {
+        const [found] = await db
+          .select()
+          .from(thoughts)
+          .where(eq(thoughts.id, t.id))
+          .limit(1);
+        thoughtRow = found;
+      } else if (t.name.trim()) {
+        const [existing] = await db
+          .select()
+          .from(thoughts)
+          .where(and(eq(thoughts.name, t.name.trim()), isNull(thoughts.userId)))
+          .limit(1);
+        if (existing) {
+          thoughtRow = existing;
+        } else {
+          const [created] = await db
+            .insert(thoughts)
+            .values({ name: t.name.trim(), userId: null })
+            .returning();
+          thoughtRow = created;
+        }
+      }
+      const thoughtsId = thoughtRow?.id ?? t.id;
+      if (thoughtsId) {
+        const [piv] = await db
+          .insert(entryThoughts)
+          .values({
+            entryId: entry.id,
+            thoughtsId,
+          })
+          .returning();
+        if (piv) {
+          insertedThoughts.push({
+            ...piv,
+            thought:
+              thoughtRow ?? {
+                id: thoughtsId,
+                name: t.name.trim(),
+                userId: null,
+                categoryId: null,
+                orderIndex: 0,
+                deletedAt: null,
+              },
+          });
+        }
+      }
+    }
+  }
+
+  const insertedReactions: EntryReactionWithRelation[] = [];
+  if (params.reactions && params.reactions.length > 0) {
+    for (const r of params.reactions) {
+      let reactionRow: Reaction | undefined;
+      if (r.id) {
+        const [found] = await db
+          .select()
+          .from(reactions)
+          .where(eq(reactions.id, r.id))
+          .limit(1);
+        reactionRow = found;
+      } else if (r.name.trim()) {
+        const [existing] = await db
+          .select()
+          .from(reactions)
+          .where(and(eq(reactions.name, r.name.trim()), isNull(reactions.userId)))
+          .limit(1);
+        if (existing) {
+          reactionRow = existing;
+        } else {
+          const [created] = await db
+            .insert(reactions)
+            .values({ name: r.name.trim(), userId: null })
+            .returning();
+          reactionRow = created;
+        }
+      }
+      const reactionId = reactionRow?.id ?? r.id;
+      if (reactionId) {
+        const [piv] = await db
+          .insert(entryReactions)
+          .values({
+            entryId: entry.id,
+            reactionId,
+          })
+          .returning();
+        if (piv) {
+          insertedReactions.push({
+            ...piv,
+            reaction:
+              reactionRow ?? {
+                id: reactionId,
+                name: r.name.trim(),
+                userId: null,
+                categoryId: null,
+                orderIndex: 0,
+                deletedAt: null,
+              },
+          });
+        }
+      }
+    }
+  }
+
+  const insertedBehaviors: EntryBehaviorWithRelation[] = [];
+  if (params.behaviors && params.behaviors.length > 0) {
+    for (const b of params.behaviors) {
+      let behaviorRow: Behavior | undefined;
+      if (b.id) {
+        const [found] = await db
+          .select()
+          .from(behaviors)
+          .where(eq(behaviors.id, b.id))
+          .limit(1);
+        behaviorRow = found;
+      } else if (b.content?.trim()) {
+        const [existing] = await db
+          .select()
+          .from(behaviors)
+          .where(and(eq(behaviors.content, b.content.trim()), isNull(behaviors.userId)))
+          .limit(1);
+        if (existing) {
+          behaviorRow = existing;
+        } else {
+          const [createdB] = await db
+            .insert(behaviors)
+            .values({
+              userId: null,
+              content: b.content.trim(),
+              icon: b.icon ?? null,
+              orderIndex: Date.now(),
+            })
+            .returning();
+          behaviorRow = createdB;
+        }
+      }
+      const bId = behaviorRow?.id ?? b.id;
+      if (bId) {
+        const [piv] = await db
+          .insert(entryBehaviors)
+          .values({
+            entryId: entry.id,
+            behaviorId: bId,
+          })
+          .returning();
+        if (piv) {
+          insertedBehaviors.push({
+            ...piv,
+            behavior:
+              behaviorRow ?? {
+                id: bId,
+                content: b.content?.trim() ?? null,
+                icon: b.icon ?? null,
+                userId: null,
+                categoryId: null,
+                orderIndex: 0,
+                deletedAt: null,
+                createdAt: new Date(),
+              },
+          });
+        }
+      }
+    }
+  }
+
+  const insertedImages: EntryImage[] = [];
+  if (params.images && params.images.length > 0) {
+    for (const imageUrl of params.images) {
+      const trimmedUrl = imageUrl.trim();
+      if (trimmedUrl) {
+        const [createdImg] = await db
+          .insert(entryImages)
+          .values({
+            entryId: entry.id,
+            imageUrl: trimmedUrl,
+          })
+          .returning();
+        if (createdImg) {
+          insertedImages.push(createdImg);
+        }
+      }
+    }
+  }
+
+  return {
+    ...entry,
+    mood: moodRow,
+    entryEmotions: insertedEmotions,
+    entryThoughts: insertedThoughts,
+    entryReactions: insertedReactions,
+    entryBehaviors: insertedBehaviors,
+    entryImages: insertedImages,
+  };
 }
 
 export async function getJournalEntries(
@@ -111,6 +349,5 @@ export async function getJournalEntries(
       entryReactions: { with: { reaction: true } },
       entryImages: true,
     },
-  })
-
+  });
 }
