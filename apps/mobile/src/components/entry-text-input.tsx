@@ -55,6 +55,8 @@ const styles = StyleSheet.create({
     color: "#16181D",
     fontSize: 16,
     lineHeight: 22,
+    paddingTop: 13,
+    paddingBottom: 0,
   },
 });
 

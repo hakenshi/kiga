@@ -1,36 +1,44 @@
 import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
+import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuthStore } from "@/stores/auth-store";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import {
   Activity,
   Angry,
   Brain,
+  Crop,
   Drama,
-  Footprints,
   Frown,
   Image as ImageIcon,
   Laugh,
+  Lock,
   Meh,
   Smile,
   X,
 } from "lucide-react-native";
-import { useMemo } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Pressable, ScrollView, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import NavButton from "../../_components/nav-button";
-import { ResourceDrawer } from "@/components/resource-drawer";
-import { BehaviorDrawer, getBehaviorIcon } from "@/components/behavior-drawer";
+import { getBehaviorIcon } from "@/lib/behavior-icons";
 import { EntryTextInput } from "@/components/entry-text-input";
 import { createJournalEntry } from "@/lib/db/entries";
 import { newEntrySchema } from "@/lib/db/zod/zod-schemas";
-import type { NewEntryInput, NewEntrySchema } from "@/lib/db/zod/zod-types";
 import { countWords } from "@/lib/utils";
 import { useEntryStore } from "@/stores/journal-store";
+import { useNewPostStore } from "@/stores/new-post-store";
+import EmotionsDrawer from "./_components/emotions-drawer";
+import ThoughtsDrawer from "./_components/thoughts-drawer";
+import ReactionsDrawer from "./_components/reactions-drawer";
+import BehaviorsDrawer from "./_components/behaviors-drawer";
+import ImageCropperModal from "./_components/image-cropper-modal";
 
 const MOOD_OPTIONS = [
   { value: 1, label: "Muito Mal", Icon: Angry },
@@ -40,12 +48,123 @@ const MOOD_OPTIONS = [
   { value: 5, label: "Muito Bem", Icon: Laugh },
 ] as const;
 
+function MediaCell({
+  uri,
+  onRemove,
+  onEdit,
+}: {
+  uri: string;
+  onRemove: (uri: string) => void;
+  onEdit: (uri: string) => void;
+}) {
+  const [aspectRatio, setAspectRatio] = useState(4 / 3);
+
+  return (
+    <Pressable
+      onPress={() => onEdit(uri)}
+      className="w-full rounded-2xl overflow-hidden border border-border relative bg-white"
+      style={{ aspectRatio }}
+    >
+      <Image
+        source={{ uri }}
+        style={{ width: "100%", height: "100%" }}
+        contentFit="contain"
+        onLoad={(e) => {
+          if (e.source.width && e.source.height) {
+            setAspectRatio(e.source.width / e.source.height);
+          }
+        }}
+      />
+      <Pressable
+        onPress={() => onRemove(uri)}
+        hitSlop={6}
+        style={{ backgroundColor: "rgba(22, 24, 29, 0.82)" }}
+        className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full items-center justify-center active:opacity-80"
+      >
+        <X size={15} color="#FFFFFF" />
+      </Pressable>
+      <Pressable
+        onPress={() => onEdit(uri)}
+        hitSlop={6}
+        style={{ backgroundColor: "rgba(22, 24, 29, 0.82)" }}
+        className="absolute bottom-2.5 right-2.5 h-7 px-3 rounded-full flex-row items-center justify-center gap-1.5 active:opacity-80"
+      >
+        <Crop size={13} color="#FFFFFF" />
+        <Text className="text-[11px] font-heading text-white">Recortar</Text>
+      </Pressable>
+    </Pressable>
+  );
+}
+
+function ComposerMediaGrid({
+  urls,
+  onRemove,
+  onEdit,
+}: {
+  urls: string[];
+  onRemove: (uri: string) => void;
+  onEdit: (uri: string) => void;
+}) {
+  if (urls.length === 0) return null;
+
+  return (
+    <VStack space="sm" className="w-full">
+      {urls.map((uri) => (
+        <MediaCell
+          key={uri}
+          uri={uri}
+          onRemove={onRemove}
+          onEdit={onEdit}
+        />
+      ))}
+    </VStack>
+  );
+}
+
 export default function NewPostPage() {
   const router = useRouter();
   const { top, bottom } = useSafeAreaInsets();
   const { user } = useAuthStore();
-  const { addEntry } = useEntryStore()
-  const entryDate = useMemo(() => new Date(), []);
+  const { addEntry } = useEntryStore();
+  const [entryDate] = useState(() => new Date());
+  const [editingImageUri, setEditingImageUri] = useState<string | null>(null);
+
+  const content = useNewPostStore((s) => s.content);
+  const selectedMood = useNewPostStore((s) => s.moodId);
+  const selectedEmotions = useNewPostStore((s) => s.emotions);
+  const selectedThoughts = useNewPostStore((s) => s.thoughts);
+  const selectedReactions = useNewPostStore((s) => s.reactions);
+  const selectedBehaviors = useNewPostStore((s) => s.behaviors);
+  const selectedImages = useNewPostStore((s) => s.images);
+
+  const setContent = useNewPostStore((s) => s.setContent);
+  const setMoodId = useNewPostStore((s) => s.setMoodId);
+  const toggleEmotion = useNewPostStore((s) => s.toggleEmotion);
+  const toggleThought = useNewPostStore((s) => s.toggleThought);
+  const toggleReaction = useNewPostStore((s) => s.toggleReaction);
+  const toggleBehavior = useNewPostStore((s) => s.toggleBehavior);
+  const addImages = useNewPostStore((s) => s.addImages);
+  const removeImage = useNewPostStore((s) => s.removeImage);
+  const replaceImage = useNewPostStore((s) => s.replaceImage);
+  const resetStore = useNewPostStore((s) => s.reset);
+
+  const {
+    control,
+    handleSubmit,
+    reset: resetForm,
+    formState: { isSubmitting },
+  } = useForm<NewEntryInput, any, NewEntrySchema>({
+    resolver: zodResolver(newEntrySchema),
+    values: {
+      content,
+      moodId: selectedMood,
+      emotions: selectedEmotions,
+      thoughts: selectedThoughts,
+      reactions: selectedReactions,
+      behaviors: selectedBehaviors,
+      images: selectedImages,
+    },
+  });
 
   const weekday = entryDate
     .toLocaleDateString("pt-BR", { weekday: "long" })
@@ -60,100 +179,37 @@ export default function NewPostPage() {
     minute: "2-digit",
   });
 
-  // Formulário padronizado com React Hook Form + Zod
-  const {
-    control,
-    handleSubmit,
-    watch,
-    getValues,
-    setValue,
-    formState: { isSubmitting },
-  } = useForm<NewEntryInput, any, NewEntrySchema>({
-    resolver: zodResolver(newEntrySchema),
-    defaultValues: {
-      content: "",
-      moodId: null,
-      emotions: [],
-      thoughts: [],
-      reactions: [],
-      behaviors: [],
-    },
-  });
+  const wordCount = countWords(content);
 
-  // oxlint-disable-next-line react/incompatible-library
-  const selectedMood = watch("moodId");
-  const content = watch("content") ?? "";
-  const selectedEmotions = watch("emotions") ?? [];
-  const selectedThoughts = watch("thoughts") ?? [];
-  const selectedReactions = watch("reactions") ?? [];
-  const selectedBehaviors = watch("behaviors") ?? [];
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
 
-  const wordCount = useMemo(() => countWords(content), [content]);
-
-  // Toggle selection handlers integrados ao react-hook-form
-  const toggleEmotion = (id: number, name: string) => {
-    const current = getValues("emotions") ?? [];
-    const next = current.some((item) => item.id === id)
-      ? current.filter((item) => item.id !== id)
-      : [...current, { id, name }];
-    setValue("emotions", next, { shouldValidate: true });
+    if (!result.canceled && result.assets.length > 0) {
+      addImages(result.assets.map((asset) => asset.uri));
+    }
   };
 
-  const toggleThought = (id: number, name: string) => {
-    const current = getValues("thoughts") ?? [];
-    const next = current.some((item) => item.id === id)
-      ? current.filter((item) => item.id !== id)
-      : [...current, { id, name }];
-    setValue("thoughts", next, { shouldValidate: true });
-  };
-
-  const toggleReaction = (id: number, name: string) => {
-    const current = getValues("reactions") ?? [];
-    const next = current.some((item) => item.id === id)
-      ? current.filter((item) => item.id !== id)
-      : [...current, { id, name }];
-    setValue("reactions", next, { shouldValidate: true });
-  };
-
-  const toggleBehavior = (item: {
-    id?: number;
-    content: string;
-    icon?: string | null;
-  }) => {
-    const current = getValues("behaviors") ?? [];
-    const exists = current.some(
-      (b) =>
-        (item.id !== undefined && b.id === item.id) ||
-        b.content.toLowerCase() === item.content.toLowerCase()
-    );
-    const next = exists
-      ? current.filter(
-        (b) =>
-          !(
-            (item.id !== undefined && b.id === item.id) ||
-            b.content.toLowerCase() === item.content.toLowerCase()
-          )
-      )
-      : [...current, item];
-    setValue("behaviors", next, { shouldValidate: true });
-  };
-
-  // Salvar Entry via Service
-  const onSave = async (formData: NewEntrySchema) => {
+  const onSave = async (parsed: NewEntrySchema) => {
     try {
       const newEntry = await createJournalEntry({
         userId: user?.id ?? 1,
-        content: formData.content,
-        moodId: formData.moodId,
-        emotions: formData.emotions,
-        thoughts: formData.thoughts,
-        reactions: formData.reactions,
-        behaviors: formData.behaviors,
+        content: parsed.content,
+        moodId: parsed.moodId,
+        emotions: parsed.emotions,
+        thoughts: parsed.thoughts,
+        reactions: parsed.reactions,
+        behaviors: parsed.behaviors,
+        images: parsed.images,
         date: entryDate,
       });
 
-      addEntry(newEntry)
-
+      addEntry(newEntry);
+      resetStore();
+      resetForm();
       router.push("/(home)/home");
     } catch (err) {
       console.error("Error saving journal entry:", err);
@@ -170,7 +226,10 @@ export default function NewPostPage() {
     <VStack className="flex-1 bg-white" style={{ paddingBottom: bottom }}>
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         {/* Header */}
-        <View style={{ paddingTop: top }} className="bg-white border-b border-gray-100">
+        <View
+          style={{ paddingTop: top }}
+          className="bg-white border-b border-gray-100"
+        >
           <HStack className="px-4 h-14 justify-between items-center">
             {/* Left Slot: 96px */}
             <HStack className="w-24 items-center justify-start">
@@ -185,10 +244,12 @@ export default function NewPostPage() {
 
             {/* Center Date & Time: fixo e estático por montagem */}
             <VStack className="items-center justify-center flex-1">
-              <Text className="font-semibold text-sm text-foreground">
+              <Text className="font-heading text-sm text-foreground">
                 {formattedDate}
               </Text>
-              <Text className="text-xs text-muted-foreground">{formattedTime}</Text>
+              <Text className="font-subtitle text-xs text-muted-foreground">
+                {formattedTime}
+              </Text>
             </VStack>
 
             {/* Right Slot: 96px */}
@@ -196,10 +257,11 @@ export default function NewPostPage() {
               <Pressable
                 onPress={handleSubmit(onSave)}
                 disabled={isSubmitting || !content.trim()}
-                className={`h-10 px-5 rounded-full items-center justify-center ${isSubmitting || !content.trim()
-                  ? "bg-muted"
-                  : "bg-primary active:opacity-85"
-                  }`}
+                className={`h-10 px-5 rounded-full items-center justify-center ${
+                  isSubmitting || !content.trim()
+                    ? "bg-muted"
+                    : "bg-primary active:opacity-85"
+                }`}
               >
                 <Text className="text-primary-foreground font-semibold text-sm">
                   {isSubmitting ? "Salvando..." : "Salvar"}
@@ -213,7 +275,7 @@ export default function NewPostPage() {
         <VStack className="flex-1">
           {/* Mood Selector Row */}
           <HStack className="justify-between px-4 py-3 items-center border-b border-border">
-            <Text className="text-[13px] text-muted-foreground font-normal">
+            <Text className="text-[13px] font-subtitle text-muted-foreground">
               Como você está?
             </Text>
             <HStack className="items-center" space="xs">
@@ -222,15 +284,8 @@ export default function NewPostPage() {
                 return (
                   <Pressable
                     key={value}
-                    onPress={() =>
-                      setValue("moodId", isSelected ? null : value, {
-                        shouldValidate: true,
-                      })
-                    }
-                    className={`size-8 rounded-full items-center justify-center active:opacity-70 ${isSelected
-                      ? "bg-background border-[1.5px] border-foreground"
-                      : "bg-secondary"
-                      }`}
+                    onPress={() => setMoodId(isSelected ? null : value)}
+                    className="size-8 rounded-full items-center justify-center active:opacity-70"
                   >
                     <Icon
                       size={18}
@@ -242,154 +297,171 @@ export default function NewPostPage() {
             </HStack>
           </HStack>
 
-          {/* Text Editor Area */}
-          <HStack className="flex-1 overflow-hidden p-5 gap-3 items-start">
-            <Avatar className="mt-0.5">
-              <AvatarImage />
-              <AvatarFallbackText>{user?.firstName}</AvatarFallbackText>
-            </Avatar>
-            <Controller
-              name="content"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <EntryTextInput
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="O que está acontecendo agora?"
+          {/* Text Editor Area + Attached Media (Twitter-style) */}
+          <ScrollView
+            className="flex-1"
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <HStack className="p-5 gap-3 items-start">
+              <Avatar>
+                <AvatarImage />
+                <AvatarFallbackText>{user?.firstName}</AvatarFallbackText>
+              </Avatar>
+              <VStack className="flex-1" space="md">
+                <Controller
+                  control={control}
+                  name="content"
+                  render={({ field }) => (
+                    <EntryTextInput
+                      value={field.value}
+                      onChangeText={(text) => {
+                        field.onChange(text);
+                        setContent(text);
+                      }}
+                      scrollEnabled={false}
+                      minHeight={72}
+                      placeholder="O que está acontecendo agora?"
+                    />
+                  )}
                 />
-              )}
-            />
-          </HStack>
+
+                {selectedImages.length > 0 && (
+                  <ComposerMediaGrid
+                    urls={selectedImages}
+                    onRemove={removeImage}
+                    onEdit={(uri) => setEditingImageUri(uri)}
+                  />
+                )}
+              </VStack>
+            </HStack>
+          </ScrollView>
 
           {/* Selected Chips Strip */}
           {hasSelectedChips && (
-            <View className="px-4 pb-2">
+            <View className="py-2.5 border-t border-[#F2F3F5]">
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 6, alignItems: "center" }}
+                contentContainerStyle={{
+                  paddingHorizontal: 20,
+                  gap: 8,
+                  alignItems: "center",
+                }}
               >
                 {selectedEmotions.map((e) => (
                   <Pressable
-                    key={`em-${e.id}`}
-                    onPress={() => toggleEmotion(e.id, e.name)}
-                    className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
+                    key={`em-${e.id ?? e.name}`}
+                    onPress={() => toggleEmotion(e)}
+                    className="flex-row items-center bg-[#E8F1FB] border border-[#D0E3F7] rounded-[10px] px-3 py-1.5 gap-1.5 active:opacity-75"
                   >
-                    <Text className="text-xs font-medium text-foreground">
+                    <Drama size={13} color="#1E4E8C" />
+                    <Text className="text-[13px] font-medium text-[#1E4E8C]">
                       {e.name}
                     </Text>
-                    <X size={12} color="#9CA3AF" />
+                    <X size={13} color="#1E4E8C" />
                   </Pressable>
                 ))}
                 {selectedThoughts.map((t) => (
                   <Pressable
-                    key={`th-${t.id}`}
-                    onPress={() => toggleThought(t.id, t.name)}
-                    className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
+                    key={`th-${t.id ?? t.name}`}
+                    onPress={() => toggleThought(t)}
+                    className="flex-row items-center bg-[#F0ECFA] border border-[#DFD6F5] rounded-[10px] px-3 py-1.5 gap-1.5 max-w-[220px] active:opacity-75"
                   >
-                    <Text className="text-xs font-medium text-foreground">
+                    <Brain size={13} color="#4B3B8F" />
+                    <Text
+                      numberOfLines={1}
+                      className="text-[13px] font-medium text-[#4B3B8F] shrink"
+                    >
                       “{t.name}”
                     </Text>
-                    <X size={12} color="#9CA3AF" />
+                    <X size={13} color="#4B3B8F" />
                   </Pressable>
                 ))}
                 {selectedReactions.map((r) => (
                   <Pressable
-                    key={`re-${r.id}`}
-                    onPress={() => toggleReaction(r.id, r.name)}
-                    className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
+                    key={`re-${r.id ?? r.name}`}
+                    onPress={() => toggleReaction(r)}
+                    className="flex-row items-center bg-[#FDF3E2] border border-[#F7E3BE] rounded-[10px] px-3 py-1.5 gap-1.5 active:opacity-75"
                   >
-                    <Text className="text-xs font-medium text-foreground">
+                    <Activity size={13} color="#8A5A12" />
+                    <Text className="text-[13px] font-medium text-[#8A5A12]">
                       {r.name}
                     </Text>
-                    <X size={12} color="#9CA3AF" />
+                    <X size={13} color="#8A5A12" />
                   </Pressable>
                 ))}
                 {selectedBehaviors.map((b, idx) => {
-                  const IconComp = getBehaviorIcon(b.icon);
+                  const iconElement = React.createElement(
+                    getBehaviorIcon(b.icon),
+                    {
+                      size: 13,
+                      color: "#166534",
+                    }
+                  );
                   return (
                     <Pressable
                       key={`beh-${b.id ?? idx}`}
                       onPress={() => toggleBehavior(b)}
-                      className="flex-row items-center bg-secondary border border-border rounded-full px-3 py-1.5 gap-1.5"
+                      className="flex-row items-center bg-[#EAF6F0] border border-[#CBEAD9] rounded-[10px] px-3 py-1.5 gap-1.5 max-w-[220px] active:opacity-75"
                     >
-                      <IconComp size={12} color="#18181b" />
-                      <Text className="text-xs font-medium text-foreground">
+                      {iconElement}
+                      <Text
+                        numberOfLines={1}
+                        className="text-[13px] font-medium text-[#166534] shrink"
+                      >
                         {b.content}
                       </Text>
-                      <X size={12} color="#9CA3AF" />
+                      <X size={13} color="#166534" />
                     </Pressable>
                   );
                 })}
               </ScrollView>
             </View>
           )}
-
-          {/* Metadata bar: Word Count & Status */}
-          <HStack className="justify-between px-5 py-2 border-t border-gray-50 items-center">
-            <Text className="text-xs text-[#9AA0AA]">{wordCount} palavras</Text>
-          </HStack>
         </VStack>
 
-        {/* Bottom Toolbar */}
-        <VStack>
-          <HStack className="bg-white px-3 py-1 items-center justify-around w-full border-t border-gray-100">
-            <ResourceDrawer
-              type="emotion"
-              selectedIds={selectedEmotions.map((e) => e.id)}
-              onToggleSelect={toggleEmotion}
-              userId={user?.id}
-            >
-              <ResourceDrawer.Trigger>
-                <NavButton Icon={Drama} badge={selectedEmotions.length}>
-                  Emoções
-                </NavButton>
-              </ResourceDrawer.Trigger>
-            </ResourceDrawer>
+        {/* Bottom Dock: Metadata + Toolbar */}
+        <VStack className="bg-white border-t border-[#E6E8EC] pt-2 pb-1">
+          <HStack className="justify-between px-5 pb-1.5 items-center">
+            <Text className="text-xs font-subtitle text-[#9AA0AA]">
+              {wordCount} {wordCount === 1 ? "palavra" : "palavras"}
+            </Text>
+            <HStack className="items-center gap-1">
+              <Lock size={11} color="#9AA0AA" />
+              <Text className="text-xs font-subtitle text-[#9AA0AA]">
+                Salvo só neste aparelho
+              </Text>
+            </HStack>
+          </HStack>
 
-            <ResourceDrawer
-              type="thought"
-              selectedIds={selectedThoughts.map((t) => t.id)}
-              onToggleSelect={toggleThought}
-              userId={user?.id}
-            >
-              <ResourceDrawer.Trigger>
-                <NavButton Icon={Brain} badge={selectedThoughts.length}>
-                  Pensamentos
-                </NavButton>
-              </ResourceDrawer.Trigger>
-            </ResourceDrawer>
+          <HStack className="px-2 items-center justify-around w-full">
+            <EmotionsDrawer />
+            <ThoughtsDrawer />
+            <ReactionsDrawer />
+            <BehaviorsDrawer />
 
-            <ResourceDrawer
-              type="reaction"
-              selectedIds={selectedReactions.map((r) => r.id)}
-              onToggleSelect={toggleReaction}
-              userId={user?.id}
+            <NavButton
+              Icon={ImageIcon}
+              badge={selectedImages.length}
+              onPress={handlePickImage}
             >
-              <ResourceDrawer.Trigger>
-                <NavButton Icon={Activity} badge={selectedReactions.length}>
-                  Reações
-                </NavButton>
-              </ResourceDrawer.Trigger>
-            </ResourceDrawer>
-
-            <BehaviorDrawer
-              selectedBehaviors={selectedBehaviors}
-              onToggleSelect={toggleBehavior}
-              userId={user?.id}
-            >
-              <BehaviorDrawer.Trigger>
-                <NavButton Icon={Footprints} badge={selectedBehaviors.length}>
-                  Comportamento
-                </NavButton>
-              </BehaviorDrawer.Trigger>
-            </BehaviorDrawer>
-
-            <NavButton Icon={ImageIcon} onPress={() => { }}>
               Foto
             </NavButton>
           </HStack>
         </VStack>
+
+        <ImageCropperModal
+          visible={Boolean(editingImageUri)}
+          uri={editingImageUri}
+          onClose={() => setEditingImageUri(null)}
+          onComplete={(newUri) => {
+            if (editingImageUri) {
+              replaceImage(editingImageUri, newUri);
+            }
+            setEditingImageUri(null);
+          }}
+        />
       </KeyboardAvoidingView>
     </VStack>
   );
