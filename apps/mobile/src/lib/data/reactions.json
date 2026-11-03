@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Fisiológicas / Corporais",
+    "userId": null,
+    "items": [
+      { "name": "Aperto no peito", "userId": null },
+      { "name": "Taquicardia", "userId": null },
+      { "name": "Nó na garganta", "userId": null },
+      { "name": "Tensão muscular", "userId": null },
+      { "name": "Sudorese", "userId": null },
+      { "name": "Respiração curta", "userId": null },
+      { "name": "Formigamento nas mãos", "userId": null },
+      { "name": "Tremores", "userId": null },
+      { "name": "Fadiga", "userId": null }
+    ]
+  },
+  {
+    "name": "Comportamentais",
+    "userId": null,
+    "items": [
+      { "name": "Isolamento", "userId": null },
+      { "name": "Procrastinação", "userId": null },
+      { "name": "Respiração 4-7-8", "userId": null },
+      { "name": "Roer unhas", "userId": null },
+      { "name": "Checar celular compulsivamente", "userId": null },
+      { "name": "Caminhada", "userId": null },
+      { "name": "Beber água gelada", "userId": null }
+    ]
+  }
+]

@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Social & Apoio",
+    "userId": null,
+    "items": [
+      { "content": "Telefonar para amigos ou família", "icon": "phone", "userId": null },
+      { "content": "Conversar / Desabafar com alguém", "icon": "phone", "userId": null },
+      { "content": "Pedir ajuda ou apoio", "icon": "heart", "userId": null },
+      { "content": "Sair com pessoas próximas", "icon": "sparkles", "userId": null }
+    ]
+  },
+  {
+    "name": "Autocuidado & Enfrentamento",
+    "userId": null,
+    "items": [
+      { "content": "Praticar caminhada / Exercício", "icon": "footprints", "userId": null },
+      { "content": "Exercício de respiração / Pausa", "icon": "wind", "userId": null },
+      { "content": "Tomar um banho relaxante", "icon": "sparkles", "userId": null },
+      { "content": "Beber água / Tomar café com calma", "icon": "coffee", "userId": null },
+      { "content": "Alimentar-se com atenção", "icon": "utensils", "userId": null },
+      { "content": "Escrever / Registrar pensamentos", "icon": "book-open", "userId": null }
+    ]
+  },
+  {
+    "name": "Esquiva & Isolamento",
+    "userId": null,
+    "items": [
+      { "content": "Isolar-se no quarto", "icon": "door-closed", "userId": null },
+      { "content": "Ficar na cama / Não levantar", "icon": "bed", "userId": null },
+      { "content": "Evitar contato / Não responder mensagens", "icon": "smartphone", "userId": null },
+      { "content": "Cancelar compromissos", "icon": "door-closed", "userId": null },
+      { "content": "Desistir da tarefa / Evitar situação", "icon": "door-closed", "userId": null }
+    ]
+  },
+  {
+    "name": "Distração & Fuga",
+    "userId": null,
+    "items": [
+      { "content": "Rolar redes sociais compulsivamente", "icon": "smartphone", "userId": null },
+      { "content": "Assistir séries / TV em excesso", "icon": "tv", "userId": null },
+      { "content": "Procrastinar atividades", "icon": "bed", "userId": null },
+      { "content": "Jogar videogame", "icon": "sparkles", "userId": null },
+      { "content": "Ouvir música para se desligar", "icon": "headphones", "userId": null }
+    ]
+  },
+  {
+    "name": "Autodestrutivo & Risco",
+    "userId": null,
+    "items": [
+      { "content": "Compulsão alimentar / Comer por ansiedade", "icon": "utensils", "userId": null },
+      { "content": "Consumir álcool ou substâncias", "icon": "flame", "userId": null },
+      { "content": "Gastos por impulso", "icon": "sparkles", "userId": null },
+      { "content": "Comportamento de risco / Impulso", "icon": "flame", "userId": null },
+      { "content": "Autocrítica destrutiva / Punição", "icon": "flame", "userId": null }
+    ]
+  }
+]

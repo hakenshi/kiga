@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Medo",
+    "userId": null,
+    "items": [
+      { "name": "Ansiedade", "userId": null },
+      { "name": "Insegurança", "userId": null },
+      { "name": "Preocupação", "userId": null },
+      { "name": "Vergonha", "userId": null },
+      { "name": "Pânico", "userId": null }
+    ]
+  },
+  {
+    "name": "Tristeza",
+    "userId": null,
+    "items": [
+      { "name": "Tristeza", "userId": null },
+      { "name": "Solidão", "userId": null },
+      { "name": "Culpa", "userId": null },
+      { "name": "Desânimo", "userId": null },
+      { "name": "Desamparo", "userId": null }
+    ]
+  },
+  {
+    "name": "Raiva",
+    "userId": null,
+    "items": [
+      { "name": "Raiva", "userId": null },
+      { "name": "Frustração", "userId": null },
+      { "name": "Irritação", "userId": null },
+      { "name": "Ressentimento", "userId": null }
+    ]
+  },
+  {
+    "name": "Sobrecarga",
+    "userId": null,
+    "items": [
+      { "name": "Sobrecarga", "userId": null },
+      { "name": "Esgotamento", "userId": null },
+      { "name": "Pressão", "userId": null },
+      { "name": "Confusão", "userId": null }
+    ]
+  },
+  {
+    "name": "Alegria & Alívio",
+    "userId": null,
+    "items": [
+      { "name": "Calma", "userId": null },
+      { "name": "Gratidão", "userId": null },
+      { "name": "Esperança", "userId": null },
+      { "name": "Alívio", "userId": null }
+    ]
+  }
+]

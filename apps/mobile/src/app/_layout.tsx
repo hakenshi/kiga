@@ -26,7 +26,6 @@ import {
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import migrations from "../../drizzle/migrations";
 import db from "../lib/db";
-import { installSystemData } from "../lib/db/install-system-data";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
@@ -63,13 +62,6 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       if ((fontsLoaded || fontError) && (success || error)) {
-        if (success) {
-          try {
-            await installSystemData();
-          } catch (e) {
-            console.error("Erro ao inicializar dados padrão:", e);
-          }
-        }
         await SplashScreen.hideAsync().catch(() => {});
       }
     }
