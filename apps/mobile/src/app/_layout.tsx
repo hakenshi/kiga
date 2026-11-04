@@ -24,6 +24,7 @@ import {
 } from "@expo-google-fonts/inter";
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import { ToastBanner } from "@/components/toast-banner";
 import migrations from "../../drizzle/migrations";
 import db from "../lib/db";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -94,6 +95,7 @@ export default function RootLayout() {
         <GluestackUIProvider mode="system">
           <KeyboardProvider>
             <Stack screenOptions={{ animation: "none", headerShown: false }} />
+            <ToastBanner />
           </KeyboardProvider>
         </GluestackUIProvider>
       </QueryClientProvider>
