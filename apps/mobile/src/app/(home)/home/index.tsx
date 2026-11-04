@@ -8,8 +8,20 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useEffect } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { Link } from "expo-router";
-import { PlusIcon } from "lucide-react-native";
+import { FaceSlightlySmilingPlus, PlusIcon } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { VStack } from "@/components/ui/vstack";
+import { Text } from "@/components/ui/text";
+
+function EmptyList() {
+  return (
+    <VStack className="h-200 flex-1 items-center justify-center" space="xl">
+      <Text>
+        Parece que você não tem nenhum pensamento ainda.
+      </Text>
+    </VStack>
+  )
+}
 
 export default function HomePage() {
   const { entries, loadInitial, loadMore, hasMore, isLoading } = useEntryStore();
@@ -23,8 +35,9 @@ export default function HomePage() {
   }, [user?.id, entries.length, loadInitial]);
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-zinc-50">
       <FlatList
+        ListEmptyComponent={<EmptyList />}
         data={entries}
         keyExtractor={(e) => String(e.id)}
         contentContainerStyle={{ paddingTop: top, paddingBottom: bottom }}
@@ -48,7 +61,7 @@ export default function HomePage() {
         }
         renderItem={({ item }) => (
           <EntryShell entryId={item.id}>
-            <EntryHeader entry={item} liked={item.liked} entryId={item.id} />
+            <EntryHeader fixed={item.fixed} entry={item} liked={item.liked} entryId={item.id} />
             <EntryBody entry={item} />
             <EntryBottom entry={item} entryId={item.id} liked={item.liked} />
           </EntryShell>

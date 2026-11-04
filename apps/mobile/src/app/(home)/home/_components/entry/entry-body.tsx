@@ -1,49 +1,14 @@
 import { HStack } from "@/components/ui/hstack";
-import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { getBehaviorIcon } from "@/lib/behavior-icons";
-import { Image } from "expo-image";
-import { Activity, Brain, Drama, Footprints } from "lucide-react-native";
+import { Activity, Brain, ChevronDown, ChevronUp, Drama, Footprints } from "lucide-react-native";
 import React, { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { ImageCarousel } from "@/components/image-carousel";
 
 interface Props {
   entry?: JournalEntryWithRelations;
   content?: string;
-}
-
-function EntryImageItem({ uri }: { uri: string }) {
-  const [aspectRatio, setAspectRatio] = useState(4 / 3);
-
-  return (
-    <View
-      className="w-full rounded-2xl overflow-hidden border border-[#E6E8EC] bg-[#F8F9FA]"
-      style={{ aspectRatio }}
-    >
-      <Image
-        source={{ uri }}
-        style={{ width: "100%", height: "100%" }}
-        contentFit="contain"
-        onLoad={(e) => {
-          if (e.source.width && e.source.height) {
-            setAspectRatio(e.source.width / e.source.height);
-          }
-        }}
-      />
-    </View>
-  );
-}
-
-function EntryMediaGrid({ urls }: { urls: string[] }) {
-  if (urls.length === 0) return null;
-
-  return (
-    <VStack space="sm" className="w-full">
-      {urls.map((uri, idx) => (
-        <EntryImageItem key={`${uri}-${idx}`} uri={uri} />
-      ))}
-    </VStack>
-  );
 }
 
 function BehaviorReportBlock({ text }: { text: string }) {
@@ -97,6 +62,16 @@ export default function EntryBody({ entry, content: contentProp }: Props) {
   const behaviorReports = behaviors.filter((be) => !be.icon);
   const behaviorChips = behaviors.filter((be) => Boolean(be.icon));
 
+  const totalChips =
+    thoughts.length +
+    emotions.length +
+    reactions.length +
+    behaviorChips.length;
+
+  const [expandedTags, setExpandedTags] = useState(false);
+  const isCrowded = totalChips > 3;
+  const showSummaryPills = isCrowded && !expandedTags;
+
   const hasRelations =
     thoughts.length > 0 ||
     emotions.length > 0 ||
@@ -122,7 +97,7 @@ export default function EntryBody({ entry, content: contentProp }: Props) {
     <VStack className="pt-0.5 pb-1" space="md">
       {content.length > 0 && (
         <VStack space="xs">
-          <Text className="text-[15px] leading-[22px] text-[#1A1D24]">
+          <Text className="font-inter leading-5 text-zinc-900 text-base">
             {shouldTruncate && !expand ? `${displayText}...` : displayText}
           </Text>
           {shouldTruncate && (
@@ -139,7 +114,7 @@ export default function EntryBody({ entry, content: contentProp }: Props) {
       )}
 
       {images.length > 0 && (
-        <EntryMediaGrid urls={images.map((img) => img.imageUrl)} />
+        <ImageCarousel images={images.map((img) => img.imageUrl)} />
       )}
 
       {hasRelations && (
@@ -151,71 +126,144 @@ export default function EntryBody({ entry, content: contentProp }: Props) {
             />
           ))}
 
-          {thoughts.length > 0 && (
-            <View className="flex-row flex-wrap gap-1.5">
-              {thoughts.map((th, idx) => (
-                <View
-                  key={`th-${th.id}-${idx}`}
-                  className="flex-row items-center bg-[#F0ECFA] border border-[#DFD6F5] rounded-[10px] px-2.5 py-1.5 gap-1.5 max-w-full"
+          {showSummaryPills ? (
+            /* Modo Resumo Clínico: Pílulas agrupadas compactas */
+            <View className="flex-row flex-wrap items-center gap-1.5 pt-0.5">
+              {thoughts.length > 0 && (
+                <Pressable
+                  onPress={() => setExpandedTags(true)}
+                  className="flex-row items-center bg-[#F0ECFA] border border-[#DFD6F5] rounded-full px-3 py-1.5 gap-1.5 active:opacity-75"
                 >
                   <Brain size={13} color="#4B3B8F" />
-                  <Text className="text-[12px] font-medium text-[#4B3B8F] shrink">
-                    “{th.name}”
+                  <Text className="text-[12px] font-heading text-[#4B3B8F]">
+                    {thoughts.length} {thoughts.length === 1 ? "pensamento" : "pensamentos"}
                   </Text>
-                </View>
-              ))}
-            </View>
-          )}
+                  <ChevronDown size={13} color="#4B3B8F" />
+                </Pressable>
+              )}
 
-          {(emotions.length > 0 ||
-            reactions.length > 0 ||
-            behaviorChips.length > 0) && (
-            <View className="flex-row flex-wrap gap-1.5">
-              {emotions.map((em, idx) => (
-                <View
-                  key={`em-${em.id}-${idx}`}
-                  className="flex-row items-center bg-[#E8F1FB] border border-[#D0E3F7] rounded-[10px] px-2.5 py-1 gap-1.5"
+              {emotions.length > 0 && (
+                <Pressable
+                  onPress={() => setExpandedTags(true)}
+                  className="flex-row items-center bg-[#E8F1FB] border border-[#D0E3F7] rounded-full px-3 py-1.5 gap-1.5 active:opacity-75"
                 >
-                  <Drama size={12} color="#1E4E8C" />
-                  <Text className="text-[12px] font-medium text-[#1E4E8C]">
-                    {em.name}
+                  <Drama size={13} color="#1E4E8C" />
+                  <Text className="text-[12px] font-heading text-[#1E4E8C]">
+                    {emotions.length} {emotions.length === 1 ? "emoção" : "emoções"}
                   </Text>
-                </View>
-              ))}
+                  <ChevronDown size={13} color="#1E4E8C" />
+                </Pressable>
+              )}
 
-              {reactions.map((re, idx) => (
-                <View
-                  key={`re-${re.id}-${idx}`}
-                  className="flex-row items-center bg-[#FDF3E2] border border-[#F7E3BE] rounded-[10px] px-2.5 py-1 gap-1.5"
+              {reactions.length > 0 && (
+                <Pressable
+                  onPress={() => setExpandedTags(true)}
+                  className="flex-row items-center bg-[#FDF3E2] border border-[#F7E3BE] rounded-full px-3 py-1.5 gap-1.5 active:opacity-75"
                 >
-                  <Activity size={12} color="#8A5A12" />
-                  <Text className="text-[12px] font-medium text-[#8A5A12]">
-                    {re.name}
+                  <Activity size={13} color="#8A5A12" />
+                  <Text className="text-[12px] font-heading text-[#8A5A12]">
+                    {reactions.length} {reactions.length === 1 ? "reação" : "reações"}
                   </Text>
-                </View>
-              ))}
+                  <ChevronDown size={13} color="#8A5A12" />
+                </Pressable>
+              )}
 
-              {behaviorChips.map((be, idx) => {
-                const iconElement = React.createElement(
-                  getBehaviorIcon(be.icon),
-                  {
-                    size: 12,
-                    color: "#166534",
-                  }
-                );
-                return (
-                  <View
-                    key={`be-${be.id}-${idx}`}
-                    className="flex-row items-center bg-[#EAF6F0] border border-[#CBEAD9] rounded-[10px] px-2.5 py-1 gap-1.5"
-                  >
-                    {iconElement}
-                    <Text className="text-[12px] font-medium text-[#166534]">
-                      {be.content}
-                    </Text>
-                  </View>
-                );
-              })}
+              {behaviorChips.length > 0 && (
+                <Pressable
+                  onPress={() => setExpandedTags(true)}
+                  className="flex-row items-center bg-[#EAF6F0] border border-[#CBEAD9] rounded-full px-3 py-1.5 gap-1.5 active:opacity-75"
+                >
+                  <Footprints size={13} color="#166534" />
+                  <Text className="text-[12px] font-heading text-[#166534]">
+                    {behaviorChips.length} {behaviorChips.length === 1 ? "ação" : "ações"}
+                  </Text>
+                  <ChevronDown size={13} color="#166534" />
+                </Pressable>
+              )}
             </View>
+          ) : (
+            /* Modo Expandido ou Poucas Tags: Renderiza todas as tags */
+            <>
+              {thoughts.length > 0 && (
+                <View className="flex-row flex-wrap gap-1.5">
+                  {thoughts.map((th, idx) => (
+                    <View
+                      key={`th-${th.id}-${idx}`}
+                      className="flex-row items-center bg-[#F0ECFA] border border-[#DFD6F5] rounded-[10px] px-2.5 py-1.5 gap-1.5 max-w-full"
+                    >
+                      <Brain size={13} color="#4B3B8F" />
+                      <Text className="text-[12px] font-medium text-[#4B3B8F] shrink">
+                        “{th.name}”
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {(emotions.length > 0 ||
+                reactions.length > 0 ||
+                behaviorChips.length > 0) && (
+                <View className="flex-row flex-wrap gap-1.5">
+                  {emotions.map((em, idx) => (
+                    <View
+                      key={`em-${em.id}-${idx}`}
+                      className="flex-row items-center bg-[#E8F1FB] border border-[#D0E3F7] rounded-[10px] px-2.5 py-1 gap-1.5"
+                    >
+                      <Drama size={12} color="#1E4E8C" />
+                      <Text className="text-[12px] font-medium text-[#1E4E8C]">
+                        {em.name}
+                      </Text>
+                    </View>
+                  ))}
+
+                  {reactions.map((re, idx) => (
+                    <View
+                      key={`re-${re.id}-${idx}`}
+                      className="flex-row items-center bg-[#FDF3E2] border border-[#F7E3BE] rounded-[10px] px-2.5 py-1 gap-1.5"
+                    >
+                      <Activity size={12} color="#8A5A12" />
+                      <Text className="text-[12px] font-medium text-[#8A5A12]">
+                        {re.name}
+                      </Text>
+                    </View>
+                  ))}
+
+                  {behaviorChips.map((be, idx) => {
+                    const iconElement = React.createElement(
+                      getBehaviorIcon(be.icon),
+                      {
+                        size: 12,
+                        color: "#166534",
+                      }
+                    );
+                    return (
+                      <View
+                        key={`be-${be.id}-${idx}`}
+                        className="flex-row items-center bg-[#EAF6F0] border border-[#CBEAD9] rounded-[10px] px-2.5 py-1 gap-1.5"
+                      >
+                        {iconElement}
+                        <Text className="text-[12px] font-medium text-[#166534]">
+                          {be.content}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+
+              {/* Botão para recolher de volta para as pílulas de resumo */}
+              {isCrowded && expandedTags && (
+                <Pressable
+                  onPress={() => setExpandedTags(false)}
+                  className="self-start py-1 flex-row items-center gap-1 active:opacity-60"
+                >
+                  <ChevronUp size={13} color="#68707C" />
+                  <Text className="text-[11.5px] font-subtitle-semibold text-[#68707C] underline">
+                    Recolher tags ({totalChips})
+                  </Text>
+                </Pressable>
+              )}
+            </>
           )}
         </VStack>
       )}
