@@ -1,4 +1,5 @@
 import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { id } from "zod/v4/locales";
 
 export const genderEnum = ["male", "female", "non_binary", "other", "prefer_not_to_say"] as const;
 export type Gender = (typeof genderEnum)[number];
@@ -79,7 +80,8 @@ export const journalEntries = sqliteTable("journal_entries", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().notNull().references(() => users.id, { onDelete: "cascade" }),
   moodId: integer().references(() => moods.id, { onDelete: "set null" }),
-  liked: integer({ mode: "boolean" }).notNull(),
+  liked: integer({ mode: "boolean" }).notNull().default(false),
+  fixed: integer({ mode: "boolean" }).notNull().default(false),
   entryType: text({ enum: journalEntryType }),
   title: text(),
   content: text().notNull(),
@@ -132,3 +134,9 @@ export const entryBehaviors = sqliteTable("entry_behaviors", {
   entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
   behaviorId: integer().notNull().references(() => behaviors.id),
 }, (t) => [unique().on(t.behaviorId, t.entryId)])
+
+
+export const entryReplies = sqliteTable("entry_replies", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+})
