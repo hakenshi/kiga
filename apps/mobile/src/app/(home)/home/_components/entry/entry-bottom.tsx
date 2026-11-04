@@ -50,7 +50,7 @@ export default function EntryBottom({ entryId, liked }: Props) {
             color={liked ? "#EF4444" : "#68707C"}
           />
           <Text className="text-xs text-black font-semibold">
-            Guardar
+            {liked ? "Remover" : "Guardar"}
           </Text>
         </Pressable>
       </HStack>

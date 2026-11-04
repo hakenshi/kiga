@@ -260,7 +260,7 @@ export default function EntryHeader({ entry, entryId, liked, fixed = false }: Pr
                     color={liked ? "#EF4444" : "gray"}
                   />
                   <Text className="font-semibold text-gray-900">
-                    {liked ? "Desfavoritar" : "Guardar"}
+                    {liked ? "Remover" : "Guardar"}
                   </Text>
                 </Pressable>
                 <Pressable onPress={() => updateEntry(entryId, { fixed: !fixed })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
