@@ -47,7 +47,7 @@ import {
   createReactionFormSchema,
 } from "@/lib/db/zod/zod-schemas";
 import { useAuthStore } from "@/stores/auth-store";
-import { useNewPostStore } from "@/stores/new-post-store";
+import { useComposer } from "../composer-context";
 
 type ActiveForm = "none" | "item" | "category";
 
@@ -61,9 +61,9 @@ export default function ReactionsDrawer() {
   const [deletingIds, setDeletingIds] = useState<number[]>([]);
 
   const user = useAuthStore((s) => s.user);
-  const reactions = useNewPostStore((s) => s.reactions);
-  const toggleReaction = useNewPostStore((s) => s.toggleReaction);
-  const removeReactions = useNewPostStore((s) => s.removeReactions);
+  const reactions = useComposer((s) => s.reactions);
+  const toggleReaction = useComposer((s) => s.toggleReaction);
+  const removeReactions = useComposer((s) => s.removeReactions);
 
   const itemForm = useForm<CreateReactionFormSchema>({
     resolver: zodResolver(createReactionFormSchema),
@@ -278,8 +278,11 @@ export default function ReactionsDrawer() {
           className="h-full rounded-none px-6 bg-white"
           style={{ paddingTop: top + 12, paddingBottom: bottom + 16 }}
         >
-          <DrawerHeader className="pb-4 items-start justify-between">
-            <VStack space="xs" className="flex-1 pr-2">
+          <DrawerHeader className="pb-4 flex-row items-center gap-3">
+            <DrawerCloseButton className="w-10 h-10 rounded-full bg-[#F2F3F5] items-center justify-center p-0 active:opacity-75">
+              <X size={18} color="#16181D" />
+            </DrawerCloseButton>
+            <VStack space="xs" className="flex-1">
               <Text className="text-[18px] font-heading text-[#16181D]">
                 Reações e sensações
               </Text>
@@ -287,9 +290,6 @@ export default function ReactionsDrawer() {
                 Registre sensações físicas ou reações do momento
               </Text>
             </VStack>
-            <DrawerCloseButton className="w-8 h-8 rounded-full bg-[#F2F3F5] items-center justify-center p-0">
-              <X size={16} color="#5A606B" />
-            </DrawerCloseButton>
           </DrawerHeader>
 
           <Input className="h-11 rounded-xl bg-[#F2F3F5] border-transparent data-[focus=true]:bg-white data-[focus=true]:border-[#16181D] shadow-none px-3.5 mb-2.5">

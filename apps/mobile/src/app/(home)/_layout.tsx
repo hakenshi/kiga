@@ -18,22 +18,24 @@ export default function HomeLayout() {
   const { bottom } = useSafeAreaInsets();
   const currentPath = usePathname();
 
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
-  if (!isAuthenticated) {
-    return <Redirect href="/" />;
+  if (!isAuthenticated || !user) {
+    return <Redirect href="/(auth)/login" />;
   }
 
-  const isNewPost = currentPath.includes("/home/new-post");
+  const isComposer =
+    Boolean(currentPath.match(/home\/[a-z0-9_-]+-post/g)) ||
+    currentPath.includes("/home/new-post");
 
   return (
     <VStack className="flex-1 bg-background">
-      <View className={currentPath.includes("/home/new-post") ? "hidden" : "flex"}>
+      <View className={`${isComposer ? "hidden" : "flex"} border-b border-border p-3`}>
         <Logo size="sm" />
       </View>
       <Tabs
         tabBar={({ state, navigation }) => {
-          if (isNewPost) {
+          if (isComposer) {
             return null;
           }
 

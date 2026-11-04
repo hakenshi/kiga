@@ -26,15 +26,15 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import defaultThoughts from "@/lib/data/thoughts.json";
 import { createThoughtFormSchema } from "@/lib/db/zod/zod-schemas";
-import { useNewPostStore } from "@/stores/new-post-store";
+import { useComposer } from "../composer-context";
 
 export default function ThoughtsDrawer() {
   const { top, bottom } = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const thoughts = useNewPostStore((s) => s.thoughts);
-  const toggleThought = useNewPostStore((s) => s.toggleThought);
+  const thoughts = useComposer((s) => s.thoughts);
+  const toggleThought = useComposer((s) => s.toggleThought);
 
   const {
     control,
@@ -99,8 +99,11 @@ export default function ThoughtsDrawer() {
           className="h-full rounded-none px-6 bg-white"
           style={{ paddingTop: top + 12, paddingBottom: bottom + 16 }}
         >
-          <DrawerHeader className="pb-4 items-start justify-between">
-            <VStack space="xs" className="flex-1 pr-2">
+          <DrawerHeader className="pb-4 flex-row items-center gap-3">
+            <DrawerCloseButton className="w-10 h-10 rounded-full bg-[#F2F3F5] items-center justify-center p-0 active:opacity-75">
+              <X size={18} color="#16181D" />
+            </DrawerCloseButton>
+            <VStack space="xs" className="flex-1">
               <Text className="text-[18px] font-heading text-[#16181D]">
                 Pensamentos automáticos
               </Text>
@@ -108,9 +111,6 @@ export default function ThoughtsDrawer() {
                 O que passou pela sua mente neste momento?
               </Text>
             </VStack>
-            <DrawerCloseButton className="w-8 h-8 rounded-full bg-[#F2F3F5] items-center justify-center p-0">
-              <X size={16} color="#5A606B" />
-            </DrawerCloseButton>
           </DrawerHeader>
 
           <VStack
