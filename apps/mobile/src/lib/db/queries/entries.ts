@@ -6,8 +6,11 @@ import {
   entryEmotions,
   entryImages,
   entryReactions,
+  entryReplies,
+  entryReposts,
   entryThoughts,
   journalEntries,
+  type JournalEntryType,
   moods,
   reactions,
   thoughts,
@@ -18,7 +21,7 @@ import type {
   CreateJournalEntryOutput,
   CreateJournalEntryParams,
 } from "../zod/zod-types";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 
 export type { CreateJournalEntryInput, CreateJournalEntryOutput, CreateJournalEntryParams };
 
@@ -43,32 +46,24 @@ const DEFAULT_MOOD_NAMES: Record<number, string> = {
   5: "Muito Bem",
 };
 
+export interface EntryThreadResult {
+  rootEntry: JournalEntryWithRelations;
+  replies: JournalEntryWithRelations[];
+}
+
 export async function createJournalEntry(
   rawParams: CreateJournalEntryInput
 ): Promise<JournalEntryWithRelations> {
   const params: CreateJournalEntryOutput = createJournalEntrySchema.parse(rawParams);
 
-  let moodRow: Mood | null = null;
   if (params.moodId) {
-    const [existingMood] = await db
-      .select()
-      .from(moods)
-      .where(eq(moods.id, params.moodId))
-      .limit(1);
-
-    if (existingMood) {
-      moodRow = existingMood;
-    } else {
-      const [createdMood] = await db
-        .insert(moods)
-        .values({
-          id: params.moodId,
-          name: DEFAULT_MOOD_NAMES[params.moodId] ?? "Neutro",
-          userId: null,
-        })
-        .returning();
-      moodRow = createdMood ?? null;
-    }
+    await db
+      .insert(moods)
+      .values({
+        id: params.moodId,
+        name: DEFAULT_MOOD_NAMES[params.moodId] ?? "Neutro",
+      })
+      .onConflictDoNothing();
   }
 
   const [entry] = await db
@@ -77,7 +72,7 @@ export async function createJournalEntry(
       userId: params.userId,
       moodId: params.moodId ?? null,
       liked: false,
-      entryType: "post",
+      entryType: params.entryType ?? "post",
       content: params.content,
       date: params.date ?? new Date(),
     })
@@ -87,256 +82,176 @@ export async function createJournalEntry(
     throw new Error("Falha ao registrar entry no banco de dados.");
   }
 
-  const insertedEmotions: EntryEmotionWithRelation[] = [];
+  if (params.parentEntryId) {
+    if (params.entryType === "repost") {
+      await db.insert(entryReposts).values({
+        entryId: entry.id,
+        parentEntryId: params.parentEntryId,
+      });
+    } else {
+      const existingReply = await db.query.entryReplies.findFirst({
+        where: eq(entryReplies.entryId, params.parentEntryId),
+      });
+      await db.insert(entryReplies).values({
+        entryId: entry.id,
+        parentEntryId: existingReply ? existingReply.parentEntryId : params.parentEntryId,
+      });
+    }
+  }
+
   if (params.emotions && params.emotions.length > 0) {
-    for (const e of params.emotions) {
-      let emotionRow: Emotion | undefined;
-      if (e.id) {
-        const [found] = await db
-          .select()
-          .from(emotions)
-          .where(eq(emotions.id, e.id))
-          .limit(1);
-        emotionRow = found;
-      } else if (e.name.trim()) {
-        const [existing] = await db
-          .select()
-          .from(emotions)
-          .where(and(eq(emotions.name, e.name.trim()), isNull(emotions.userId)))
-          .limit(1);
-        if (existing) {
-          emotionRow = existing;
-        } else {
-          const [created] = await db
-            .insert(emotions)
-            .values({ name: e.name.trim(), userId: null })
-            .returning();
-          emotionRow = created;
-        }
-      }
-      const emotionId = emotionRow?.id ?? e.id;
-      if (emotionId) {
-        const [piv] = await db
-          .insert(entryEmotions)
-          .values({
-            entryId: entry.id,
-            emotionId,
-          })
-          .returning();
-        if (piv) {
-          insertedEmotions.push({
-            ...piv,
-            emotion:
-              emotionRow ?? {
-                id: emotionId,
-                name: e.name.trim(),
-                userId: null,
-                categoryId: null,
-                orderIndex: 0,
-                deletedAt: null,
-              },
-          });
-        }
-      }
+    const valid = params.emotions.filter((e) => e.id);
+    if (valid.length > 0) {
+      await db
+        .insert(entryEmotions)
+        .values(valid.map((e) => ({ entryId: entry.id, emotionId: e.id! })))
+        .onConflictDoNothing();
     }
   }
 
-  const insertedThoughts: EntryThoughtWithRelation[] = [];
   if (params.thoughts && params.thoughts.length > 0) {
+    const thoughtIds: number[] = [];
     for (const t of params.thoughts) {
-      let thoughtRow: Thought | undefined;
       if (t.id) {
-        const [found] = await db
-          .select()
-          .from(thoughts)
-          .where(eq(thoughts.id, t.id))
-          .limit(1);
-        thoughtRow = found;
-      } else if (t.name.trim()) {
-        const [existing] = await db
-          .select()
-          .from(thoughts)
-          .where(and(eq(thoughts.name, t.name.trim()), isNull(thoughts.userId)))
-          .limit(1);
-        if (existing) {
-          thoughtRow = existing;
+        thoughtIds.push(t.id);
+      } else if (t.name?.trim()) {
+        const [created] = await db
+          .insert(thoughts)
+          .values({ name: t.name.trim() })
+          .onConflictDoNothing()
+          .returning({ id: thoughts.id });
+        if (created?.id) {
+          thoughtIds.push(created.id);
         } else {
-          const [created] = await db
-            .insert(thoughts)
-            .values({ name: t.name.trim(), userId: null })
-            .returning();
-          thoughtRow = created;
-        }
-      }
-      const thoughtsId = thoughtRow?.id ?? t.id;
-      if (thoughtsId) {
-        const [piv] = await db
-          .insert(entryThoughts)
-          .values({
-            entryId: entry.id,
-            thoughtsId,
-          })
-          .returning();
-        if (piv) {
-          insertedThoughts.push({
-            ...piv,
-            thought:
-              thoughtRow ?? {
-                id: thoughtsId,
-                name: t.name.trim(),
-                userId: null,
-                categoryId: null,
-                orderIndex: 0,
-                deletedAt: null,
-              },
-          });
+          const found = await db.query.thoughts.findFirst({ where: eq(thoughts.name, t.name.trim()) });
+          if (found) thoughtIds.push(found.id);
         }
       }
     }
+    if (thoughtIds.length > 0) {
+      await db
+        .insert(entryThoughts)
+        .values(thoughtIds.map((id) => ({ entryId: entry.id, thoughtsId: id })))
+        .onConflictDoNothing();
+    }
   }
 
-  const insertedReactions: EntryReactionWithRelation[] = [];
   if (params.reactions && params.reactions.length > 0) {
-    for (const r of params.reactions) {
-      let reactionRow: Reaction | undefined;
-      if (r.id) {
-        const [found] = await db
-          .select()
-          .from(reactions)
-          .where(eq(reactions.id, r.id))
-          .limit(1);
-        reactionRow = found;
-      } else if (r.name.trim()) {
-        const [existing] = await db
-          .select()
-          .from(reactions)
-          .where(and(eq(reactions.name, r.name.trim()), isNull(reactions.userId)))
-          .limit(1);
-        if (existing) {
-          reactionRow = existing;
-        } else {
-          const [created] = await db
-            .insert(reactions)
-            .values({ name: r.name.trim(), userId: null })
-            .returning();
-          reactionRow = created;
-        }
-      }
-      const reactionId = reactionRow?.id ?? r.id;
-      if (reactionId) {
-        const [piv] = await db
-          .insert(entryReactions)
-          .values({
-            entryId: entry.id,
-            reactionId,
-          })
-          .returning();
-        if (piv) {
-          insertedReactions.push({
-            ...piv,
-            reaction:
-              reactionRow ?? {
-                id: reactionId,
-                name: r.name.trim(),
-                userId: null,
-                categoryId: null,
-                orderIndex: 0,
-                deletedAt: null,
-              },
-          });
-        }
-      }
+    const valid = params.reactions.filter((r) => r.id);
+    if (valid.length > 0) {
+      await db
+        .insert(entryReactions)
+        .values(valid.map((r) => ({ entryId: entry.id, reactionId: r.id! })))
+        .onConflictDoNothing();
     }
   }
 
-  const insertedBehaviors: EntryBehaviorWithRelation[] = [];
   if (params.behaviors && params.behaviors.length > 0) {
+    const behaviorIds: number[] = [];
     for (const b of params.behaviors) {
-      let behaviorRow: Behavior | undefined;
       if (b.id) {
-        const [found] = await db
-          .select()
-          .from(behaviors)
-          .where(eq(behaviors.id, b.id))
-          .limit(1);
-        behaviorRow = found;
+        behaviorIds.push(b.id);
       } else if (b.content?.trim()) {
-        const [existing] = await db
-          .select()
-          .from(behaviors)
-          .where(and(eq(behaviors.content, b.content.trim()), isNull(behaviors.userId)))
-          .limit(1);
-        if (existing) {
-          behaviorRow = existing;
-        } else {
-          const [createdB] = await db
-            .insert(behaviors)
-            .values({
-              userId: null,
-              content: b.content.trim(),
-              icon: b.icon ?? null,
-              orderIndex: Date.now(),
-            })
-            .returning();
-          behaviorRow = createdB;
-        }
+        const [created] = await db
+          .insert(behaviors)
+          .values({ content: b.content.trim(), icon: b.icon ?? null })
+          .returning({ id: behaviors.id });
+        if (created?.id) behaviorIds.push(created.id);
       }
-      const bId = behaviorRow?.id ?? b.id;
-      if (bId) {
-        const [piv] = await db
-          .insert(entryBehaviors)
-          .values({
-            entryId: entry.id,
-            behaviorId: bId,
-          })
-          .returning();
-        if (piv) {
-          insertedBehaviors.push({
-            ...piv,
-            behavior:
-              behaviorRow ?? {
-                id: bId,
-                content: b.content?.trim() ?? null,
-                icon: b.icon ?? null,
-                userId: null,
-                categoryId: null,
-                orderIndex: 0,
-                deletedAt: null,
-                createdAt: new Date(),
-              },
-          });
-        }
-      }
+    }
+    if (behaviorIds.length > 0) {
+      await db
+        .insert(entryBehaviors)
+        .values(behaviorIds.map((id) => ({ entryId: entry.id, behaviorId: id })))
+        .onConflictDoNothing();
     }
   }
 
-  const insertedImages: EntryImage[] = [];
   if (params.images && params.images.length > 0) {
-    for (const imageUrl of params.images) {
-      const trimmedUrl = imageUrl.trim();
-      if (trimmedUrl) {
-        const [createdImg] = await db
-          .insert(entryImages)
-          .values({
-            entryId: entry.id,
-            imageUrl: trimmedUrl,
-          })
-          .returning();
-        if (createdImg) {
-          insertedImages.push(createdImg);
-        }
-      }
+    const uniqueImages = Array.from(new Set(params.images.map((img) => img.trim()).filter(Boolean)));
+    if (uniqueImages.length > 0) {
+      await db.insert(entryImages).values(
+        uniqueImages.map((imageUrl) => ({ entryId: entry.id, imageUrl }))
+      );
     }
   }
+
+  const created = await getJournalEntryById(entry.id);
+  if (!created) {
+    throw new Error("Falha ao carregar relato recém-criado.");
+  }
+
+  return created;
+}
+
+export async function getParentEntry(
+  entryId: number
+): Promise<JournalEntryWithRelations | null> {
+  const replyLink = await db.query.entryReplies.findFirst({
+    where: eq(entryReplies.entryId, entryId),
+  });
+  if (replyLink) {
+    return getJournalEntryById(replyLink.parentEntryId);
+  }
+
+  const repostLink = await db.query.entryReposts.findFirst({
+    where: eq(entryReposts.entryId, entryId),
+  });
+  if (repostLink) {
+    return getJournalEntryById(repostLink.parentEntryId);
+  }
+
+  return null;
+}
+
+export async function getEntryWithThread(
+  entryId: number
+): Promise<EntryThreadResult | null> {
+  const entry = await getJournalEntryById(entryId);
+  if (!entry) return null;
+
+  let rootId = entry.id;
+  if (entry.entryType === "reply") {
+    const parentLink = await db.query.entryReplies.findFirst({
+      where: eq(entryReplies.entryId, entry.id),
+    });
+    if (parentLink) {
+      rootId = parentLink.parentEntryId;
+    }
+  }
+
+  const rootEntry = rootId === entry.id ? entry : await getJournalEntryById(rootId);
+  if (!rootEntry) return null;
+
+  const replyLinks = await db.query.entryReplies.findMany({
+    where: eq(entryReplies.parentEntryId, rootId),
+  });
+
+  const replyEntryIds = replyLinks.map((r) => r.entryId);
+  if (replyEntryIds.length === 0) {
+    return { rootEntry, replies: [] };
+  }
+
+  const allReplies = await db.query.journalEntries.findMany({
+    where: and(
+      inArray(journalEntries.id, replyEntryIds),
+      eq(journalEntries.entryType, "reply"),
+      isNull(journalEntries.deletedAt)
+    ),
+    orderBy: [asc(journalEntries.date), asc(journalEntries.id)],
+    with: {
+      mood: true,
+      entryEmotions: { with: { emotion: true } },
+      entryThoughts: { with: { thought: true } },
+      entryBehaviors: { with: { behavior: true } },
+      entryReactions: { with: { reaction: true } },
+      entryImages: true,
+    },
+  });
 
   return {
-    ...entry,
-    mood: moodRow,
-    entryEmotions: insertedEmotions,
-    entryThoughts: insertedThoughts,
-    entryReactions: insertedReactions,
-    entryBehaviors: insertedBehaviors,
-    entryImages: insertedImages,
+    rootEntry,
+    replies: (allReplies as JournalEntryWithRelations[]) ?? [],
   };
 }
 
@@ -349,9 +264,14 @@ export async function getJournalEntries(
   return db.query.journalEntries.findMany({
     where: and(
       eq(journalEntries.userId, userId),
-      isNull(journalEntries.deletedAt)
+      isNull(journalEntries.deletedAt),
+      or(
+        eq(journalEntries.entryType, "post"),
+        eq(journalEntries.entryType, "repost"),
+        isNull(journalEntries.entryType)
+      )
     ),
-    orderBy: [desc(journalEntries.date), desc(journalEntries.fixed), desc(journalEntries.id)],
+    orderBy: [desc(journalEntries.fixed), desc(journalEntries.date), desc(journalEntries.id)],
     limit,
     offset,
     with: {
@@ -361,6 +281,34 @@ export async function getJournalEntries(
       entryBehaviors: { with: { behavior: true } },
       entryReactions: { with: { reaction: true } },
       entryImages: true,
+      parentRepost: {
+        with: {
+          parentEntry: {
+            with: {
+              mood: true,
+              entryEmotions: { with: { emotion: true } },
+              entryThoughts: { with: { thought: true } },
+              entryBehaviors: { with: { behavior: true } },
+              entryReactions: { with: { reaction: true } },
+              entryImages: true,
+            },
+          },
+        },
+      },
+      parentReply: {
+        with: {
+          parentEntry: {
+            with: {
+              mood: true,
+              entryEmotions: { with: { emotion: true } },
+              entryThoughts: { with: { thought: true } },
+              entryBehaviors: { with: { behavior: true } },
+              entryReactions: { with: { reaction: true } },
+              entryImages: true,
+            },
+          },
+        },
+      },
     },
   });
 }
@@ -380,6 +328,34 @@ export async function getJournalEntryById(
       entryBehaviors: { with: { behavior: true } },
       entryReactions: { with: { reaction: true } },
       entryImages: true,
+      parentRepost: {
+        with: {
+          parentEntry: {
+            with: {
+              mood: true,
+              entryEmotions: { with: { emotion: true } },
+              entryThoughts: { with: { thought: true } },
+              entryBehaviors: { with: { behavior: true } },
+              entryReactions: { with: { reaction: true } },
+              entryImages: true,
+            },
+          },
+        },
+      },
+      parentReply: {
+        with: {
+          parentEntry: {
+            with: {
+              mood: true,
+              entryEmotions: { with: { emotion: true } },
+              entryThoughts: { with: { thought: true } },
+              entryBehaviors: { with: { behavior: true } },
+              entryReactions: { with: { reaction: true } },
+              entryImages: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -392,22 +368,13 @@ export async function updateJournalEntry(
   const { entryId } = rawParams;
 
   if (rawParams.moodId) {
-    const [existingMood] = await db
-      .select()
-      .from(moods)
-      .where(eq(moods.id, rawParams.moodId))
-      .limit(1);
-
-    if (!existingMood) {
-      await db
-        .insert(moods)
-        .values({
-          id: rawParams.moodId,
-          name: DEFAULT_MOOD_NAMES[rawParams.moodId] ?? "Neutro",
-          userId: null,
-        })
-        .onConflictDoNothing();
-    }
+    await db
+      .insert(moods)
+      .values({
+        id: rawParams.moodId,
+        name: DEFAULT_MOOD_NAMES[rawParams.moodId] ?? "Neutro",
+      })
+      .onConflictDoNothing();
   }
 
   await db
@@ -422,200 +389,53 @@ export async function updateJournalEntry(
 
   if (rawParams.emotions !== undefined) {
     await db.delete(entryEmotions).where(eq(entryEmotions.entryId, entryId));
-    const processedEmotionIds = new Set<number>();
-
-    for (const e of rawParams.emotions) {
-      let emotionRow: Emotion | undefined;
-      if (e.id) {
-        const [found] = await db
-          .select()
-          .from(emotions)
-          .where(eq(emotions.id, e.id))
-          .limit(1);
-        emotionRow = found;
-      } else if (e.name.trim()) {
-        const [existing] = await db
-          .select()
-          .from(emotions)
-          .where(and(eq(emotions.name, e.name.trim()), isNull(emotions.userId)))
-          .limit(1);
-        if (existing) {
-          emotionRow = existing;
-        } else {
-          const [created] = await db
-            .insert(emotions)
-            .values({ name: e.name.trim(), userId: null })
-            .returning();
-          emotionRow = created;
-        }
-      }
-
-      const emotionId = emotionRow?.id ?? e.id;
-      if (emotionId && !processedEmotionIds.has(emotionId)) {
-        processedEmotionIds.add(emotionId);
-        await db
-          .insert(entryEmotions)
-          .values({
-            entryId,
-            emotionId,
-          })
-          .onConflictDoNothing();
-      }
+    const valid = rawParams.emotions.filter((e) => e.id);
+    if (valid.length > 0) {
+      await db
+        .insert(entryEmotions)
+        .values(valid.map((e) => ({ entryId, emotionId: e.id! })))
+        .onConflictDoNothing();
     }
   }
 
   if (rawParams.thoughts !== undefined) {
     await db.delete(entryThoughts).where(eq(entryThoughts.entryId, entryId));
-    const processedThoughtIds = new Set<number>();
-
-    for (const t of rawParams.thoughts) {
-      let thoughtRow: Thought | undefined;
-      if (t.id) {
-        const [found] = await db
-          .select()
-          .from(thoughts)
-          .where(eq(thoughts.id, t.id))
-          .limit(1);
-        thoughtRow = found;
-      } else if (t.name.trim()) {
-        const [existing] = await db
-          .select()
-          .from(thoughts)
-          .where(and(eq(thoughts.name, t.name.trim()), isNull(thoughts.userId)))
-          .limit(1);
-        if (existing) {
-          thoughtRow = existing;
-        } else {
-          const [created] = await db
-            .insert(thoughts)
-            .values({ name: t.name.trim(), userId: null })
-            .returning();
-          thoughtRow = created;
-        }
-      }
-
-      const thoughtsId = thoughtRow?.id ?? t.id;
-      if (thoughtsId && !processedThoughtIds.has(thoughtsId)) {
-        processedThoughtIds.add(thoughtsId);
-        await db
-          .insert(entryThoughts)
-          .values({
-            entryId,
-            thoughtsId,
-          })
-          .onConflictDoNothing();
-      }
+    const thoughtIds = rawParams.thoughts.filter((t) => t.id).map((t) => t.id!);
+    if (thoughtIds.length > 0) {
+      await db
+        .insert(entryThoughts)
+        .values(thoughtIds.map((id) => ({ entryId, thoughtsId: id })))
+        .onConflictDoNothing();
     }
   }
 
   if (rawParams.reactions !== undefined) {
     await db.delete(entryReactions).where(eq(entryReactions.entryId, entryId));
-    const processedReactionIds = new Set<number>();
-
-    for (const r of rawParams.reactions) {
-      let reactionRow: Reaction | undefined;
-      if (r.id) {
-        const [found] = await db
-          .select()
-          .from(reactions)
-          .where(eq(reactions.id, r.id))
-          .limit(1);
-        reactionRow = found;
-      } else if (r.name.trim()) {
-        const [existing] = await db
-          .select()
-          .from(reactions)
-          .where(and(eq(reactions.name, r.name.trim()), isNull(reactions.userId)))
-          .limit(1);
-        if (existing) {
-          reactionRow = existing;
-        } else {
-          const [created] = await db
-            .insert(reactions)
-            .values({ name: r.name.trim(), userId: null })
-            .returning();
-          reactionRow = created;
-        }
-      }
-
-      const reactionId = reactionRow?.id ?? r.id;
-      if (reactionId && !processedReactionIds.has(reactionId)) {
-        processedReactionIds.add(reactionId);
-        await db
-          .insert(entryReactions)
-          .values({
-            entryId,
-            reactionId,
-          })
-          .onConflictDoNothing();
-      }
+    const valid = rawParams.reactions.filter((r) => r.id);
+    if (valid.length > 0) {
+      await db
+        .insert(entryReactions)
+        .values(valid.map((r) => ({ entryId, reactionId: r.id! })))
+        .onConflictDoNothing();
     }
   }
 
   if (rawParams.behaviors !== undefined) {
     await db.delete(entryBehaviors).where(eq(entryBehaviors.entryId, entryId));
-    const processedBehaviorIds = new Set<number>();
-
-    for (const b of rawParams.behaviors) {
-      let behaviorRow: Behavior | undefined;
-      if (b.id) {
-        const [found] = await db
-          .select()
-          .from(behaviors)
-          .where(eq(behaviors.id, b.id))
-          .limit(1);
-        behaviorRow = found;
-      } else if (b.content?.trim()) {
-        const [existing] = await db
-          .select()
-          .from(behaviors)
-          .where(and(eq(behaviors.content, b.content.trim()), isNull(behaviors.userId)))
-          .limit(1);
-        if (existing) {
-          behaviorRow = existing;
-        } else {
-          const [createdB] = await db
-            .insert(behaviors)
-            .values({
-              userId: null,
-              content: b.content.trim(),
-              icon: b.icon ?? null,
-              orderIndex: Date.now(),
-            })
-            .returning();
-          behaviorRow = createdB;
-        }
-      }
-
-      const bId = behaviorRow?.id ?? b.id;
-      if (bId && !processedBehaviorIds.has(bId)) {
-        processedBehaviorIds.add(bId);
-        await db
-          .insert(entryBehaviors)
-          .values({
-            entryId,
-            behaviorId: bId,
-          })
-          .onConflictDoNothing();
-      }
+    const valid = rawParams.behaviors.filter((b) => b.id);
+    if (valid.length > 0) {
+      await db
+        .insert(entryBehaviors)
+        .values(valid.map((b) => ({ entryId, behaviorId: b.id! })))
+        .onConflictDoNothing();
     }
   }
 
   if (rawParams.images !== undefined) {
     await db.delete(entryImages).where(eq(entryImages.entryId, entryId));
-    const seenImages = new Set<string>();
-
-    for (const imageUrl of rawParams.images) {
-      const trimmedUrl = imageUrl.trim();
-      if (trimmedUrl && !seenImages.has(trimmedUrl)) {
-        seenImages.add(trimmedUrl);
-        await db
-          .insert(entryImages)
-          .values({
-            entryId,
-            imageUrl: trimmedUrl,
-          });
-      }
+    const unique = Array.from(new Set(rawParams.images.map((img) => img.trim()).filter(Boolean)));
+    if (unique.length > 0) {
+      await db.insert(entryImages).values(unique.map((imageUrl) => ({ entryId, imageUrl })));
     }
   }
 
