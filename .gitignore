@@ -45,6 +45,11 @@ example
 # generated native folders
 /ios
 /android
+apps/mobile/android/
+
+# built binaries
+*.apk
+*.aab
 
 # sqlite databases
 *.db
