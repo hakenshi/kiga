@@ -8,6 +8,20 @@ import { useToastStore } from "@/stores/toast-store";
 
 const PAGE_SIZE = 20;
 
+function sortEntries(entries: JournalEntryWithRelations[]): JournalEntryWithRelations[] {
+  return [...entries].sort((a, b) => {
+    const fixedA = a.fixed ? 1 : 0;
+    const fixedB = b.fixed ? 1 : 0;
+    if (fixedA !== fixedB) return fixedB - fixedA;
+
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    if (dateA !== dateB) return dateB - dateA;
+
+    return b.id - a.id;
+  });
+}
+
 interface JournalEntryState {
   entries: JournalEntryWithRelations[];
   isLoading: boolean;
@@ -71,26 +85,31 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
   },
   addEntry: (newEntry: JournalEntryWithRelations) => {
     set((s) => ({
-      entries: [newEntry, ...s.entries]
-    }))
+      entries: sortEntries([newEntry, ...s.entries.filter((e) => e.id !== newEntry.id)]),
+    }));
   },
   updateEntry: async (entryId, newEntryData) => {
-    const data = journalEntryUpdateSchema.parse(newEntryData)
+    const data = journalEntryUpdateSchema.parse(newEntryData);
     await db
       .update(journalEntries)
       .set(data)
       .where(eq(journalEntries.id, entryId));
 
-    set((s) => ({
-      entries: s.entries.map((entry) =>
+    set((s) => {
+      const updated = s.entries.map((entry) =>
         entry.id === entryId ? { ...entry, ...newEntryData } : entry
-      ),
-    }));
+      );
+      return {
+        entries: newEntryData.fixed !== undefined ? sortEntries(updated) : updated,
+      };
+    });
   },
   replaceEntry: (updatedEntry) => {
     set((s) => ({
-      entries: s.entries.map((entry) =>
-        entry.id === updatedEntry.id ? updatedEntry : entry
+      entries: sortEntries(
+        s.entries.map((entry) =>
+          entry.id === updatedEntry.id ? updatedEntry : entry
+        )
       ),
     }));
   },
