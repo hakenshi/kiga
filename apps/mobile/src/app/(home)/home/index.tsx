@@ -5,22 +5,28 @@ import EntryHeader from "./_components/entry/entry-header";
 import EntryShell from "./_components/entry/entry-shell";
 import { useEntryStore } from "@/stores/journal-store";
 import { useAuthStore } from "@/stores/auth-store";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { Link } from "expo-router";
-import { FaceSlightlySmilingPlus, PlusIcon } from "lucide-react-native";
+import { PlusIcon, Sparkles } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
 
 function EmptyList() {
   return (
-    <VStack className="h-200 flex-1 items-center justify-center" space="xl">
-      <Text>
-        Parece que você não tem nenhum pensamento ainda.
+    <VStack className="py-24 items-center justify-center px-6 gap-3">
+      <View className="w-14 h-14 rounded-full bg-zinc-100 items-center justify-center">
+        <Sparkles size={24} color="#71717A" />
+      </View>
+      <Text className="text-[15px] font-heading text-zinc-900 text-center">
+        Seu diário está em branco
+      </Text>
+      <Text className="text-xs font-subtitle text-zinc-500 text-center max-w-[260px]">
+        Registre como você está se sentindo ou um pensamento que passou pela sua cabeça.
       </Text>
     </VStack>
-  )
+  );
 }
 
 export default function HomePage() {
@@ -40,12 +46,12 @@ export default function HomePage() {
         ListEmptyComponent={<EmptyList />}
         data={entries}
         keyExtractor={(e) => String(e.id)}
-        contentContainerStyle={{ paddingTop: top, paddingBottom: bottom }}
+        contentContainerStyle={{ paddingTop: top, paddingBottom: bottom + 88 }}
         showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         initialNumToRender={20}
         maxToRenderPerBatch={20}
         windowSize={5}
-        showsVerticalScrollIndicator={false}
         onEndReached={() => {
           if (user?.id && hasMore && !isLoading) {
             loadMore(user.id);
@@ -60,7 +66,7 @@ export default function HomePage() {
           ) : null
         }
         renderItem={({ item }) => (
-          <EntryShell entryId={item.id}>
+          <EntryShell entry={item} entryId={item.id}>
             <EntryHeader fixed={item.fixed} entry={item} liked={item.liked} entryId={item.id} />
             <EntryBody entry={item} />
             <EntryBottom entry={item} entryId={item.id} liked={item.liked} />

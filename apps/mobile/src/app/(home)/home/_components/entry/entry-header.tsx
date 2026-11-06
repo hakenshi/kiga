@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import {
   Angry,
   EllipsisVerticalIcon,
+  Eye,
   Frown,
   HeartIcon,
   Laugh,
@@ -33,6 +34,7 @@ import {
 import type { LucideIcon } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
+import { RepostDrawer } from "./repost-drawer";
 
 interface Props {
   entry?: JournalEntryWithRelations;
@@ -41,75 +43,7 @@ interface Props {
   fixed: boolean
 }
 
-interface MoodStyleConfig {
-  label: string;
-  Icon: LucideIcon;
-  bg: string;
-  border: string;
-  color: string;
-}
-
-const MOOD_BY_ID: Record<number, MoodStyleConfig> = {
-  1: {
-    label: "Muito Mal",
-    Icon: Angry,
-    bg: "#FEF2F2",
-    border: "#FECACA",
-    color: "#B91C1C",
-  },
-  2: {
-    label: "Mal",
-    Icon: Frown,
-    bg: "#FFF7ED",
-    border: "#FED7AA",
-    color: "#C2410C",
-  },
-  3: {
-    label: "Neutro",
-    Icon: Meh,
-    bg: "#F4F4F5",
-    border: "#E4E4E7",
-    color: "#52525B",
-  },
-  4: {
-    label: "Bem",
-    Icon: Smile,
-    bg: "#F0FDF4",
-    border: "#BBF7D0",
-    color: "#15803D",
-  },
-  5: {
-    label: "Muito Bem",
-    Icon: Laugh,
-    bg: "#ECFDF5",
-    border: "#A7F3D0",
-    color: "#047857",
-  },
-};
-
-function resolveMoodConfig(entry?: JournalEntryWithRelations): MoodStyleConfig | null {
-  const moodId = entry?.moodId ?? entry?.mood?.id;
-  const moodName = entry?.mood?.name?.trim();
-
-  if (moodId && MOOD_BY_ID[moodId]) {
-    const base = MOOD_BY_ID[moodId];
-    return {
-      ...base,
-      label: moodName || base.label,
-    };
-  }
-
-  if (moodName) {
-    const lower = moodName.toLowerCase();
-    if (lower.includes("muito mal")) return { ...MOOD_BY_ID[1], label: moodName };
-    if (lower.includes("mal")) return { ...MOOD_BY_ID[2], label: moodName };
-    if (lower.includes("muito bem")) return { ...MOOD_BY_ID[5], label: moodName };
-    if (lower.includes("bem")) return { ...MOOD_BY_ID[4], label: moodName };
-    return { ...MOOD_BY_ID[3], label: moodName };
-  }
-
-  return null;
-}
+import { resolveMoodConfig, type MoodStyleConfig } from "@/lib/mood-utils";
 
 function formatEntryDate(rawDate?: Date | string | number | null): string {
   if (!rawDate) return "";
@@ -145,14 +79,27 @@ export default function EntryHeader({ entry, entryId, liked, fixed = false }: Pr
   const updateEntry = useEntryStore((e) => e.updateEntry);
   const startEditing = useEditPostStore((s) => s.startEditing);
   const [open, setOpen] = useState(false);
+  const [repostOpen, setRepostOpen] = useState(false);
 
-  const moodConfig = resolveMoodConfig(entry);
-  const formattedDate = formatEntryDate(entry?.date ?? entry?.createdAt);
+  const isPureRepost = entry?.entryType === "repost" && !entry?.content?.trim();
+  const parentEntry = (entry?.parentRepost as any)?.parentEntry || (entry?.parentReply as any)?.parentEntry;
+  const displayEntry = isPureRepost && parentEntry ? parentEntry : entry;
+
+  const moodConfig = resolveMoodConfig(displayEntry);
+  const formattedDate = formatEntryDate(displayEntry?.date ?? displayEntry?.createdAt);
 
   const router = useRouter();
 
   return (
     <>
+      {entry?.entryType === "repost" && (
+        <HStack className="items-center gap-1.5 pb-0.5">
+          <RefreshCcw size={12} color="#71717A" />
+          <Text className="text-[11.5px] font-subtitle-medium text-zinc-500">
+            Revisitou um momento
+          </Text>
+        </HStack>
+      )}
 
       {fixed && (
         <HStack className="justify-end" space="xs">
@@ -165,9 +112,8 @@ export default function EntryHeader({ entry, entryId, liked, fixed = false }: Pr
       <HStack className="justify-between items-start" space="md">
         <HStack space="sm" className="items-center flex-1 pr-2">
           <Avatar className="bg-[#F4F4F5] border border-[#E6E8EC]">
-            <AvatarImage />
             <AvatarFallbackText className="text-[#111318] font-heading">
-              {user?.firstName}
+              {user?.firstName?.charAt(0) || "U"}
             </AvatarFallbackText>
           </Avatar>
           <VStack className="flex-1">
@@ -176,23 +122,25 @@ export default function EntryHeader({ entry, entryId, liked, fixed = false }: Pr
                 className="text-[15px] font-heading text-[#111318]"
                 numberOfLines={1}
               >
-                {user?.firstName} {user?.secondName}
+                {`${user?.firstName ?? ""} ${user?.secondName ?? ""}`.trim() || "Você"}
               </Text>
-
             </HStack>
             <HStack className="items-center" space="xs">
-              <Text className="text-[13px] font-subtitle text-[#68707C]">
-                @{user?.username}
-              </Text>
+              {user?.username ? (
+                <Text className="text-[13px] font-subtitle text-[#68707C]">
+                  @{user.username}
+                </Text>
+              ) : null}
               {formattedDate ? (
                 <>
-                  <Text className="text-xs font-subtitle text-[#9AA0AA]">·</Text>
+                  {user?.username ? (
+                    <Text className="text-xs font-subtitle text-[#9AA0AA]">·</Text>
+                  ) : null}
                   <Text className="text-xs font-subtitle text-[#8E95A2]">
                     {formattedDate}
                   </Text>
                 </>
               ) : null}
-
             </HStack>
           </VStack>
         </HStack>
@@ -235,17 +183,37 @@ export default function EntryHeader({ entry, entryId, liked, fixed = false }: Pr
                 </DrawerCloseButton>
               </DrawerHeader>
               <DrawerBody className="gap-1 pb-6">
-                <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
-                  <PencilIcon size={20} color="gray" />
+                <Pressable
+                  onPress={() => {
+                    setOpen(false);
+                    const targetId = isPureRepost && parentEntry ? parentEntry.id : entryId;
+                    router.push(`/(home)/home/view-post/${targetId}`);
+                  }}
+                  className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
+                >
+                  <Eye size={20} color="gray" />
                   <Text className="font-semibold text-gray-900">
                     Visualizar pensamento
                   </Text>
                 </Pressable>
-                <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <Pressable
+                  onPress={() => {
+                    setOpen(false);
+                    const targetId = isPureRepost && parentEntry ? parentEntry.id : entryId;
+                    router.push(`/(home)/home/reply-post/${targetId}`);
+                  }}
+                  className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
+                >
                   <ReplyIcon size={20} color="gray" />
                   <Text className="font-semibold text-gray-900">Responder</Text>
                 </Pressable>
-                <Pressable className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+                <Pressable
+                  onPress={() => {
+                    setOpen(false);
+                    setRepostOpen(true);
+                  }}
+                  className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
+                >
                   <RefreshCcw size={20} color="gray" />
                   <Text className="font-semibold text-gray-900">Republicar</Text>
                 </Pressable>
@@ -299,5 +267,10 @@ export default function EntryHeader({ entry, entryId, liked, fixed = false }: Pr
         )}
       </HStack>
 
+      <RepostDrawer
+        isOpen={repostOpen}
+        onClose={() => setRepostOpen(false)}
+        entry={entry ?? ({ id: entryId } as any)}
+      />
     </>);
 }

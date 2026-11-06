@@ -1,10 +1,13 @@
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { getBehaviorIcon } from "@/lib/behavior-icons";
+import { getParentEntry } from "@/lib/db/entries";
 import { Activity, Brain, ChevronDown, ChevronUp, Drama, Footprints } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { ImageCarousel } from "@/components/image-carousel";
+import { useRouter } from "expo-router";
+import { QuotedEntryCard } from "./quoted-entry-card";
 
 interface Props {
   entry?: JournalEntryWithRelations;
@@ -44,18 +47,38 @@ function BehaviorReportBlock({ text }: { text: string }) {
 }
 
 export default function EntryBody({ entry, content: contentProp }: Props) {
-  const content = entry?.content ?? contentProp ?? "";
-  const images = entry?.entryImages ?? [];
-  const emotions = (entry?.entryEmotions ?? [])
+  const router = useRouter();
+  const [lazyParent, setLazyParent] = useState<JournalEntryWithRelations | null>(null);
+
+  const preloadedQuoted =
+    (entry?.parentRepost as any)?.parentEntry ||
+    (entry?.parentReply as any)?.parentEntry;
+
+  const quotedEntry = (preloadedQuoted || lazyParent) as JournalEntryWithRelations | undefined;
+
+  useEffect(() => {
+    if (entry?.entryType === "repost" && !preloadedQuoted && entry?.id && !lazyParent) {
+      getParentEntry(entry.id).then((p) => {
+        if (p) setLazyParent(p);
+      });
+    }
+  }, [entry?.id, entry?.entryType, preloadedQuoted, lazyParent]);
+
+  const isPureRepost = entry?.entryType === "repost" && !entry?.content?.trim();
+  const sourceEntry = (isPureRepost && quotedEntry) ? quotedEntry : entry;
+
+  const content = sourceEntry?.content ?? contentProp ?? "";
+  const images = sourceEntry?.entryImages ?? [];
+  const emotions = (sourceEntry?.entryEmotions ?? [])
     .map((item) => item.emotion)
     .filter((em): em is Emotion => Boolean(em?.name));
-  const thoughts = (entry?.entryThoughts ?? [])
+  const thoughts = (sourceEntry?.entryThoughts ?? [])
     .map((item) => item.thought)
     .filter((th): th is Thought => Boolean(th?.name));
-  const reactions = (entry?.entryReactions ?? [])
+  const reactions = (sourceEntry?.entryReactions ?? [])
     .map((item) => item.reaction)
     .filter((re): re is Reaction => Boolean(re?.name));
-  const behaviors = (entry?.entryBehaviors ?? [])
+  const behaviors = (sourceEntry?.entryBehaviors ?? [])
     .map((item) => item.behavior)
     .filter((be): be is Behavior => Boolean(be?.content));
 
@@ -251,7 +274,6 @@ export default function EntryBody({ entry, content: contentProp }: Props) {
                 </View>
               )}
 
-              {/* Botão para recolher de volta para as pílulas de resumo */}
               {isCrowded && expandedTags && (
                 <Pressable
                   onPress={() => setExpandedTags(false)}
@@ -267,6 +289,8 @@ export default function EntryBody({ entry, content: contentProp }: Props) {
           )}
         </VStack>
       )}
+
+      {!isPureRepost && quotedEntry && <QuotedEntryCard entry={quotedEntry} />}
     </VStack>
   );
 }
