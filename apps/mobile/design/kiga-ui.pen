@@ -33321,6 +33321,1300 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "P4HzTE",
+      "x": 3540,
+      "y": 4550,
+      "name": "29 / Thread com Múltiplas Reflexões (Linha do Tempo TCC)",
+      "clip": true,
+      "width": 390,
+      "height": 1220,
+      "fill": "#FFFFFF",
+      "cornerRadius": 36,
+      "stroke": "#E4E4E7",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "justifyContent": "space_between",
+      "children": [
+        {
+          "type": "frame",
+          "id": "WgmkS",
+          "name": "Scroll Content Area",
+          "width": "fill_container",
+          "layout": "vertical",
+          "children": [
+            {
+              "id": "JhlCT",
+              "type": "ref",
+              "ref": "S6dORx",
+              "name": "Status Bar",
+              "width": "fill_container",
+              "descendants": {
+                "W0ASrH": {
+                  "content": "10:37"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "EoZkz",
+              "name": "Detail Navigation Bar",
+              "width": "fill_container",
+              "height": 54,
+              "fill": "#FFFFFF",
+              "stroke": "#E6E8EC",
+              "strokeWidth": {
+                "bottom": 1
+              },
+              "padding": [
+                0,
+                16
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hPhvd",
+                  "name": "Left Back & Title",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "O9sCkZ",
+                      "name": "Back Button",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "#F4F4F5",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "n9NNjI",
+                          "name": "Arrow Left",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "arrow-left",
+                          "library": "lucide",
+                          "fill": "#18181B"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rY5p2",
+                      "name": "Title Stack",
+                      "layout": "vertical",
+                      "gap": 1,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "L1WCuO",
+                          "name": "Page Title",
+                          "fill": "#18181B",
+                          "content": "Pensamento & Thread",
+                          "fontFamily": "Plus Jakarta Sans",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ijNAf",
+                          "name": "Sub Context",
+                          "fill": "#71717A",
+                          "content": "3 reflexões registradas",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "OpsBd",
+                  "name": "Right Actions",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Hu4AU",
+                      "name": "Options Button",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "#F4F4F5",
+                      "cornerRadius": 999,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "muv2j",
+                          "name": "More Icon",
+                          "width": 18,
+                          "height": 18,
+                          "icon": "ellipsis",
+                          "library": "lucide",
+                          "fill": "#18181B"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UeO4H",
+              "name": "Focal Entry Section (Raiz)",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "stroke": "#E6E8EC",
+              "strokeWidth": {
+                "bottom": 1
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                16,
+                16,
+                14,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LsDcR",
+                  "name": "Author Row",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "MqfTj",
+                      "name": "Author Left",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "e8zZbR",
+                          "name": "Author Avatar",
+                          "width": 40,
+                          "height": 40,
+                          "fill": "#F4F4F5",
+                          "cornerRadius": 999,
+                          "stroke": "#E6E8EC",
+                          "strokeWidth": 1,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ENctT",
+                              "name": "Initial",
+                              "fill": "#18181B",
+                              "content": "F",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "lb7nN",
+                          "name": "Author Meta",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "l5081y",
+                              "name": "Author Name",
+                              "fill": "#18181B",
+                              "content": "Felipe Kafka Dias",
+                              "fontFamily": "Plus Jakarta Sans",
+                              "fontSize": 14,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "tYAKN",
+                              "name": "Handle & Time",
+                              "fill": "#71717A",
+                              "content": "@yoru · Terça-feira · 10:30",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HEqC8",
+                      "name": "Mood Badge",
+                      "fill": "#FEF2F2",
+                      "cornerRadius": 999,
+                      "stroke": "#FECACA",
+                      "strokeWidth": 1,
+                      "gap": 5,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "qUk3f",
+                          "name": "Mood Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "angry",
+                          "library": "lucide",
+                          "fill": "#B91C1C"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ssxZo",
+                          "name": "Mood Label",
+                          "fill": "#B91C1C",
+                          "content": "Muito Mal",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "aP29l",
+                  "name": "Focal Body Text",
+                  "fill": "#18181B",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Vou apresentar o projeto hoje para a diretoria e sinto que não vou dar conta. Se eu gaguejar ou travar, vai ser o fim da minha carreira aqui.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "h6E78h",
+                  "name": "Focal Tags Row",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "HheM1",
+                      "name": "Thought Chip",
+                      "fill": "#F0ECFA",
+                      "cornerRadius": 999,
+                      "stroke": "#DFD6F5",
+                      "strokeWidth": 1,
+                      "gap": 5,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "mRyhp",
+                          "name": "Brain Icon",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "brain",
+                          "library": "lucide",
+                          "fill": "#4B3B8F"
+                        },
+                        {
+                          "type": "text",
+                          "id": "DnDTj",
+                          "name": "Chip Text",
+                          "fill": "#4B3B8F",
+                          "content": "“Não vou dar conta”",
+                          "fontFamily": "Inter",
+                          "fontSize": 11.5,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "aGdtb",
+                      "name": "Emotion Chip",
+                      "fill": "#E8F1FB",
+                      "cornerRadius": 999,
+                      "stroke": "#D0E3F7",
+                      "strokeWidth": 1,
+                      "gap": 5,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "aCrkg",
+                          "name": "Drama Icon",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "drama",
+                          "library": "lucide",
+                          "fill": "#1E4E8C"
+                        },
+                        {
+                          "type": "text",
+                          "id": "aAPwT",
+                          "name": "Chip Text",
+                          "fill": "#1E4E8C",
+                          "content": "Ansiedade",
+                          "fontFamily": "Inter",
+                          "fontSize": 11.5,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p12KIS",
+                      "name": "Reaction Chip",
+                      "fill": "#FDF3E2",
+                      "cornerRadius": 999,
+                      "stroke": "#F7E3BE",
+                      "strokeWidth": 1,
+                      "gap": 5,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "X95hM4",
+                          "name": "Activity Icon",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "activity",
+                          "library": "lucide",
+                          "fill": "#8A5A12"
+                        },
+                        {
+                          "type": "text",
+                          "id": "sBj4c",
+                          "name": "Chip Text",
+                          "fill": "#8A5A12",
+                          "content": "Taquicardia",
+                          "fontFamily": "Inter",
+                          "fontSize": 11.5,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "I6osyk",
+                  "name": "Focal Actions Bar",
+                  "width": "fill_container",
+                  "padding": [
+                    4,
+                    0,
+                    0,
+                    0
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "GzrKv",
+                      "name": "Buttons Row",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "UHfuB",
+                          "name": "Btn Continuar",
+                          "fill": "#18181B",
+                          "cornerRadius": 999,
+                          "gap": 5,
+                          "padding": [
+                            6,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "D4vsLu",
+                              "name": "Icon",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "corner-down-right",
+                              "library": "lucide",
+                              "fill": "#FFFFFF"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Y5oWl",
+                              "name": "Label",
+                              "fill": "#FFFFFF",
+                              "content": "Continuar",
+                              "fontFamily": "Inter",
+                              "fontSize": 11.5,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "u0LVo",
+                          "name": "Btn Revisitar",
+                          "fill": "#F4F4F5",
+                          "cornerRadius": 999,
+                          "gap": 5,
+                          "padding": [
+                            6,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Rs7lW",
+                              "name": "Icon",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "refresh-cw",
+                              "library": "lucide",
+                              "fill": "#18181B"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dT2cl",
+                              "name": "Label",
+                              "fill": "#18181B",
+                              "content": "Revisitar",
+                              "fontFamily": "Inter",
+                              "fontSize": 11.5,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "AeEod",
+                      "name": "Time Stamp",
+                      "fill": "#A1A1AA",
+                      "content": "10:30 · 4 nov",
+                      "fontFamily": "Inter",
+                      "fontSize": 11.5,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tOJxH",
+              "name": "Timeline Section",
+              "width": "fill_container",
+              "fill": "#FBFBFC",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "VAztE",
+                  "name": "Timeline Header Row",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Tbi6h",
+                      "name": "Timeline Title",
+                      "fill": "#18181B",
+                      "content": "Linha do tempo das reflexões (3)",
+                      "fontFamily": "Plus Jakarta Sans",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "V1lheq",
+                      "name": "Timeline Span",
+                      "fill": "#15803D",
+                      "content": "3 dias de desdobramento",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "csap7",
+                  "name": "Step Row 1",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "xIhe6",
+                      "name": "Spine Column",
+                      "width": 24,
+                      "layout": "vertical",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "vpV2O",
+                          "name": "Step Node",
+                          "width": 24,
+                          "height": 24,
+                          "fill": "#18181B",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cjfUX",
+                              "name": "Step Num",
+                              "fill": "#FFFFFF",
+                              "content": "1",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "jIHXM",
+                          "name": "Connector Line",
+                          "fill": "#E4E4E7",
+                          "width": 2,
+                          "height": 160
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "edF3T",
+                      "name": "Step Card Box",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": "#E6E8EC",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "OnQHh",
+                          "name": "Card Header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "J9nGzB",
+                              "name": "Delta Label",
+                              "fill": "#52525B",
+                              "content": "+2h 15m depois · Terça 12:45",
+                              "fontFamily": "Inter",
+                              "fontSize": 11.5,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "HqB3q",
+                              "name": "Step Mood Pill",
+                              "fill": "#F0FDF4",
+                              "cornerRadius": 999,
+                              "stroke": "#BBF7D0",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "Z54Pz",
+                                  "name": "Mood Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "smile",
+                                  "library": "lucide",
+                                  "fill": "#15803D"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "NNGZq",
+                                  "name": "Mood Text",
+                                  "fill": "#15803D",
+                                  "content": "Alívio",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "lSU4R",
+                          "name": "Step Body Text",
+                          "fill": "#27272A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Acabei de sair da apresentação. Minha voz tremeu nos primeiros 30 segundos, mas engrenei. Ninguém me julgou e o feedback foi super positivo.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "C2PF8",
+                          "name": "Step Chips Row",
+                          "width": "fill_container",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "OakeZ",
+                              "name": "Chip Alívio",
+                              "fill": "#E8F1FB",
+                              "cornerRadius": 999,
+                              "stroke": "#D0E3F7",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "kXn1f",
+                                  "name": "Chip Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "drama",
+                                  "library": "lucide",
+                                  "fill": "#1E4E8C"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Vf5TF",
+                                  "name": "Chip Text",
+                                  "fill": "#1E4E8C",
+                                  "content": "Alívio",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "AvPxx",
+                              "name": "Chip Apresentar sem fugir",
+                              "fill": "#EAF6F0",
+                              "cornerRadius": 999,
+                              "stroke": "#CBEAD9",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "ySkaA",
+                                  "name": "Chip Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "footprints",
+                                  "library": "lucide",
+                                  "fill": "#166534"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "djHcr",
+                                  "name": "Chip Text",
+                                  "fill": "#166534",
+                                  "content": "Apresentar sem fugir",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "z3gB1",
+                  "name": "Step Row 2",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Hpaiv",
+                      "name": "Spine Column",
+                      "width": 24,
+                      "layout": "vertical",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Edz0w",
+                          "name": "Step Node",
+                          "width": 24,
+                          "height": 24,
+                          "fill": "#18181B",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "SlGcG",
+                              "name": "Step Num",
+                              "fill": "#FFFFFF",
+                              "content": "2",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "tlnSg",
+                          "name": "Connector Line",
+                          "fill": "#E4E4E7",
+                          "width": 2,
+                          "height": 160
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "OVaYO",
+                      "name": "Step Card Box",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": "#E6E8EC",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "homtG",
+                          "name": "Card Header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cAWF0",
+                              "name": "Delta Label",
+                              "fill": "#52525B",
+                              "content": "+10h 40m depois · Terça 21:10",
+                              "fontFamily": "Inter",
+                              "fontSize": 11.5,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "SGZZG",
+                              "name": "Step Mood Pill",
+                              "fill": "#ECFDF5",
+                              "cornerRadius": 999,
+                              "stroke": "#A7F3D0",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "w4DCDv",
+                                  "name": "Mood Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "smile",
+                                  "library": "lucide",
+                                  "fill": "#047857"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Yfk4S",
+                                  "name": "Mood Text",
+                                  "fill": "#047857",
+                                  "content": "Bem",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "bWaKI",
+                          "name": "Step Body Text",
+                          "fill": "#27272A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Relendo com calma: gastei 3 dias em pânico sofrendo por algo que durou 20 minutos e correu bem. É a 4ª vez que caio nessa armadilha mental.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "VreKs",
+                          "name": "Step Chips Row",
+                          "width": "fill_container",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "H9UlJ6",
+                              "name": "Chip “Superestimei o perigo”",
+                              "fill": "#F0ECFA",
+                              "cornerRadius": 999,
+                              "stroke": "#DFD6F5",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "e7TeX",
+                                  "name": "Chip Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "brain",
+                                  "library": "lucide",
+                                  "fill": "#4B3B8F"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "qQnBQ",
+                                  "name": "Chip Text",
+                                  "fill": "#4B3B8F",
+                                  "content": "“Superestimei o perigo”",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "seG9S",
+                              "name": "Chip Tranquilidade",
+                              "fill": "#E8F1FB",
+                              "cornerRadius": 999,
+                              "stroke": "#D0E3F7",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "bxZQw",
+                                  "name": "Chip Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "drama",
+                                  "library": "lucide",
+                                  "fill": "#1E4E8C"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "yqUDq",
+                                  "name": "Chip Text",
+                                  "fill": "#1E4E8C",
+                                  "content": "Tranquilidade",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UBrSA",
+                  "name": "Step Row 3",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "N5BXf9",
+                      "name": "Spine Column",
+                      "width": 24,
+                      "layout": "vertical",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "k69J5",
+                          "name": "Step Node",
+                          "width": 24,
+                          "height": 24,
+                          "fill": "#18181B",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "j7zQgV",
+                              "name": "Step Num",
+                              "fill": "#FFFFFF",
+                              "content": "3",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "A6gVe",
+                      "name": "Step Card Box",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 16,
+                      "stroke": "#E6E8EC",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "H08BqB",
+                          "name": "Card Header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Tipah",
+                              "name": "Delta Label",
+                              "fill": "#52525B",
+                              "content": "3 dias depois · Sexta 16:30",
+                              "fontFamily": "Inter",
+                              "fontSize": 11.5,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "VJMCg",
+                              "name": "Step Mood Pill",
+                              "fill": "#ECFDF5",
+                              "cornerRadius": 999,
+                              "stroke": "#A7F3D0",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "s6BoJG",
+                                  "name": "Mood Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "laugh",
+                                  "library": "lucide",
+                                  "fill": "#047857"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "JOkZH",
+                                  "name": "Mood Text",
+                                  "fill": "#047857",
+                                  "content": "Muito Bem",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "OrG4m",
+                          "name": "Step Body Text",
+                          "fill": "#27272A",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "O cliente aprovou o projeto hoje sem nenhuma alteração. A catástrofe que minha cabeça inventou na terça de manhã nunca existiu. Guardando de prova.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "o2GFrq",
+                          "name": "Step Chips Row",
+                          "width": "fill_container",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "bO3HR",
+                              "name": "Chip “Fato vs Pensamento”",
+                              "fill": "#F0ECFA",
+                              "cornerRadius": 999,
+                              "stroke": "#DFD6F5",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "XtU2h",
+                                  "name": "Chip Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "brain",
+                                  "library": "lucide",
+                                  "fill": "#4B3B8F"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "yfS4k",
+                                  "name": "Chip Text",
+                                  "fill": "#4B3B8F",
+                                  "content": "“Fato vs Pensamento”",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "VXGF8",
+                              "name": "Chip Orgulho",
+                              "fill": "#E8F1FB",
+                              "cornerRadius": 999,
+                              "stroke": "#D0E3F7",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "w77dV",
+                                  "name": "Chip Icon",
+                                  "width": 11,
+                                  "height": 11,
+                                  "icon": "drama",
+                                  "library": "lucide",
+                                  "fill": "#1E4E8C"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "fJqRC",
+                                  "name": "Chip Text",
+                                  "fill": "#1E4E8C",
+                                  "content": "Orgulho",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10.5,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "aWfRx",
+          "name": "Bottom Quick Reply Bar",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "stroke": "#E6E8EC",
+          "strokeWidth": {
+            "top": 1
+          },
+          "layout": "vertical",
+          "gap": 6,
+          "padding": [
+            10,
+            16,
+            8,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "t4OgD",
+              "name": "Input Row",
+              "width": "fill_container",
+              "fill": "#F4F4F5",
+              "cornerRadius": 999,
+              "stroke": "#E6E8EC",
+              "strokeWidth": 1,
+              "gap": 8,
+              "padding": [
+                8,
+                14
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "IACDA",
+                  "name": "Placeholder",
+                  "fill": "#8E95A2",
+                  "content": "Continuar esta reflexão no tempo...",
+                  "fontFamily": "Inter",
+                  "fontSize": 12.5,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "csFKT",
+                  "name": "Send Icon Button",
+                  "width": 28,
+                  "height": 28,
+                  "fill": "#18181B",
+                  "cornerRadius": 999,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ASQAj",
+                      "name": "Send Icon",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "arrow-up",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
