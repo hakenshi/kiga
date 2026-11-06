@@ -21,6 +21,10 @@ import type {
   entryReactionSelectSchema,
   entryReactionWithRelationSchema,
   entryReactionItemSchema,
+  entryReplyInsertSchema,
+  entryReplySelectSchema,
+  entryRepostInsertSchema,
+  entryRepostSelectSchema,
   entryThoughtSelectSchema,
   entryThoughtWithRelationSchema,
   entryThoughtItemSchema,
@@ -87,6 +91,16 @@ declare global {
   type EntryReaction = z.infer<typeof entryReactionSelectSchema>;
   type EntryBehavior = z.infer<typeof entryBehaviorSelectSchema>;
   type EntryImage = z.infer<typeof entryImageSelectSchema>;
+  type EntryReply = z.infer<typeof entryReplySelectSchema>;
+  type EntryReplyInsert = z.infer<typeof entryReplyInsertSchema>;
+  type EntryReplyWithRelation = EntryReply & {
+    parentEntry?: JournalEntryWithRelations | null;
+  };
+  type EntryRepost = z.infer<typeof entryRepostSelectSchema>;
+  type EntryRepostInsert = z.infer<typeof entryRepostInsertSchema>;
+  type EntryRepostWithRelation = EntryRepost & {
+    parentEntry?: JournalEntryWithRelations | null;
+  };
 
   type EntryEmotionWithRelation = z.infer<typeof entryEmotionWithRelationSchema>;
   type EntryThoughtWithRelation = z.infer<typeof entryThoughtWithRelationSchema>;
@@ -198,6 +212,8 @@ export type {
   EntryReaction,
   EntryBehavior,
   EntryImage,
+  EntryReply,
+  EntryReplyInsert,
   EntryEmotionWithRelation,
   EntryThoughtWithRelation,
   EntryReactionWithRelation,

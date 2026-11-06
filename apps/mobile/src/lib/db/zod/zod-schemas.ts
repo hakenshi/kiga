@@ -7,6 +7,8 @@ import {
   entryEmotions,
   entryImages,
   entryReactions,
+  entryReplies,
+  entryReposts,
   entryThoughts,
   genderEnum,
   journalEntries,
@@ -41,6 +43,10 @@ export const entryThoughtSelectSchema = createSelectSchema(entryThoughts);
 export const entryReactionSelectSchema = createSelectSchema(entryReactions);
 export const entryBehaviorSelectSchema = createSelectSchema(entryBehaviors);
 export const entryImageSelectSchema = createSelectSchema(entryImages);
+export const entryReplySelectSchema = createSelectSchema(entryReplies);
+export const entryReplyInsertSchema = createInsertSchema(entryReplies);
+export const entryRepostSelectSchema = createSelectSchema(entryReposts);
+export const entryRepostInsertSchema = createInsertSchema(entryReposts);
 
 // ─── 2. TABELAS BASE (INSERT SCHEMAS VIA DRIZZLE-ZOD) ─────────────────────
 export const userInsertBaseSchema = createInsertSchema(users, {
@@ -130,6 +136,14 @@ export const entryBehaviorWithRelationSchema = entryBehaviorSelectSchema.extend(
   behavior: behaviorSelectSchema.optional(),
 });
 
+export const entryReplyWithRelationSchema = entryReplySelectSchema.extend({
+  parentEntry: z.custom<any>().nullable().optional(),
+});
+
+export const entryRepostWithRelationSchema = entryRepostSelectSchema.extend({
+  parentEntry: z.custom<any>().nullable().optional(),
+});
+
 // Entry completo com todos os relacionamentos filhos
 export const journalEntryWithRelationsSchema = journalEntrySelectSchema.extend({
   mood: moodSelectSchema.nullable().optional(),
@@ -138,6 +152,10 @@ export const journalEntryWithRelationsSchema = journalEntrySelectSchema.extend({
   entryReactions: z.array(entryReactionWithRelationSchema).optional(),
   entryBehaviors: z.array(entryBehaviorWithRelationSchema).optional(),
   entryImages: z.array(entryImageSelectSchema).optional(),
+  parentReply: entryReplyWithRelationSchema.nullable().optional(),
+  replies: z.array(entryReplySelectSchema).optional(),
+  parentRepost: entryRepostWithRelationSchema.nullable().optional(),
+  reposts: z.array(entryRepostSelectSchema).optional(),
 });
 
 // Categoria com itens relacionados
@@ -322,21 +340,34 @@ export const entryBehaviorItemSchema = behaviorInsertSchema
 // ─── 6. RELATO DO DIÁRIO (NOVA ENTRY / PERSISTÊNCIA VIA DRIZZLE-ZOD) ──────
 export const newEntrySchema = journalEntryInsertSchema
   .pick({
-    content: true,
     moodId: true,
     entryType: true,
   })
   .extend({
+    content: z
+      .string()
+      .default("")
+      .transform((s) => s.trim()),
     emotions: z.array(entryEmotionItemSchema).default([]),
     thoughts: z.array(entryThoughtItemSchema).default([]),
     reactions: z.array(entryReactionItemSchema).default([]),
     behaviors: z.array(entryBehaviorItemSchema).default([]),
     images: z.array(entryImageInsertSchema.shape.imageUrl).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.entryType !== "repost" && (!data.content || data.content.trim().length === 0)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["content"],
+        message: "O conteúdo do relato não pode ficar em branco",
+      });
+    }
   });
 
 export const createJournalEntrySchema = newEntrySchema.extend({
   userId: journalEntryInsertSchema.shape.userId,
   date: journalEntryInsertSchema.shape.date.optional(),
+  parentEntryId: z.number().optional(),
 });
 
 export const journalEntryUpdateSchema = journalEntryInsertSchema.partial();

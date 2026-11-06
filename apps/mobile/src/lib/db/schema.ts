@@ -1,5 +1,4 @@
 import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
-import { id } from "zod/v4/locales";
 
 export const genderEnum = ["male", "female", "non_binary", "other", "prefer_not_to_say"] as const;
 export type Gender = (typeof genderEnum)[number];
@@ -139,4 +138,11 @@ export const entryBehaviors = sqliteTable("entry_behaviors", {
 export const entryReplies = sqliteTable("entry_replies", {
   id: integer().primaryKey({ autoIncrement: true }),
   entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
-})
+  parentEntryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+});
+
+export const entryReposts = sqliteTable("entry_reposts", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  parentEntryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+});

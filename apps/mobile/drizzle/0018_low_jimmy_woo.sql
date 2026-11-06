@@ -1,0 +1,1 @@
+ALTER TABLE `entry_replies` ADD `parentEntryId` integer NOT NULL REFERENCES journal_entries(id);

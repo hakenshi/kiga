@@ -19,6 +19,8 @@ import m0014 from './0014_fast_killer_shrike.sql';
 import m0015 from './0015_optimal_black_knight.sql';
 import m0016 from './0016_equal_drax.sql';
 import m0017 from './0017_loud_grey_gargoyle.sql';
+import m0018 from './0018_low_jimmy_woo.sql';
+import m0019 from './0019_old_blur.sql';
 
   export default {
     journal,
@@ -40,7 +42,9 @@ m0013,
 m0014,
 m0015,
 m0016,
-m0017
+m0017,
+m0018,
+m0019
     }
   }
   
