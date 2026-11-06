@@ -1,4 +1,4 @@
-import type { StateCreator, StoreApi, UseBoundStore } from "zustand";
+import { create, type StateCreator, type StoreApi, type UseBoundStore } from "zustand";
 
 /**
  * Estado e ações comuns a qualquer tela que escreve um registro
@@ -126,3 +126,7 @@ export function entryToComposerState(entry: JournalEntryWithRelations): Partial<
     images: entry.entryImages?.map((img) => img.imageUrl) ?? [],
   };
 }
+
+export const useComposerDraftStore = create<ComposerSlice>()((set, get, api) => ({
+  ...createComposerSlice<ComposerSlice>()(set, get, api),
+}));

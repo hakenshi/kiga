@@ -70,11 +70,11 @@ function Header({ title, submit }: HeaderProps) {
   return (
     <View style={{ paddingTop: top }} className="bg-white border-b border-gray-100">
       <HStack className="px-4 h-14 justify-between items-center">
-        <HStack className="w-24 items-center justify-start">
+        <View className="min-w-[40px] items-start justify-center">
           <Close />
-        </HStack>
-        <VStack className="items-center justify-center flex-1">{title}</VStack>
-        <HStack className="w-24 items-center justify-end">{submit}</HStack>
+        </View>
+        <VStack className="items-center justify-center flex-1 px-2">{title}</VStack>
+        <View className="min-w-[40px] items-end justify-center">{submit}</View>
       </HStack>
     </View>
   );
@@ -131,11 +131,11 @@ function Submit({ children, pendingLabel = "Salvando..." }: SubmitProps) {
     <Pressable
       onPress={submit}
       disabled={disabled}
-      className={`h-10 px-5 rounded-full items-center justify-center ${
+      className={`h-9 px-4 rounded-full items-center justify-center ${
         disabled ? "bg-muted" : "bg-primary active:opacity-85"
       }`}
     >
-      <Text className="text-primary-foreground font-semibold text-sm">
+      <Text numberOfLines={1} className="text-primary-foreground font-semibold text-[13.5px]">
         {isSaving ? pendingLabel : children}
       </Text>
     </Pressable>
