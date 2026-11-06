@@ -5,6 +5,7 @@ import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { newEntrySchema } from "@/lib/db/zod/zod-schemas";
 import * as schema from "@/lib/db/schema";
+import * as relations from "@/lib/db/relations";
 import {
   emotions,
   entryEmotions,
@@ -133,7 +134,7 @@ describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
       // Cria banco 100% isolado em memória RAM (NÃO toca no kiga.db do disco)
       sqlite = new Database(":memory:");
       sqlite.run("PRAGMA foreign_keys = ON;");
-      testDb = drizzle(sqlite, { schema });
+      testDb = drizzle(sqlite, { schema: { ...schema, ...relations } });
 
       // Aplica migrações na memória para espelhar exatamente as tabelas do app
       const drizzleDir = join(__dirname, "../../drizzle");

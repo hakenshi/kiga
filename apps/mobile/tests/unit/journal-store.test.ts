@@ -362,6 +362,9 @@ describe("useEntryStore (journal-store)", () => {
       // Executa exclusão de e1
       await useEntryStore.getState().deleteEntry(e1.id);
 
+      // Aguarda o timer de 4500ms da exclusão otimista com Desfazer
+      await new Promise((r) => setTimeout(r, 4600));
+
       // Valida estado da store
       const state = useEntryStore.getState();
       expect(state.entries).toHaveLength(1);
