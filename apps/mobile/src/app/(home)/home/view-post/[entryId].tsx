@@ -28,12 +28,12 @@ import {
   getEntryWithThread,
   getParentEntry,
   type EntryThreadResult,
-} from "@/lib/db/entries";
+} from "@/repositories/entry-repository";
 import { resolveMoodConfig } from "@/lib/mood-utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
-import { QuotedEntryCard } from "../_components/entry/quoted-entry-card";
-import { RepostDrawer } from "../_components/entry/repost-drawer";
+import { QuotedEntryCard } from "@/components/entry/quoted-entry-card";
+import { RepostDrawer } from "@/components/entry/repost-drawer";
 
 function formatTimelineDelta(rootDate: Date, replyDate: Date): string {
   const diffMs = replyDate.getTime() - rootDate.getTime();
@@ -91,7 +91,7 @@ export default function ViewPostPage() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { entryId } = useLocalSearchParams<{ entryId: string }>();
-  const { user } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
   const updateEntry = useEntryStore((s) => s.updateEntry);
 
   const [threadData, setThreadData] = useState<EntryThreadResult | null>(null);
@@ -422,7 +422,7 @@ export default function ViewPostPage() {
                 return (
                   <HStack key={`step-${reply.id}`} className="items-stretch gap-3.5">
                     <VStack className="items-center w-7">
-                      <View className="w-7 h-7 rounded-full bg-white border-2 border-zinc-300 items-center justify-center shadow-sm">
+                      <View className="w-7 h-7 rounded-full bg-white border-2 border-zinc-300 items-center justify-center">
                         <Text className="text-[11px] font-bold text-zinc-700">
                           {stepNum}
                         </Text>
@@ -432,7 +432,7 @@ export default function ViewPostPage() {
                       )}
                     </VStack>
 
-                    <VStack className="flex-1 bg-white border border-zinc-200 rounded-2xl p-4 gap-2.5 mb-4 shadow-sm">
+                    <VStack className="flex-1 bg-white border border-zinc-200 rounded-2xl p-4 gap-2.5 mb-4">
                       <HStack className="justify-between items-center">
                         <Text className="text-[11.5px] font-subtitle-semibold text-zinc-500">
                           {formatTimelineDelta(

@@ -1,5 +1,5 @@
 import { Composer } from "@/components/composer/composer";
-import { createJournalEntry } from "@/lib/db/entries";
+import { createJournalEntry } from "@/repositories/entry-repository";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
 import { useNewPostStore } from "@/stores/new-post-store";
@@ -8,8 +8,8 @@ import { useRouter } from "expo-router";
 
 export default function NewPostPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
-  const { addEntry } = useEntryStore();
+  const user = useAuthStore((s) => s.user);
+  const addEntry = useEntryStore((s) => s.addEntry);
 
   const actions = {
     close: () => {

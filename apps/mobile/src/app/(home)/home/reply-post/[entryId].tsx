@@ -9,7 +9,7 @@ import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { createJournalEntry, getEntryWithThread } from "@/lib/db/entries";
+import { createJournalEntry, getEntryWithThread } from "@/repositories/entry-repository";
 import { resolveMoodConfig } from "@/lib/mood-utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
@@ -34,8 +34,8 @@ function formatParentTime(rawDate?: Date | string | number | null) {
 export default function ReplyPostPage() {
   const router = useRouter();
   const { entryId } = useLocalSearchParams<{ entryId: string }>();
-  const { user } = useAuthStore();
-  const { addEntry } = useEntryStore();
+  const user = useAuthStore((s) => s.user);
+  const addEntry = useEntryStore((s) => s.addEntry);
 
   const [rootEntry, setRootEntry] = useState<JournalEntryWithRelations | null>(null);
   const [existingRepliesCount, setExistingRepliesCount] = useState(0);

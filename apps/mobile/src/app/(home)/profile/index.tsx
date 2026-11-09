@@ -6,10 +6,14 @@ import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar"
 import { useAuthStore } from "@/stores/auth-store";
 import { LogOut } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useEntryStore } from "@/stores/journal-store";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const { top } = useSafeAreaInsets();
+
+  const resetEntries = useEntryStore((s) => s.reset);
 
   return (
     <ScrollView
@@ -39,7 +43,10 @@ export default function ProfilePage() {
         <VStack space="md" className="pt-4">
           <Button
             variant="destructive"
-            onPress={logout}
+            onPress={() => {
+              resetEntries()
+              logout()
+            }}
             className="w-full flex-row items-center justify-center gap-2"
           >
             <ButtonIcon as={LogOut} size="sm" />

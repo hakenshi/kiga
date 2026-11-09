@@ -8,7 +8,7 @@ import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { createJournalEntry, getJournalEntryById } from "@/lib/db/entries";
+import { createJournalEntry, getJournalEntryById } from "@/repositories/entry-repository";
 import { resolveMoodConfig } from "@/lib/mood-utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
@@ -33,8 +33,8 @@ function formatQuotedTime(rawDate?: Date | string | number | null) {
 export default function RepostPostPage() {
   const router = useRouter();
   const { entryId } = useLocalSearchParams<{ entryId: string }>();
-  const { user } = useAuthStore();
-  const { addEntry } = useEntryStore();
+  const user = useAuthStore((s) => s.user);
+  const addEntry = useEntryStore((s) => s.addEntry);
 
   const [quotedEntry, setQuotedEntry] = useState<JournalEntryWithRelations | null>(null);
   const [isLoadingQuoted, setIsLoadingQuoted] = useState(true);

@@ -1,4 +1,4 @@
-import Logo from "@/components/Logo";
+import Logo from "@/components/common/logo";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { useAuthStore } from "@/stores/auth-store";
@@ -18,7 +18,8 @@ export default function HomeLayout() {
   const { bottom } = useSafeAreaInsets();
   const currentPath = usePathname();
 
-  const { isAuthenticated, user } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
 
   if (!isAuthenticated || !user) {
     return <Redirect href="/(auth)/login" />;
@@ -30,9 +31,9 @@ export default function HomeLayout() {
 
   return (
     <VStack className="flex-1 bg-background">
-      <View className={`${isComposer ? "hidden" : "flex"} border-b border-border p-3`}>
+      <HStack className={`${isComposer ? "hidden" : "flex"} border-b border-border p-3`}>
         <Logo size="sm" />
-      </View>
+      </HStack>
       <Tabs
         tabBar={({ state, navigation }) => {
           if (isComposer) {
