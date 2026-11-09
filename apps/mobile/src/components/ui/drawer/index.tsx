@@ -79,7 +79,7 @@ const drawerBackdropStyle = tva({
 });
 
 const drawerContentStyle = tva({
-  base: 'bg-background shadow-hard-5 p-6 absolute',
+  base: 'bg-background p-6 absolute',
   parentVariants: {
     size: {
       sm: '',

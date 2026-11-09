@@ -23,13 +23,13 @@ const UIButton = createButton({
   Icon: StyledUIIcon,
 });
 const buttonStyle = tva({
-  base: 'rounded-xl flex-row items-center justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2 h-fit',
+  base: 'flex-row items-center justify-center data-[focus-visible=true]:web:outline-none data-[focus-visible=true]:web:ring-2 data-[disabled=true]:opacity-40 gap-2 h-fit',
   variants: {
     variant: {
       default: 'bg-primary data-[hover=true]:bg-primary/90 data-[active=true]:bg-primary/90',
       secondary: 'border border-border bg-secondary text-secondary-foreground data-[hover=true]:bg-secondary/80 data-[active=true]:bg-secondary/80',
       outline:
-        'border border-border bg-background shadow-xs data-[hover=true]:bg-accent data-[active=true]:bg-accent dark:bg-input/[0.045] dark:border-border/90 dark:data-[hover=true]:bg-input/[0.075] dark:data-[active=true]:bg-input/[0.075]',
+        'border border-border bg-background data-[hover=true]:bg-accent data-[active=true]:bg-accent dark:bg-input/[0.045] dark:border-border/90 dark:data-[hover=true]:bg-input/[0.075] dark:data-[active=true]:bg-input/[0.075]',
       ghost: 'data-[hover=true]:bg-accent data-[active=true]:bg-accent dark:data-[hover=true]:bg-accent/50 dark:data-[active=true]:bg-accent/50',
       destructive:
         'bg-destructive data-[hover=true]:bg-destructive/90 data-[active=true]:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
@@ -38,12 +38,27 @@ const buttonStyle = tva({
       link: 'text-primary underline-offset-4 data-[hover=true]:underline data-[active=true]:underline',
     },
     size: {
-      md: 'px-4 py-2',
-      sm: 'min-h-8 rounded-md px-3 text-xs',
-      default: 'min-h-12 px-8',
-      lg: 'min-h-12 px-8',
-      icon: 'min-h-9 min-w-9',
+      xs: 'min-h-7 px-2.5 py-1 gap-1',
+      sm: 'min-h-8 px-3.5 py-1.5 gap-1.5',
+      md: 'min-h-10 px-4 py-2 gap-2',
+      default: 'min-h-12 px-6 py-2.5 gap-2',
+      lg: 'min-h-12 px-8 py-3 gap-2.5',
+      icon: 'min-h-9 min-w-9 p-0',
     },
+    rounding: {
+      none: 'rounded-none',
+      xs: 'rounded-xs',
+      sm: 'rounded-sm',
+      md: 'rounded-md',
+      lg: 'rounded-lg',
+      xl: 'rounded-xl',
+      '2xl': 'rounded-2xl',
+      '3xl': 'rounded-3xl',
+      full: 'rounded-full',
+    },
+  },
+  defaultVariants: {
+    rounding: 'xl',
   },
 });
 const buttonTextStyle = tva({
@@ -61,6 +76,7 @@ const buttonTextStyle = tva({
     },
     size: {
       default: 'text-sm',
+      xs: 'text-xs',
       sm: 'text-xs',
       md: 'text-sm',
       lg: 'text-base',
@@ -74,7 +90,9 @@ const buttonSpinnerStyle = tva({
   parentVariants: {
     size: {
       default: 'h-4 w-4',
+      xs: 'h-3 w-3',
       sm: 'h-3 w-3',
+      md: 'h-4 w-4',
       lg: 'h-5 w-5',
       icon: 'h-4 w-4',
     },
@@ -98,7 +116,8 @@ const buttonIconStyle = tva({
     },
     size: {
       default: 'h-4 w-4',
-      sm: 'h-3 w-3',
+      xs: 'h-3 w-3',
+      sm: 'h-3.5 w-3.5',
       md: 'h-4 w-4',
       lg: 'h-5 w-5',
       icon: 'h-4 w-4',
@@ -133,17 +152,21 @@ type IButtonProps = Omit<
   React.ComponentPropsWithoutRef<typeof UIButton>,
   'context'
 > &
-  VariantProps<typeof buttonStyle> & { className?: string };
+  VariantProps<typeof buttonStyle> & {
+    className?: string;
+    rounded?: VariantProps<typeof buttonStyle>['rounding'];
+  };
 const Button = React.forwardRef<
   React.ElementRef<typeof UIButton>,
   IButtonProps
->(({ className, variant = 'default', size = 'default', ...props }, ref) => {
+>(({ className, variant = 'default', size = 'default', rounding, rounded, ...props }, ref) => {
+  const resolvedRounding = rounding ?? rounded ?? 'xl';
   return (
     <UIButton
       ref={ref}
       {...props}
-      className={buttonStyle({ variant, size, class: className })}
-      context={{ variant, size }}
+      className={buttonStyle({ variant, size, rounding: resolvedRounding, class: className })}
+      context={{ variant, size, rounding: resolvedRounding }}
     />
   );
 });

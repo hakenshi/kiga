@@ -71,7 +71,7 @@ const alertDialogBackdropStyle = tva({
 });
 
 const alertDialogContentStyle = tva({
-  base: 'bg-white rounded-2xl p-6 overflow-hidden shadow-2xl border border-gray-100',
+  base: 'bg-white rounded-2xl p-6 overflow-hidden border border-gray-100',
   parentVariants: {
     size: {
       xs: 'w-[60%] max-w-[360px]',
