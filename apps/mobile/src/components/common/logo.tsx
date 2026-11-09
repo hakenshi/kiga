@@ -14,8 +14,7 @@ const sizes = {
 export default function Logo({ size }: Props) {
   return (
     <Image
-      source={require("@/assets/images/kiga-logo.jpg")}
-      className="shadow"
+      source={require("../../../assets/images/kiga-logo.jpg")}
       style={{ width: size ? sizes[size] : 160, height: size ? sizes[size] : 160, borderRadius: 20 }}
       contentFit="contain"
     />
