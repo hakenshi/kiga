@@ -22,7 +22,7 @@ import { useRouter } from "expo-router";
 import { AtSign, Eye, EyeOff, Lock } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import Logo from "@/components/Logo";
+import Logo from "@/components/common/logo";
 import { View } from "react-native";
 import { useEntryStore } from "@/stores/journal-store";
 
@@ -31,7 +31,8 @@ export default function LoginPage() {
   const [useCloud, setUseCloud] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  const authStore = useAuthStore();
+  const loadInitial = useEntryStore((e) => e.loadInitial);
+  const setUser = useAuthStore((s) => s.setUser);
 
   const {
     control,
@@ -46,8 +47,6 @@ export default function LoginPage() {
     },
   });
 
-  const { loadInitial } = useEntryStore()
-
   const submit = async (data: LoginSchema) => {
     const { data: userData, success } = loginSchema.safeParse(data);
 
@@ -60,7 +59,6 @@ export default function LoginPage() {
       where: eq(users.username, userData.username),
       with: {
         emotions: true,
-        journalEntries: true,
         moods: true,
         profileImages: true,
         reactions: true,
@@ -87,7 +85,7 @@ export default function LoginPage() {
       return;
     }
 
-    authStore.setUser({ user, isAuthenticated: true });
+    setUser({ user, isAuthenticated: true });
     router.navigate("/home");
   };
 
@@ -167,17 +165,17 @@ export default function LoginPage() {
           )}
         />
 
-        <HStack className="justify-between items-center py-1">
-          <FormControlLabel>
-            <FormControlLabelText className="text-zinc-600 text-sm">
-              Fazer login na nuvem?
-            </FormControlLabelText>
-          </FormControlLabel>
-          <Switch
-            value={useCloud}
-            onValueChange={(val) => setUseCloud(val)}
-          />
-        </HStack>
+        {/* <HStack className="justify-between items-center py-1"> */}
+        {/*   <FormControlLabel> */}
+        {/*     <FormControlLabelText className="text-zinc-600 text-sm"> */}
+        {/*       Fazer login na nuvem? */}
+        {/*     </FormControlLabelText> */}
+        {/*   </FormControlLabel> */}
+        {/*   <Switch */}
+        {/*     value={useCloud} */}
+        {/*     onValueChange={(val) => setUseCloud(val)} */}
+        {/*   /> */}
+        {/* </HStack> */}
       </VStack>
 
       <AuthButtonsContainer>

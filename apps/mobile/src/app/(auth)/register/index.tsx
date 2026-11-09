@@ -21,8 +21,12 @@ import { Controller, useForm } from "react-hook-form";
 
 export default function NamePage() {
   const router = useRouter();
-  const { firstName, secondName, username, birthDate, setStep1Data, reset } =
-    useRegisterStore();
+  const firstName = useRegisterStore((s) => s.firstName);
+  const secondName = useRegisterStore((s) => s.secondName);
+  const username = useRegisterStore((s) => s.username);
+  const birthDate = useRegisterStore((s) => s.birthDate);
+  const setStep1Data = useRegisterStore((s) => s.setStep1Data);
+  const reset = useRegisterStore((s) => s.reset);
 
   const {
     control,

@@ -1,4 +1,4 @@
-import Logo from "@/components/Logo";
+import Logo from "@/components/common/logo";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
@@ -9,7 +9,7 @@ import { ArrowRightIcon, UserIcon } from "lucide-react-native";
 
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   if (isAuthenticated) {
     return <Redirect href="/home" />;
@@ -34,11 +34,6 @@ export default function Index() {
           <ButtonIcon as={UserIcon} size="md" />
           <ButtonText>
             Começar agora - Criar Conta
-          </ButtonText>
-        </Button>
-        <Button variant="secondary">
-          <ButtonText>
-            Fazer login com o Google
           </ButtonText>
         </Button>
         <HStack className="items-center justify-center pt-8 gap-1">

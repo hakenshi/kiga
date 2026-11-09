@@ -23,7 +23,9 @@ export default function SecurityPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { password, confirmPassword, setStep2Data } = useRegisterStore();
+  const password = useRegisterStore((s) => s.password);
+  const confirmPassword = useRegisterStore((s) => s.confirmPassword);
+  const setStep2Data = useRegisterStore((s) => s.setStep2Data);
 
   const {
     control,

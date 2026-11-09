@@ -34,7 +34,7 @@ const KEYPAD_ROWS = [
 
 export default function PinPage() {
   const router = useRouter();
-  const authStore = useAuthStore();
+  const setUser = useAuthStore((s) => s.setUser);
   const {
     control,
     handleSubmit,
@@ -94,7 +94,7 @@ export default function PinPage() {
         createdAt: createdUser.createdAt,
       };
 
-      authStore.setUser({ user: sessionUser, isAuthenticated: true });
+      setUser({ user: sessionUser, isAuthenticated: true });
 
       router.replace("/home");
     } catch (err: unknown) {
@@ -181,7 +181,8 @@ export default function PinPage() {
                     <Button
                       key={colIndex}
                       variant="secondary"
-                      className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
+                      rounding="2xl"
+                      className="flex-1 h-14 sm:h-16 items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
                       onPress={() =>
                         setValue("pin", pin.slice(0, -1), {
                           shouldValidate: true,
@@ -197,7 +198,8 @@ export default function PinPage() {
                   <Button
                     key={colIndex}
                     variant="secondary"
-                    className="flex-1 h-14 sm:h-16 rounded-2xl items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
+                    rounding="2xl"
+                    className="flex-1 h-14 sm:h-16 items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
                     onPress={() => {
                       if (pin.length < 6) {
                         setValue("pin", pin + item, {

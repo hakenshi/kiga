@@ -35,7 +35,9 @@ export const PRONOUN_OPTIONS = [
 export default function IdentityPage() {
   const router = useRouter();
 
-  const { gender, pronoun, setStep3Data } = useRegisterStore();
+  const gender = useRegisterStore((s) => s.gender);
+  const pronoun = useRegisterStore((s) => s.pronoun);
+  const setStep3Data = useRegisterStore((s) => s.setStep3Data);
 
   const {
     control,
@@ -91,7 +93,7 @@ export default function IdentityPage() {
                       testID={`gender-${option.value}`}
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
-                      className="rounded-xl"
+                      rounding="xl"
                       onPress={() => field.onChange(option.value)}
                     >
                       <ButtonText>{option.label}</ButtonText>
@@ -123,7 +125,7 @@ export default function IdentityPage() {
                       testID={`pronoun-${option.value}`}
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
-                      className="rounded-xl"
+                      rounding="xl"
                       onPress={() => field.onChange(option.value)}
                     >
                       <ButtonText>{option.label}</ButtonText>
