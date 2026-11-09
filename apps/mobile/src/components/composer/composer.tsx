@@ -4,7 +4,7 @@ import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar"
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import NavButton from "@/app/(home)/_components/nav-button";
+import NavButton from "@/components/common/nav-button";
 import { getBehaviorIcon } from "@/lib/behavior-icons";
 import { countWords } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";

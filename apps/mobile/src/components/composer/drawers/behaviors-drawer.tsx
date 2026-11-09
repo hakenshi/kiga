@@ -13,7 +13,7 @@ import {
   Trash2,
   X,
 } from "lucide-react-native";
-import NavButton from "@/app/(home)/_components/nav-button";
+import NavButton from "@/components/common/nav-button";
 import { EntryTextInput } from "@/components/entry-text-input";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
@@ -43,12 +43,12 @@ import {
   createBehavior,
   deleteBehaviors,
   getUserBehaviors,
-} from "@/lib/db/behaviors";
+} from "@/repositories/behavior-repository";
 import {
   createCategoryItem,
   deleteCategoryItem,
   getUserCategories,
-} from "@/lib/db/resources";
+} from "@/repositories/resource-repository";
 import {
   createBehaviorFormSchema,
   createCategoryFormSchema,
@@ -399,7 +399,8 @@ export default function BehaviorsDrawer() {
                       </Input>
                       <Button
                         size="sm"
-                        className="h-10 rounded-lg px-4 bg-[#16181D]"
+                        rounding="lg"
+                        className="h-10 px-4 bg-[#16181D]"
                         disabled={itemForm.formState.isSubmitting}
                         onPress={itemForm.handleSubmit(onSubmitItem)}
                       >
@@ -523,7 +524,8 @@ export default function BehaviorsDrawer() {
                       </Input>
                       <Button
                         size="sm"
-                        className="h-10 rounded-lg px-4 bg-[#16181D]"
+                        rounding="lg"
+                        className="h-10 px-4 bg-[#16181D]"
                         disabled={categoryForm.formState.isSubmitting}
                         onPress={categoryForm.handleSubmit(onSubmitCategory)}
                       >
@@ -807,14 +809,16 @@ export default function BehaviorsDrawer() {
               <HStack space="sm" className="w-full">
                 <Button
                   variant="outline"
-                  className="flex-1 h-[52px] rounded-[14px]"
+                  rounding="2xl"
+                  className="flex-1 h-[52px]"
                   onPress={() => setDeletingIds([])}
                 >
                   <ButtonText>Cancelar</ButtonText>
                 </Button>
                 <Button
                   variant="destructive"
-                  className="flex-1 h-[52px] rounded-[14px]"
+                  rounding="2xl"
+                  className="flex-1 h-[52px]"
                   onPress={handleDeleteSelected}
                 >
                   <Trash2 size={16} color="#fafafa" />
@@ -823,7 +827,8 @@ export default function BehaviorsDrawer() {
               </HStack>
             ) : (
               <Button
-                className="w-full h-[52px] rounded-[14px] bg-[#16181D]"
+                rounding="2xl"
+                className="w-full h-[52px] bg-[#16181D]"
                 onPress={() => setOpen(false)}
               >
                 <ButtonText className="text-[15px] font-semibold text-white">

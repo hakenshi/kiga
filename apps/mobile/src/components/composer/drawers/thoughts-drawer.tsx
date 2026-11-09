@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Brain, Check, Plus, Search, X } from "lucide-react-native";
-import NavButton from "@/app/(home)/_components/nav-button";
+import NavButton from "@/components/common/nav-button";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
   Drawer,
@@ -139,7 +139,8 @@ export default function ThoughtsDrawer() {
                     </Input>
                     <Button
                       size="sm"
-                      className="h-10 rounded-lg px-3.5 bg-[#16181D]"
+                      rounding="lg"
+                      className="h-10 px-3.5 bg-[#16181D]"
                       disabled={isSubmitting}
                       onPress={handleSubmit(onSubmitThought)}
                     >
@@ -238,7 +239,8 @@ export default function ThoughtsDrawer() {
 
           <DrawerFooter className="pt-2">
             <Button
-              className="w-full h-[52px] rounded-[14px] bg-[#16181D]"
+              rounding="2xl"
+              className="w-full h-[52px] bg-[#16181D]"
               onPress={() => setOpen(false)}
             >
               <ButtonText className="text-[15px] font-semibold text-white">
