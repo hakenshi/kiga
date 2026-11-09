@@ -8,7 +8,7 @@ module.exports = function (api) {
       [
         'module-resolver',
         {
-          root: ['./src', './'],
+          root: ['./src'],
           extensions: [
             '.ios.js',
             '.android.js',
@@ -27,7 +27,7 @@ module.exports = function (api) {
             '.svg',
           ],
           alias: {
-            '@': ['./src', './'],
+            '@': './src',
             'tailwind.config': './tailwind.config.js',
           },
         },
