@@ -1,8 +1,8 @@
 import { and, asc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
-import db from "../index";
-import { behaviors, categories } from "../schema";
-import { resolveCategoryId } from "./resources";
-import type { BehaviorCategory, BehaviorItem } from "../zod/zod-types";
+import db from "@/lib/db";
+import { behaviors, categories } from "@/lib/db/schema";
+import { resolveCategoryId } from "./resource-repository";
+import type { BehaviorCategory, BehaviorItem } from "@/lib/db/zod/zod-types";
 
 export type { BehaviorCategory, BehaviorItem };
 

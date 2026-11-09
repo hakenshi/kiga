@@ -1,5 +1,5 @@
 import { and, asc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
-import db from "../index";
+import db from "@/lib/db";
 import {
   behaviors,
   categories,
@@ -7,8 +7,8 @@ import {
   reactions,
   thoughts,
   type CategoryType,
-} from "../schema";
-import type { Category, ResourceCategory, ResourceItem } from "../zod/zod-types";
+} from "@/lib/db/schema";
+import type { Category, ResourceCategory, ResourceItem } from "@/lib/db/zod/zod-types";
 
 export type { Category, ResourceCategory, ResourceItem };
 

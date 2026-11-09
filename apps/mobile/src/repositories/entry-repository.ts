@@ -14,13 +14,13 @@ import {
   moods,
   reactions,
   thoughts,
-} from "../schema";
-import { createJournalEntrySchema } from "../zod/zod-schemas";
+} from "@/lib/db/schema";
+import { createJournalEntrySchema, journalEntryUpdateSchema } from "@/lib/db/zod/zod-schemas";
 import type {
   CreateJournalEntryInput,
   CreateJournalEntryOutput,
   CreateJournalEntryParams,
-} from "../zod/zod-types";
+} from "@/lib/db/zod/zod-types";
 import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 
 export type { CreateJournalEntryInput, CreateJournalEntryOutput, CreateJournalEntryParams };
@@ -445,4 +445,19 @@ export async function updateJournalEntry(
   }
 
   return updated;
+}
+
+export async function deleteJournalEntry(entryId: number): Promise<void> {
+  await db.delete(journalEntries).where(eq(journalEntries.id, entryId));
+}
+
+export async function updateEntryPartial(
+  entryId: number,
+  newEntryData: UpdateJournalEntryInput
+): Promise<void> {
+  const data = journalEntryUpdateSchema.parse(newEntryData);
+  await db
+    .update(journalEntries)
+    .set(data)
+    .where(eq(journalEntries.id, entryId));
 }
