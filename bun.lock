@@ -50,6 +50,7 @@
         "@kiga/schema": "workspace:*",
         "@legendapp/motion": "^2.4.0",
         "@tanstack/react-query": "^5.104.1",
+        "date-fns": "^4.4.0",
         "drizzle-orm": "^0.45.4",
         "drizzle-zod": "^0.8.3",
         "expo": "~57.0.31",
