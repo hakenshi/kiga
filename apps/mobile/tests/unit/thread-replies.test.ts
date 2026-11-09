@@ -38,17 +38,17 @@ mock.module("expo-sqlite", () => ({
   }),
 }));
 
-let createJournalEntry: typeof import("@/lib/db/entries").createJournalEntry;
-let getEntryWithThread: typeof import("@/lib/db/entries").getEntryWithThread;
-let getParentEntry: typeof import("@/lib/db/entries").getParentEntry;
-let getJournalEntries: typeof import("@/lib/db/queries/entries").getJournalEntries;
+let createJournalEntry: typeof import("@/repositories/entry-repository").createJournalEntry;
+let getEntryWithThread: typeof import("@/repositories/entry-repository").getEntryWithThread;
+let getParentEntry: typeof import("@/repositories/entry-repository").getParentEntry;
+let getJournalEntries: typeof import("@/repositories/entry-repository").getJournalEntries;
 
 describe("Thread de Pensamentos e Reflexões (Linear TCC Timeline)", () => {
   let sqlite: Database;
   let testUserId: number;
 
   beforeAll(async () => {
-    const entriesMod = await import("@/lib/db/entries");
+    const entriesMod = await import("@/repositories/entry-repository");
     createJournalEntry = entriesMod.createJournalEntry;
     getEntryWithThread = entriesMod.getEntryWithThread;
     getParentEntry = entriesMod.getParentEntry;

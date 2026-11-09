@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { updateJournalEntry } from "@/lib/db/entries";
+import { updateJournalEntry } from "@/repositories/entry-repository";
 import {
   createComposerSlice,
   entryToComposerState,

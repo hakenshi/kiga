@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import { getJournalEntries, getJournalEntryById } from "@/lib/db/entries";
-import db from "@/lib/db";
-import { journalEntries } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { journalEntryUpdateSchema } from "@/lib/db/zod/zod-schemas";
+import {
+  deleteJournalEntry,
+  getJournalEntries,
+  getJournalEntryById,
+  updateEntryPartial,
+} from "@/repositories/entry-repository";
 import { useToastStore } from "@/stores/toast-store";
 
 const PAGE_SIZE = 20;
@@ -89,11 +90,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     }));
   },
   updateEntry: async (entryId, newEntryData) => {
-    const data = journalEntryUpdateSchema.parse(newEntryData);
-    await db
-      .update(journalEntries)
-      .set(data)
-      .where(eq(journalEntries.id, entryId));
+    await updateEntryPartial(entryId, newEntryData);
 
     set((s) => {
       const updated = s.entries.map((entry) =>
@@ -137,7 +134,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     const commitDelete = async () => {
       if (isUndone) return;
       try {
-        await db.delete(journalEntries).where(eq(journalEntries.id, entryId));
+        await deleteJournalEntry(entryId);
       } catch (error) {
         useToastStore.getState().showError("Falha ao excluir o relato do banco de dados.", error);
         // Restaura na tela caso falhe no banco

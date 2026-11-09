@@ -42,7 +42,7 @@ mock.module("expo-sqlite", () => ({
   }),
 }));
 
-let createJournalEntry: typeof import("@/lib/db/entries").createJournalEntry;
+let createJournalEntry: typeof import("@/repositories/entry-repository").createJournalEntry;
 
 describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
   // ─── 1. VALIDAÇÃO ZOD (newEntrySchema) ───────────────────────────────────
@@ -128,7 +128,7 @@ describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
     let reactionId: number;
 
     beforeAll(async () => {
-      const entriesMod = await import("@/lib/db/entries");
+      const entriesMod = await import("@/repositories/entry-repository");
       createJournalEntry = entriesMod.createJournalEntry;
 
       // Cria banco 100% isolado em memória RAM (NÃO toca no kiga.db do disco)
