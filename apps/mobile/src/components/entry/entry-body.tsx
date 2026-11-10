@@ -1,7 +1,7 @@
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { getBehaviorIcon } from "@/lib/behavior-icons";
-import { getParentEntry } from "@/repositories/entry-repository";
+import { EntryRepository } from "@/repositories/entry-repository";
 import { Activity, Brain, ChevronDown, ChevronUp, Drama, Footprints } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -58,7 +58,7 @@ export default function EntryBody({ entry, content: contentProp }: Props) {
 
   useEffect(() => {
     if (entry?.entryType === "repost" && !preloadedQuoted && entry?.id && !lazyParent) {
-      getParentEntry(entry.id).then((p) => {
+      EntryRepository.getParent(entry.id).then((p) => {
         if (p) setLazyParent(p);
       });
     }

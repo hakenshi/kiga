@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { updateJournalEntry } from "@/repositories/entry-repository";
+import { EntryRepository } from "@/repositories/entry-repository";
 import {
   createComposerSlice,
   entryToComposerState,
@@ -50,7 +50,7 @@ export const useEditPostStore = create<EditPostStore>()((set, get, api) => ({
 
     set({ isSaving: true });
     try {
-      const updated = await updateJournalEntry({
+      const updated = await EntryRepository.update({
         entryId: editingEntryId,
         content,
         moodId,

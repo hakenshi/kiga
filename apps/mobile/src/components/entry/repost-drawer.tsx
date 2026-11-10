@@ -14,7 +14,7 @@ import { Icon, CloseIcon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { Pencil, RefreshCcw } from "lucide-react-native";
-import { createJournalEntry } from "@/repositories/entry-repository";
+import { EntryRepository } from "@/repositories/entry-repository";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
 import { useToastStore } from "@/stores/toast-store";
@@ -41,11 +41,9 @@ export function RepostDrawer({ isOpen, onClose, entry }: Props) {
     if (!user) return;
     onClose();
     try {
-      const newRepost = await createJournalEntry({
+      const newRepost = await EntryRepository.createRepost({
         userId: user.id,
-        entryType: "repost",
         parentEntryId: targetId,
-        content: "",
       });
       addEntry(newRepost);
       useToastStore.getState().showInfo("Momento revisitado.");

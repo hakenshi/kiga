@@ -1,10 +1,5 @@
 import { create } from "zustand";
-import {
-  deleteJournalEntry,
-  getJournalEntries,
-  getJournalEntryById,
-  updateEntryPartial,
-} from "@/repositories/entry-repository";
+import { EntryRepository } from "@/repositories/entry-repository";
 import { useToastStore } from "@/stores/toast-store";
 
 const PAGE_SIZE = 20;
@@ -50,7 +45,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
   loadInitial: async (userId) => {
     set(({ isLoading: true, page: 0, hasMore: true }))
     try {
-      const data = await getJournalEntries(userId, {
+      const data = await EntryRepository.getFeed(userId, {
         limit: PAGE_SIZE,
         offset: 0,
       });
@@ -70,7 +65,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     set({ isLoading: true });
     try {
       const offset = page * PAGE_SIZE;
-      const data = await getJournalEntries(userId, {
+      const data = await EntryRepository.getFeed(userId, {
         limit: PAGE_SIZE,
         offset,
       });
@@ -90,7 +85,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     }));
   },
   updateEntry: async (entryId, newEntryData) => {
-    await updateEntryPartial(entryId, newEntryData);
+    await EntryRepository.updatePartial(entryId, newEntryData);
 
     set((s) => {
       const updated = s.entries.map((entry) =>
@@ -114,7 +109,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     const { entries } = get();
     const cached = entries.find((e) => e.id === entryId);
     if (cached) return cached;
-    return await getJournalEntryById(entryId);
+    return await EntryRepository.getById(entryId);
   },
   deleteEntry: async (entryId) => {
     const { entries } = get();
@@ -134,7 +129,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     const commitDelete = async () => {
       if (isUndone) return;
       try {
-        await deleteJournalEntry(entryId);
+        await EntryRepository.delete(entryId);
       } catch (error) {
         useToastStore.getState().showError("Falha ao excluir o relato do banco de dados.", error);
         // Restaura na tela caso falhe no banco
