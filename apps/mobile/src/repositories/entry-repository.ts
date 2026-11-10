@@ -1,7 +1,5 @@
 import db from "@/lib/db";
 import {
-  behaviors,
-  emotions,
   entryBehaviors,
   entryEmotions,
   entryImages,
@@ -10,454 +8,436 @@ import {
   entryReposts,
   entryThoughts,
   journalEntries,
-  type JournalEntryType,
   moods,
-  reactions,
-  thoughts,
 } from "@/lib/db/schema";
-import { createJournalEntrySchema, journalEntryUpdateSchema } from "@/lib/db/zod/zod-schemas";
-import type {
-  CreateJournalEntryInput,
-  CreateJournalEntryOutput,
-  CreateJournalEntryParams,
-} from "@/lib/db/zod/zod-types";
+import {
+  createJournalEntrySchema,
+  createPostSchema,
+  createReplySchema,
+  createRepostSchema,
+  journalEntryUpdateSchema,
+  updateJournalEntryParamsSchema,
+} from "@/lib/db/zod/zod-schemas";
 import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 
-export type { CreateJournalEntryInput, CreateJournalEntryOutput, CreateJournalEntryParams };
+export abstract class EntryRepository {
+  private static readonly DEFAULT_MOOD_NAMES: Record<number, string> = {
+    1: "Muito Mal",
+    2: "Mal",
+    3: "Neutro",
+    4: "Bem",
+    5: "Muito Bem",
+  };
 
-export type UpdateJournalEntryParams = {
-  entryId: number;
-  userId?: number;
-  content: string;
-  moodId?: number | null;
-  date?: Date;
-  emotions?: EntryEmotionItem[];
-  thoughts?: EntryThoughtItem[];
-  reactions?: EntryReactionItem[];
-  behaviors?: EntryBehaviorItem[];
-  images?: string[];
-};
-
-const DEFAULT_MOOD_NAMES: Record<number, string> = {
-  1: "Muito Mal",
-  2: "Mal",
-  3: "Neutro",
-  4: "Bem",
-  5: "Muito Bem",
-};
-
-export interface EntryThreadResult {
-  rootEntry: JournalEntryWithRelations;
-  replies: JournalEntryWithRelations[];
-}
-
-export async function createJournalEntry(
-  rawParams: CreateJournalEntryInput
-): Promise<JournalEntryWithRelations> {
-  const params: CreateJournalEntryOutput = createJournalEntrySchema.parse(rawParams);
-
-  if (params.moodId) {
+  private static async ensureMood(moodId?: number | null): Promise<void> {
+    if (!moodId) return;
     await db
       .insert(moods)
       .values({
-        id: params.moodId,
-        name: DEFAULT_MOOD_NAMES[params.moodId] ?? "Neutro",
+        id: moodId,
+        name: EntryRepository.DEFAULT_MOOD_NAMES[moodId] ?? "Neutro",
       })
       .onConflictDoNothing();
   }
 
-  const [entry] = await db
-    .insert(journalEntries)
-    .values({
-      userId: params.userId,
-      moodId: params.moodId ?? null,
-      liked: false,
-      entryType: params.entryType ?? "post",
-      content: params.content,
-      date: params.date ?? new Date(),
-    })
-    .returning();
+  private static async syncRelations(
+    entryId: number,
+    relations: {
+      emotions?: EntryEmotionItem[];
+      thoughts?: EntryThoughtItem[];
+      reactions?: EntryReactionItem[];
+      behaviors?: EntryBehaviorItem[];
+      images?: string[];
+    },
+    options: { replace?: boolean } = {}
+  ): Promise<void> {
+    const { replace = false } = options;
 
-  if (!entry) {
-    throw new Error("Falha ao registrar entry no banco de dados.");
+    if (replace) {
+      if (relations.emotions !== undefined) await db.delete(entryEmotions).where(eq(entryEmotions.entryId, entryId));
+      if (relations.thoughts !== undefined) await db.delete(entryThoughts).where(eq(entryThoughts.entryId, entryId));
+      if (relations.reactions !== undefined) await db.delete(entryReactions).where(eq(entryReactions.entryId, entryId));
+      if (relations.behaviors !== undefined) await db.delete(entryBehaviors).where(eq(entryBehaviors.entryId, entryId));
+      if (relations.images !== undefined) await db.delete(entryImages).where(eq(entryImages.entryId, entryId));
+    }
+
+    const emotionIds = relations.emotions?.map((e) => e.id).filter((id): id is number => typeof id === "number") ?? [];
+    if (emotionIds.length > 0) {
+      await db.insert(entryEmotions).values(emotionIds.map((emotionId) => ({ entryId, emotionId }))).onConflictDoNothing();
+    }
+
+    const thoughtIds = relations.thoughts?.map((t) => t.id).filter((id): id is number => typeof id === "number") ?? [];
+    if (thoughtIds.length > 0) {
+      await db.insert(entryThoughts).values(thoughtIds.map((thoughtsId) => ({ entryId, thoughtsId }))).onConflictDoNothing();
+    }
+
+    const reactionIds = relations.reactions?.map((r) => r.id).filter((id): id is number => typeof id === "number") ?? [];
+    if (reactionIds.length > 0) {
+      await db.insert(entryReactions).values(reactionIds.map((reactionId) => ({ entryId, reactionId }))).onConflictDoNothing();
+    }
+
+    const behaviorIds = relations.behaviors?.map((b) => b.id).filter((id): id is number => typeof id === "number") ?? [];
+    if (behaviorIds.length > 0) {
+      await db.insert(entryBehaviors).values(behaviorIds.map((behaviorId) => ({ entryId, behaviorId }))).onConflictDoNothing();
+    }
+
+    const images = relations.images?.map((img) => img.trim()).filter(Boolean) ?? [];
+    if (images.length > 0) {
+      await db.insert(entryImages).values(images.map((imageUrl) => ({ entryId, imageUrl })));
+    }
   }
 
-  if (params.parentEntryId) {
-    if (params.entryType === "repost") {
-      await db.insert(entryReposts).values({
-        entryId: entry.id,
+  static async createPost(rawParams: CreatePostInput): Promise<JournalEntryWithRelations> {
+    const params: CreatePostOutput = createPostSchema.parse(rawParams);
+    await EntryRepository.ensureMood(params.moodId);
+
+    const [entry] = await db
+      .insert(journalEntries)
+      .values({
+        userId: params.userId,
+        moodId: params.moodId ?? null,
+        liked: false,
+        entryType: "post",
+        content: params.content,
+        date: params.date ?? new Date(),
+      })
+      .returning();
+
+    if (!entry) {
+      throw new Error("Falha ao registrar relato no banco de dados.");
+    }
+
+    await EntryRepository.syncRelations(entry.id, params);
+
+    const created = await EntryRepository.getById(entry.id);
+    if (!created) {
+      throw new Error("Falha ao carregar relato recém-criado.");
+    }
+    return created;
+  }
+
+  static async createReply(rawParams: CreateReplyInput): Promise<JournalEntryWithRelations> {
+    const params: CreateReplyOutput = createReplySchema.parse(rawParams);
+    await EntryRepository.ensureMood(params.moodId);
+
+    const [entry] = await db
+      .insert(journalEntries)
+      .values({
+        userId: params.userId,
+        moodId: params.moodId ?? null,
+        liked: false,
+        entryType: "reply",
+        content: params.content,
+        date: params.date ?? new Date(),
+      })
+      .returning();
+
+    if (!entry) {
+      throw new Error("Falha ao registrar resposta no banco de dados.");
+    }
+
+    const existingReply = await db.query.entryReplies.findFirst({
+      where: eq(entryReplies.entryId, params.parentEntryId),
+    });
+    await db.insert(entryReplies).values({
+      entryId: entry.id,
+      parentEntryId: existingReply ? existingReply.parentEntryId : params.parentEntryId,
+    });
+
+    await EntryRepository.syncRelations(entry.id, params);
+
+    const created = await EntryRepository.getById(entry.id);
+    if (!created) {
+      throw new Error("Falha ao carregar reflexão recém-criada.");
+    }
+    return created;
+  }
+
+  static async createRepost(rawParams: CreateRepostInput): Promise<JournalEntryWithRelations> {
+    const params: CreateRepostOutput = createRepostSchema.parse(rawParams);
+    await EntryRepository.ensureMood(params.moodId);
+
+    const [entry] = await db
+      .insert(journalEntries)
+      .values({
+        userId: params.userId,
+        moodId: params.moodId ?? null,
+        liked: false,
+        entryType: "repost",
+        content: params.content ?? "",
+        date: params.date ?? new Date(),
+      })
+      .returning();
+
+    if (!entry) {
+      throw new Error("Falha ao registrar republicação no banco de dados.");
+    }
+
+    await db.insert(entryReposts).values({
+      entryId: entry.id,
+      parentEntryId: params.parentEntryId,
+    });
+
+    await EntryRepository.syncRelations(entry.id, params);
+
+    const created = await EntryRepository.getById(entry.id);
+    if (!created) {
+      throw new Error("Falha ao carregar momento revisitado recém-criado.");
+    }
+    return created;
+  }
+
+  static async createJournalEntry(
+    rawParams: CreateJournalEntryInput
+  ): Promise<JournalEntryWithRelations> {
+    const params: CreateJournalEntryOutput = createJournalEntrySchema.parse(rawParams);
+
+    if (params.entryType === "repost" && params.parentEntryId) {
+      return EntryRepository.createRepost({
+        ...params,
         parentEntryId: params.parentEntryId,
       });
-    } else {
-      const existingReply = await db.query.entryReplies.findFirst({
-        where: eq(entryReplies.entryId, params.parentEntryId),
+    }
+
+    if (params.entryType === "reply" && params.parentEntryId) {
+      return EntryRepository.createReply({
+        ...params,
+        parentEntryId: params.parentEntryId,
       });
-      await db.insert(entryReplies).values({
-        entryId: entry.id,
-        parentEntryId: existingReply ? existingReply.parentEntryId : params.parentEntryId,
-      });
     }
+
+    return EntryRepository.createPost(params);
   }
 
-  if (params.emotions && params.emotions.length > 0) {
-    const valid = params.emotions.filter((e) => e.id);
-    if (valid.length > 0) {
-      await db
-        .insert(entryEmotions)
-        .values(valid.map((e) => ({ entryId: entry.id, emotionId: e.id! })))
-        .onConflictDoNothing();
-    }
-  }
+  static async update(
+    rawParams: UpdateJournalEntryInput
+  ): Promise<JournalEntryWithRelations> {
+    const params: UpdateJournalEntryOutput = updateJournalEntryParamsSchema.parse(rawParams);
+    const { entryId } = params;
 
-  if (params.thoughts && params.thoughts.length > 0) {
-    const thoughtIds: number[] = [];
-    for (const t of params.thoughts) {
-      if (t.id) {
-        thoughtIds.push(t.id);
-      } else if (t.name?.trim()) {
-        const [created] = await db
-          .insert(thoughts)
-          .values({ name: t.name.trim() })
-          .onConflictDoNothing()
-          .returning({ id: thoughts.id });
-        if (created?.id) {
-          thoughtIds.push(created.id);
-        } else {
-          const found = await db.query.thoughts.findFirst({ where: eq(thoughts.name, t.name.trim()) });
-          if (found) thoughtIds.push(found.id);
-        }
-      }
-    }
-    if (thoughtIds.length > 0) {
-      await db
-        .insert(entryThoughts)
-        .values(thoughtIds.map((id) => ({ entryId: entry.id, thoughtsId: id })))
-        .onConflictDoNothing();
-    }
-  }
+    await EntryRepository.ensureMood(params.moodId);
 
-  if (params.reactions && params.reactions.length > 0) {
-    const valid = params.reactions.filter((r) => r.id);
-    if (valid.length > 0) {
-      await db
-        .insert(entryReactions)
-        .values(valid.map((r) => ({ entryId: entry.id, reactionId: r.id! })))
-        .onConflictDoNothing();
-    }
-  }
-
-  if (params.behaviors && params.behaviors.length > 0) {
-    const behaviorIds: number[] = [];
-    for (const b of params.behaviors) {
-      if (b.id) {
-        behaviorIds.push(b.id);
-      } else if (b.content?.trim()) {
-        const [created] = await db
-          .insert(behaviors)
-          .values({ content: b.content.trim(), icon: b.icon ?? null })
-          .returning({ id: behaviors.id });
-        if (created?.id) behaviorIds.push(created.id);
-      }
-    }
-    if (behaviorIds.length > 0) {
-      await db
-        .insert(entryBehaviors)
-        .values(behaviorIds.map((id) => ({ entryId: entry.id, behaviorId: id })))
-        .onConflictDoNothing();
-    }
-  }
-
-  if (params.images && params.images.length > 0) {
-    const uniqueImages = Array.from(new Set(params.images.map((img) => img.trim()).filter(Boolean)));
-    if (uniqueImages.length > 0) {
-      await db.insert(entryImages).values(
-        uniqueImages.map((imageUrl) => ({ entryId: entry.id, imageUrl }))
-      );
-    }
-  }
-
-  const created = await getJournalEntryById(entry.id);
-  if (!created) {
-    throw new Error("Falha ao carregar relato recém-criado.");
-  }
-
-  return created;
-}
-
-export async function getParentEntry(
-  entryId: number
-): Promise<JournalEntryWithRelations | null> {
-  const replyLink = await db.query.entryReplies.findFirst({
-    where: eq(entryReplies.entryId, entryId),
-  });
-  if (replyLink) {
-    return getJournalEntryById(replyLink.parentEntryId);
-  }
-
-  const repostLink = await db.query.entryReposts.findFirst({
-    where: eq(entryReposts.entryId, entryId),
-  });
-  if (repostLink) {
-    return getJournalEntryById(repostLink.parentEntryId);
-  }
-
-  return null;
-}
-
-export async function getEntryWithThread(
-  entryId: number
-): Promise<EntryThreadResult | null> {
-  const entry = await getJournalEntryById(entryId);
-  if (!entry) return null;
-
-  let rootId = entry.id;
-  if (entry.entryType === "reply") {
-    const parentLink = await db.query.entryReplies.findFirst({
-      where: eq(entryReplies.entryId, entry.id),
-    });
-    if (parentLink) {
-      rootId = parentLink.parentEntryId;
-    }
-  }
-
-  const rootEntry = rootId === entry.id ? entry : await getJournalEntryById(rootId);
-  if (!rootEntry) return null;
-
-  const replyLinks = await db.query.entryReplies.findMany({
-    where: eq(entryReplies.parentEntryId, rootId),
-  });
-
-  const replyEntryIds = replyLinks.map((r) => r.entryId);
-  if (replyEntryIds.length === 0) {
-    return { rootEntry, replies: [] };
-  }
-
-  const allReplies = await db.query.journalEntries.findMany({
-    where: and(
-      inArray(journalEntries.id, replyEntryIds),
-      eq(journalEntries.entryType, "reply"),
-      isNull(journalEntries.deletedAt)
-    ),
-    orderBy: [asc(journalEntries.date), asc(journalEntries.id)],
-    with: {
-      mood: true,
-      entryEmotions: { with: { emotion: true } },
-      entryThoughts: { with: { thought: true } },
-      entryBehaviors: { with: { behavior: true } },
-      entryReactions: { with: { reaction: true } },
-      entryImages: true,
-    },
-  });
-
-  return {
-    rootEntry,
-    replies: (allReplies as JournalEntryWithRelations[]) ?? [],
-  };
-}
-
-export async function getJournalEntries(
-  userId: number,
-  options: { limit?: number; offset?: number } = {}
-): Promise<JournalEntryWithRelations[]> {
-  const { limit = 20, offset = 0 } = options;
-
-  return db.query.journalEntries.findMany({
-    where: and(
-      eq(journalEntries.userId, userId),
-      isNull(journalEntries.deletedAt),
-      or(
-        eq(journalEntries.entryType, "post"),
-        eq(journalEntries.entryType, "repost"),
-        isNull(journalEntries.entryType)
-      )
-    ),
-    orderBy: [desc(journalEntries.fixed), desc(journalEntries.date), desc(journalEntries.id)],
-    limit,
-    offset,
-    with: {
-      mood: true,
-      entryEmotions: { with: { emotion: true } },
-      entryThoughts: { with: { thought: true } },
-      entryBehaviors: { with: { behavior: true } },
-      entryReactions: { with: { reaction: true } },
-      entryImages: true,
-      parentRepost: {
-        with: {
-          parentEntry: {
-            with: {
-              mood: true,
-              entryEmotions: { with: { emotion: true } },
-              entryThoughts: { with: { thought: true } },
-              entryBehaviors: { with: { behavior: true } },
-              entryReactions: { with: { reaction: true } },
-              entryImages: true,
-            },
-          },
-        },
-      },
-      parentReply: {
-        with: {
-          parentEntry: {
-            with: {
-              mood: true,
-              entryEmotions: { with: { emotion: true } },
-              entryThoughts: { with: { thought: true } },
-              entryBehaviors: { with: { behavior: true } },
-              entryReactions: { with: { reaction: true } },
-              entryImages: true,
-            },
-          },
-        },
-      },
-    },
-  });
-}
-
-export async function getJournalEntryById(
-  entryId: number
-): Promise<JournalEntryWithRelations | null> {
-  const entry = await db.query.journalEntries.findFirst({
-    where: and(
-      eq(journalEntries.id, entryId),
-      isNull(journalEntries.deletedAt)
-    ),
-    with: {
-      mood: true,
-      entryEmotions: { with: { emotion: true } },
-      entryThoughts: { with: { thought: true } },
-      entryBehaviors: { with: { behavior: true } },
-      entryReactions: { with: { reaction: true } },
-      entryImages: true,
-      parentRepost: {
-        with: {
-          parentEntry: {
-            with: {
-              mood: true,
-              entryEmotions: { with: { emotion: true } },
-              entryThoughts: { with: { thought: true } },
-              entryBehaviors: { with: { behavior: true } },
-              entryReactions: { with: { reaction: true } },
-              entryImages: true,
-            },
-          },
-        },
-      },
-      parentReply: {
-        with: {
-          parentEntry: {
-            with: {
-              mood: true,
-              entryEmotions: { with: { emotion: true } },
-              entryThoughts: { with: { thought: true } },
-              entryBehaviors: { with: { behavior: true } },
-              entryReactions: { with: { reaction: true } },
-              entryImages: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  return (entry as JournalEntryWithRelations) ?? null;
-}
-
-export async function updateJournalEntry(
-  rawParams: UpdateJournalEntryParams
-): Promise<JournalEntryWithRelations> {
-  const { entryId } = rawParams;
-
-  if (rawParams.moodId) {
     await db
-      .insert(moods)
-      .values({
-        id: rawParams.moodId,
-        name: DEFAULT_MOOD_NAMES[rawParams.moodId] ?? "Neutro",
+      .update(journalEntries)
+      .set({
+        ...(params.content !== undefined ? { content: params.content } : {}),
+        ...(params.moodId !== undefined ? { moodId: params.moodId } : {}),
+        ...(params.date !== undefined ? { date: params.date } : {}),
+        updatedAt: new Date(),
       })
-      .onConflictDoNothing();
-  }
+      .where(eq(journalEntries.id, entryId));
 
-  await db
-    .update(journalEntries)
-    .set({
-      content: rawParams.content,
-      moodId: rawParams.moodId ?? null,
-      ...(rawParams.date ? { date: rawParams.date } : {}),
-      updatedAt: new Date(),
-    })
-    .where(eq(journalEntries.id, entryId));
+    await EntryRepository.syncRelations(entryId, params, { replace: true });
 
-  if (rawParams.emotions !== undefined) {
-    await db.delete(entryEmotions).where(eq(entryEmotions.entryId, entryId));
-    const valid = rawParams.emotions.filter((e) => e.id);
-    if (valid.length > 0) {
-      await db
-        .insert(entryEmotions)
-        .values(valid.map((e) => ({ entryId, emotionId: e.id! })))
-        .onConflictDoNothing();
+    const updated = await EntryRepository.getById(entryId);
+    if (!updated) {
+      throw new Error(`Entrada #${entryId} não encontrada após atualização.`);
     }
+
+    return updated;
   }
 
-  if (rawParams.thoughts !== undefined) {
-    await db.delete(entryThoughts).where(eq(entryThoughts.entryId, entryId));
-    const thoughtIds = rawParams.thoughts.filter((t) => t.id).map((t) => t.id!);
-    if (thoughtIds.length > 0) {
-      await db
-        .insert(entryThoughts)
-        .values(thoughtIds.map((id) => ({ entryId, thoughtsId: id })))
-        .onConflictDoNothing();
+  static async updatePartial(
+    entryId: number,
+    newEntryData: UpdateJournalEntryPartialInput
+  ): Promise<void> {
+    const data = journalEntryUpdateSchema.parse(newEntryData);
+    await db
+      .update(journalEntries)
+      .set(data)
+      .where(eq(journalEntries.id, entryId));
+  }
+
+  static async delete(entryId: number): Promise<void> {
+    await db.delete(journalEntries).where(eq(journalEntries.id, entryId));
+  }
+
+  static async getById(entryId: number): Promise<JournalEntryWithRelations | null> {
+    const entry = await db.query.journalEntries.findFirst({
+      where: and(
+        eq(journalEntries.id, entryId),
+        isNull(journalEntries.deletedAt)
+      ),
+      with: {
+        mood: true,
+        entryEmotions: { with: { emotion: true } },
+        entryThoughts: { with: { thought: true } },
+        entryBehaviors: { with: { behavior: true } },
+        entryReactions: { with: { reaction: true } },
+        entryImages: true,
+        parentRepost: {
+          with: {
+            parentEntry: {
+              with: {
+                mood: true,
+                entryEmotions: { with: { emotion: true } },
+                entryThoughts: { with: { thought: true } },
+                entryBehaviors: { with: { behavior: true } },
+                entryReactions: { with: { reaction: true } },
+                entryImages: true,
+              },
+            },
+          },
+        },
+        parentReply: {
+          with: {
+            parentEntry: {
+              with: {
+                mood: true,
+                entryEmotions: { with: { emotion: true } },
+                entryThoughts: { with: { thought: true } },
+                entryBehaviors: { with: { behavior: true } },
+                entryReactions: { with: { reaction: true } },
+                entryImages: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return (entry as JournalEntryWithRelations) ?? null;
+  }
+
+  static async getParent(
+    entryId: number
+  ): Promise<JournalEntryWithRelations | null> {
+    const replyLink = await db.query.entryReplies.findFirst({
+      where: eq(entryReplies.entryId, entryId),
+    });
+    if (replyLink) {
+      return EntryRepository.getById(replyLink.parentEntryId);
     }
-  }
 
-  if (rawParams.reactions !== undefined) {
-    await db.delete(entryReactions).where(eq(entryReactions.entryId, entryId));
-    const valid = rawParams.reactions.filter((r) => r.id);
-    if (valid.length > 0) {
-      await db
-        .insert(entryReactions)
-        .values(valid.map((r) => ({ entryId, reactionId: r.id! })))
-        .onConflictDoNothing();
+    const repostLink = await db.query.entryReposts.findFirst({
+      where: eq(entryReposts.entryId, entryId),
+    });
+    if (repostLink) {
+      return EntryRepository.getById(repostLink.parentEntryId);
     }
+
+    return null;
   }
 
-  if (rawParams.behaviors !== undefined) {
-    await db.delete(entryBehaviors).where(eq(entryBehaviors.entryId, entryId));
-    const valid = rawParams.behaviors.filter((b) => b.id);
-    if (valid.length > 0) {
-      await db
-        .insert(entryBehaviors)
-        .values(valid.map((b) => ({ entryId, behaviorId: b.id! })))
-        .onConflictDoNothing();
+  static async getThread(
+    entryId: number
+  ): Promise<EntryThreadResult | null> {
+    const entry = await EntryRepository.getById(entryId);
+    if (!entry) return null;
+
+    let rootId = entry.id;
+    if (entry.entryType === "reply") {
+      const parentLink = await db.query.entryReplies.findFirst({
+        where: eq(entryReplies.entryId, entry.id),
+      });
+      if (parentLink) {
+        rootId = parentLink.parentEntryId;
+      }
     }
-  }
 
-  if (rawParams.images !== undefined) {
-    await db.delete(entryImages).where(eq(entryImages.entryId, entryId));
-    const unique = Array.from(new Set(rawParams.images.map((img) => img.trim()).filter(Boolean)));
-    if (unique.length > 0) {
-      await db.insert(entryImages).values(unique.map((imageUrl) => ({ entryId, imageUrl })));
+    const rootEntry = rootId === entry.id ? entry : await EntryRepository.getById(rootId);
+    if (!rootEntry) return null;
+
+    const replyLinks = await db.query.entryReplies.findMany({
+      where: eq(entryReplies.parentEntryId, rootId),
+    });
+
+    const replyEntryIds = replyLinks.map((r) => r.entryId);
+    if (replyEntryIds.length === 0) {
+      return { rootEntry, replies: [] };
     }
+
+    const allReplies = await db.query.journalEntries.findMany({
+      where: and(
+        inArray(journalEntries.id, replyEntryIds),
+        eq(journalEntries.entryType, "reply"),
+        isNull(journalEntries.deletedAt)
+      ),
+      orderBy: [asc(journalEntries.date), asc(journalEntries.id)],
+      with: {
+        mood: true,
+        entryEmotions: { with: { emotion: true } },
+        entryThoughts: { with: { thought: true } },
+        entryBehaviors: { with: { behavior: true } },
+        entryReactions: { with: { reaction: true } },
+        entryImages: true,
+      },
+    });
+
+    return {
+      rootEntry,
+      replies: (allReplies as JournalEntryWithRelations[]) ?? [],
+    };
   }
 
-  const updated = await getJournalEntryById(entryId);
-  if (!updated) {
-    throw new Error(`Entrada #${entryId} não encontrada após atualização.`);
-  }
+  static async getFeed(
+    userId: number,
+    options: { limit?: number; offset?: number } = {}
+  ): Promise<JournalEntryWithRelations[]> {
+    const { limit = 20, offset = 0 } = options;
 
-  return updated;
+    return db.query.journalEntries.findMany({
+      where: and(
+        eq(journalEntries.userId, userId),
+        isNull(journalEntries.deletedAt),
+        or(
+          eq(journalEntries.entryType, "post"),
+          eq(journalEntries.entryType, "repost"),
+          isNull(journalEntries.entryType)
+        )
+      ),
+      orderBy: [desc(journalEntries.fixed), desc(journalEntries.date), desc(journalEntries.id)],
+      limit,
+      offset,
+      with: {
+        mood: true,
+        entryEmotions: { with: { emotion: true } },
+        entryThoughts: { with: { thought: true } },
+        entryBehaviors: { with: { behavior: true } },
+        entryReactions: { with: { reaction: true } },
+        entryImages: true,
+        parentRepost: {
+          with: {
+            parentEntry: {
+              with: {
+                mood: true,
+                entryEmotions: { with: { emotion: true } },
+                entryThoughts: { with: { thought: true } },
+                entryBehaviors: { with: { behavior: true } },
+                entryReactions: { with: { reaction: true } },
+                entryImages: true,
+              },
+            },
+          },
+        },
+        parentReply: {
+          with: {
+            parentEntry: {
+              with: {
+                mood: true,
+                entryEmotions: { with: { emotion: true } },
+                entryThoughts: { with: { thought: true } },
+                entryBehaviors: { with: { behavior: true } },
+                entryReactions: { with: { reaction: true } },
+                entryImages: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }
 
-export async function deleteJournalEntry(entryId: number): Promise<void> {
-  await db.delete(journalEntries).where(eq(journalEntries.id, entryId));
-}
-
-export async function updateEntryPartial(
-  entryId: number,
-  newEntryData: UpdateJournalEntryInput
-): Promise<void> {
-  const data = journalEntryUpdateSchema.parse(newEntryData);
-  await db
-    .update(journalEntries)
-    .set(data)
-    .where(eq(journalEntries.id, entryId));
-}
+// ─── ALIASES PARA COMPATIBILIDADE E CONVENIÊNCIA ───────────────────────────
+export const createPost = EntryRepository.createPost;
+export const createReply = EntryRepository.createReply;
+export const createRepost = EntryRepository.createRepost;
+export const createJournalEntry = EntryRepository.createJournalEntry;
+export const updateJournalEntry = EntryRepository.update;
+export const deleteJournalEntry = EntryRepository.delete;
+export const updateEntryPartial = EntryRepository.updatePartial;
+export const getJournalEntries = EntryRepository.getFeed;
+export const getJournalEntryById = EntryRepository.getById;
+export const getEntryWithThread = EntryRepository.getThread;
+export const getParentEntry = EntryRepository.getParent;

@@ -210,6 +210,10 @@ describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
         .insert(reactions)
         .values({ name: "Sorriso involuntário", userId: testUserId })
         .returning();
+      const [bh] = await testDb
+        .insert(schema.behaviors)
+        .values({ content: "Caminhar ao ar livre", icon: "Footprints", userId: testUserId })
+        .returning();
 
       emotionId = em.id;
       thoughtId = th.id;
@@ -225,7 +229,7 @@ describe("Tela de Nova Entry - Validação e Salvamento no Banco", () => {
         emotions: [{ id: emotionId, name: "Alegria" }],
         thoughts: [{ id: thoughtId, name: "Tudo vai dar certo" }],
         reactions: [{ id: reactionId, name: "Sorriso involuntário" }],
-        behaviors: [{ content: "Caminhar ao ar livre", icon: "Footprints" }],
+        behaviors: [{ id: bh.id, content: "Caminhar ao ar livre", icon: "Footprints" }],
         images: ["file:///storage/emulated/0/DCIM/Camera/IMG_001.jpg"],
       });
 
