@@ -1,35 +1,47 @@
 import type { z } from "zod/v4";
 import type { CategoryType } from "../schema";
 import type {
+  behaviorCategorySchema,
   behaviorInsertSchema,
+  behaviorItemSchema,
   behaviorSelectSchema,
   birthDateSchema,
   categoryInsertSchema,
   categorySelectSchema,
   categoryWithItemsSchema,
+  createBehaviorFormSchema,
+  createCategoryFormSchema,
+  createEmotionFormSchema,
   createJournalEntrySchema,
+  createPostSchema,
+  createReactionFormSchema,
+  createReplySchema,
+  createRepostSchema,
+  createThoughtFormSchema,
   emotionInsertSchema,
   emotionSelectSchema,
+  entryBehaviorItemSchema,
   entryBehaviorSelectSchema,
   entryBehaviorWithRelationSchema,
-  entryBehaviorItemSchema,
+  entryEmotionItemSchema,
   entryEmotionSelectSchema,
   entryEmotionWithRelationSchema,
-  entryEmotionItemSchema,
   entryImageInsertSchema,
   entryImageSelectSchema,
+  entryReactionItemSchema,
   entryReactionSelectSchema,
   entryReactionWithRelationSchema,
-  entryReactionItemSchema,
   entryReplyInsertSchema,
   entryReplySelectSchema,
   entryRepostInsertSchema,
   entryRepostSelectSchema,
+  entryThoughtItemSchema,
   entryThoughtSelectSchema,
   entryThoughtWithRelationSchema,
-  entryThoughtItemSchema,
+  entryThreadResultSchema,
   journalEntryInsertSchema,
   journalEntrySelectSchema,
+  journalEntryUpdateSchema,
   journalEntryWithRelationsSchema,
   loginSchema,
   moodInsertSchema,
@@ -44,18 +56,15 @@ import type {
   registerPinSchema,
   registerSchema,
   registerSecuritySchema,
+  resourceCategorySchema,
+  resourceItemSchema,
   thoughtInsertSchema,
   thoughtSelectSchema,
+  updateJournalEntryParamsSchema,
   userInsertBaseSchema,
   userInsertSchema,
   userSelectBaseSchema,
   userWithRelationsSchema,
-  journalEntryUpdateSchema,
-  createCategoryFormSchema,
-  createEmotionFormSchema,
-  createThoughtFormSchema,
-  createReactionFormSchema,
-  createBehaviorFormSchema,
 } from "./zod-schemas";
 
 declare global {
@@ -116,18 +125,30 @@ declare global {
   type JournalEntryWithRelations = z.infer<typeof journalEntryWithRelationsSchema>;
   type CategoryWithItems = z.infer<typeof categoryWithItemsSchema>;
   type UserWithRelations = z.infer<typeof userWithRelationsSchema>;
+  type EntryThreadResult = z.infer<typeof entryThreadResultSchema>;
 
   // User principal tipado com relacionamentos para a sessão Zustand
   type User = UserWithRelations;
 
-  // ─── 5. RELATO DO DIÁRIO / ENTRY ─────────────────────────────────────────
+  // ─── 5. RELATO DO DIÁRIO / ENTRY (POST, REPLY, REPOST E UPDATE) ──────────
+  type CreatePostInput = z.input<typeof createPostSchema>;
+  type CreatePostOutput = z.output<typeof createPostSchema>;
+
+  type CreateReplyInput = z.input<typeof createReplySchema>;
+  type CreateReplyOutput = z.output<typeof createReplySchema>;
+
+  type CreateRepostInput = z.input<typeof createRepostSchema>;
+  type CreateRepostOutput = z.output<typeof createRepostSchema>;
+
+  type UpdateJournalEntryInput = z.input<typeof updateJournalEntryParamsSchema>;
+  type UpdateJournalEntryOutput = z.output<typeof updateJournalEntryParamsSchema>;
+  type UpdateJournalEntryPartialInput = z.input<typeof journalEntryUpdateSchema>;
+
   type NewEntrySchema = z.infer<typeof newEntrySchema>;
   type NewEntryInput = z.input<typeof newEntrySchema>;
   type CreateJournalEntryOutput = z.output<typeof createJournalEntrySchema>;
   type CreateJournalEntryInput = z.input<typeof createJournalEntrySchema>;
   type CreateJournalEntryParams = CreateJournalEntryInput;
-
-  type UpdateJournalEntryInput = z.input<typeof journalEntryUpdateSchema>;
 
   // ─── 6. AUTENTICAÇÃO E CADASTRO ──────────────────────────────────────────
   type LoginSchema = z.infer<typeof loginSchema>;
@@ -142,47 +163,17 @@ declare global {
   type RegisterIdentitySchema = z.infer<typeof registerIdentitySchema>;
   type RegisterPinSchema = z.infer<typeof registerPinSchema>;
 
-  // ─── 7. UI / DRAWER VIEW HELPERS ────────────────────────────────────────
+  // ─── 7. UI / DRAWER VIEW HELPERS E PROJEÇÕES ────────────────────────────
   type CreateCategoryFormSchema = z.infer<typeof createCategoryFormSchema>;
   type CreateEmotionFormSchema = z.infer<typeof createEmotionFormSchema>;
   type CreateThoughtFormSchema = z.infer<typeof createThoughtFormSchema>;
   type CreateReactionFormSchema = z.infer<typeof createReactionFormSchema>;
   type CreateBehaviorFormSchema = z.infer<typeof createBehaviorFormSchema>;
 
-  type ResourceItem = {
-    id: number;
-    name: string;
-    categoryId: number | null;
-    categoryName?: string | null;
-    orderIndex: number;
-    userId: number | null;
-  };
-
-  type ResourceCategory = {
-    id: number;
-    name: string;
-    type?: CategoryType;
-    orderIndex: number;
-    userId: number | null;
-    items: ResourceItem[];
-  };
-
-  type BehaviorItem = {
-    id: number;
-    content: string;
-    icon: string | null;
-    categoryId: number | null;
-    categoryName?: string | null;
-    userId: number | null;
-    orderIndex: number;
-  };
-
-  type BehaviorCategory = {
-    id: number;
-    name: string;
-    orderIndex: number;
-    items: BehaviorItem[];
-  };
+  type ResourceItem = z.infer<typeof resourceItemSchema>;
+  type ResourceCategory = z.infer<typeof resourceCategorySchema>;
+  type BehaviorItem = z.infer<typeof behaviorItemSchema>;
+  type BehaviorCategory = z.infer<typeof behaviorCategorySchema>;
 }
 
 export type {
@@ -225,6 +216,16 @@ export type {
   JournalEntryWithRelations,
   CategoryWithItems,
   UserWithRelations,
+  EntryThreadResult,
+  CreatePostInput,
+  CreatePostOutput,
+  CreateReplyInput,
+  CreateReplyOutput,
+  CreateRepostInput,
+  CreateRepostOutput,
+  UpdateJournalEntryInput,
+  UpdateJournalEntryOutput,
+  UpdateJournalEntryPartialInput,
   NewEntrySchema,
   NewEntryInput,
   CreateJournalEntryOutput,

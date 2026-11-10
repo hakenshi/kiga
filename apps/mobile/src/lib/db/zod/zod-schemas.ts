@@ -2,6 +2,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import {
   behaviors,
   categories,
+  categoryTypeEnum,
   emotions,
   entryBehaviors,
   entryEmotions,
@@ -156,6 +157,12 @@ export const journalEntryWithRelationsSchema = journalEntrySelectSchema.extend({
   replies: z.array(entryReplySelectSchema).optional(),
   parentRepost: entryRepostWithRelationSchema.nullable().optional(),
   reposts: z.array(entryRepostSelectSchema).optional(),
+});
+
+// Resultado de Thread (Post raiz + lista de reflexões/replies)
+export const entryThreadResultSchema = z.object({
+  rootEntry: journalEntryWithRelationsSchema,
+  replies: z.array(journalEntryWithRelationsSchema),
 });
 
 // Categoria com itens relacionados
@@ -338,6 +345,67 @@ export const entryBehaviorItemSchema = behaviorInsertSchema
   });
 
 // ─── 6. RELATO DO DIÁRIO (NOVA ENTRY / PERSISTÊNCIA VIA DRIZZLE-ZOD) ──────
+
+// Payload base compartilhado entre operações de entrada (sem defaults mágicos para permitir .partial())
+export const entryBasePayloadSchema = journalEntryInsertSchema
+  .pick({
+    moodId: true,
+  })
+  .extend({
+    content: z.string().transform((s) => s.trim()),
+    emotions: z.array(entryEmotionItemSchema),
+    thoughts: z.array(entryThoughtItemSchema),
+    reactions: z.array(entryReactionItemSchema),
+    behaviors: z.array(entryBehaviorItemSchema),
+    images: z.array(entryImageInsertSchema.shape.imageUrl),
+  });
+
+// Schema dedicado para criação de post original
+export const createPostSchema = entryBasePayloadSchema
+  .extend({
+    userId: journalEntryInsertSchema.shape.userId,
+    date: journalEntryInsertSchema.shape.date.optional(),
+    content: z
+      .string()
+      .trim()
+      .min(1, "O conteúdo do relato não pode ficar em branco"),
+    emotions: z.array(entryEmotionItemSchema).default([]),
+    thoughts: z.array(entryThoughtItemSchema).default([]),
+    reactions: z.array(entryReactionItemSchema).default([]),
+    behaviors: z.array(entryBehaviorItemSchema).default([]),
+    images: z.array(entryImageInsertSchema.shape.imageUrl).default([]),
+  });
+
+// Schema dedicado para criação de resposta (reply em thread)
+export const createReplySchema = createPostSchema.extend({
+  parentEntryId: z.number().int().positive("ID do relato pai inválido"),
+});
+
+// Schema dedicado para criação de repost (com citação opcional)
+export const createRepostSchema = entryBasePayloadSchema
+  .extend({
+    userId: journalEntryInsertSchema.shape.userId,
+    date: journalEntryInsertSchema.shape.date.optional(),
+    parentEntryId: z.number().int().positive("ID do relato original inválido"),
+    content: z.string().default("").transform((s) => s.trim()),
+    emotions: z.array(entryEmotionItemSchema).default([]),
+    thoughts: z.array(entryThoughtItemSchema).default([]),
+    reactions: z.array(entryReactionItemSchema).default([]),
+    behaviors: z.array(entryBehaviorItemSchema).default([]),
+    images: z.array(entryImageInsertSchema.shape.imageUrl).default([]),
+  });
+
+// Schema de Atualização derivado com .partial() a partir do payload base + campos de usuário/data
+export const updateJournalEntryParamsSchema = entryBasePayloadSchema
+  .extend({
+    userId: journalEntryInsertSchema.shape.userId,
+    date: journalEntryInsertSchema.shape.date,
+  })
+  .partial()
+  .extend({
+    entryId: journalEntrySelectSchema.shape.id,
+  });
+
 export const newEntrySchema = journalEntryInsertSchema
   .pick({
     moodId: true,
@@ -405,4 +473,41 @@ export const createBehaviorFormSchema = behaviorInsertSchema
   .extend({
     categoryName: z.string().nullable().optional(),
   });
+
+// ─── 8. SCHEMAS DE RECURSOS E COMPORTAMENTOS (PROJEÇÃO DE CONSULTA) ───────
+export const resourceItemSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  categoryId: z.number().nullable(),
+  categoryName: z.string().nullable().optional(),
+  orderIndex: z.number(),
+  userId: z.number().nullable(),
+});
+
+export const resourceCategorySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  type: z.enum(categoryTypeEnum).optional(),
+  orderIndex: z.number(),
+  userId: z.number().nullable(),
+  items: z.array(resourceItemSchema),
+});
+
+export const behaviorItemSchema = z.object({
+  id: z.number(),
+  content: z.string(),
+  icon: z.string().nullable(),
+  categoryId: z.number().nullable(),
+  categoryName: z.string().nullable().optional(),
+  userId: z.number().nullable(),
+  orderIndex: z.number(),
+});
+
+export const behaviorCategorySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  orderIndex: z.number(),
+  items: z.array(behaviorItemSchema),
+});
+
 
