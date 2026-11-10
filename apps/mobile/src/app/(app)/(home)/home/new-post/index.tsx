@@ -1,5 +1,5 @@
 import { Composer } from "@/components/composer/composer";
-import { createJournalEntry } from "@/repositories/entry-repository";
+import { EntryRepository } from "@/repositories/entry-repository";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
 import { useNewPostStore } from "@/stores/new-post-store";
@@ -21,7 +21,7 @@ export default function NewPostPage() {
 
       useNewPostStore.setState({ isSaving: true });
       try {
-        const newEntry = await createJournalEntry({
+        const newEntry = await EntryRepository.createPost({
           userId: user!.id,
           content: state.content,
           moodId: state.moodId,

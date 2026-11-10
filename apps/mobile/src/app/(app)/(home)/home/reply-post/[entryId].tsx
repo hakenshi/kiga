@@ -9,7 +9,7 @@ import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { createJournalEntry, getEntryWithThread } from "@/repositories/entry-repository";
+import { EntryRepository } from "@/repositories/entry-repository";
 import { resolveMoodConfig } from "@/lib/mood-utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
@@ -46,7 +46,7 @@ export default function ReplyPostPage() {
     const numId = Number(entryId);
     useComposerDraftStore.getState().reset();
     setIsLoadingThread(true);
-    getEntryWithThread(numId)
+    EntryRepository.getThread(numId)
       .then((thread) => {
         if (thread) {
           setRootEntry(thread.rootEntry);
@@ -72,9 +72,8 @@ export default function ReplyPostPage() {
 
       useComposerDraftStore.setState({ isSaving: true });
       try {
-        const newReply = await createJournalEntry({
+        const newReply = await EntryRepository.createReply({
           userId: user!.id,
-          entryType: "reply",
           parentEntryId: rootEntry.id,
           content: state.content,
           moodId: state.moodId,

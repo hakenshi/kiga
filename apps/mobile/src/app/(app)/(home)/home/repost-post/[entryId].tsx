@@ -8,7 +8,7 @@ import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { createJournalEntry, getJournalEntryById } from "@/repositories/entry-repository";
+import { EntryRepository } from "@/repositories/entry-repository";
 import { resolveMoodConfig } from "@/lib/mood-utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
@@ -44,7 +44,7 @@ export default function RepostPostPage() {
     const numId = Number(entryId);
     useComposerDraftStore.getState().reset();
     setIsLoadingQuoted(true);
-    getJournalEntryById(numId)
+    EntryRepository.getById(numId)
       .then((entry) => setQuotedEntry(entry))
       .finally(() => setIsLoadingQuoted(false));
   }, [entryId]);
@@ -64,9 +64,8 @@ export default function RepostPostPage() {
 
       useComposerDraftStore.setState({ isSaving: true });
       try {
-        const newRepost = await createJournalEntry({
+        const newRepost = await EntryRepository.createRepost({
           userId: user!.id,
-          entryType: "repost",
           parentEntryId: quotedEntry.id,
           content: state.content.trim(),
           moodId: state.moodId,
