@@ -10,7 +10,7 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { VStack } from "@/components/ui/vstack";
-import { registerIdentitySchema } from "@/lib/db/zod/zod-schemas";
+import { registerIdentitySchema } from "@/lib/db/zod/schemas/auth.schema";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";

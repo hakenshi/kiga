@@ -11,7 +11,7 @@ import {
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { registerNameSchema } from "@/lib/db/zod/zod-schemas";
+import { registerNameSchema } from "@/lib/db/zod/schemas/auth.schema";
 import { formatDateMask, toMaskedDate } from "@/lib/utils";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -4,7 +4,7 @@ import {
   registerNameSchema,
   registerPinSchema,
   registerSecuritySchema,
-} from "@/lib/db/zod/zod-schemas";
+} from "@/lib/db/zod/schemas/auth.schema";
 import { useRegisterStore } from "@/stores/register-store";
 
 describe("Fluxo de Cadastro - 4 Etapas com Zustand Store", () => {

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/form-control";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
-import { registerSecuritySchema } from "@/lib/db/zod/zod-schemas";
+import { registerSecuritySchema } from "@/lib/db/zod/schemas/auth.schema";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";

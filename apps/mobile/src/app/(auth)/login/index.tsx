@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { loginSchema } from "@/lib/db/zod/zod-schemas";
+import { loginSchema } from "@/lib/db/zod/schemas/auth.schema";
 import { useAuthStore } from "@/stores/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { eq } from "drizzle-orm";

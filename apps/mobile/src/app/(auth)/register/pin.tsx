@@ -15,7 +15,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { birthDateSchema, registerPinSchema } from "@/lib/db/zod/zod-schemas";
+import { birthDateSchema, registerPinSchema } from "@/lib/db/zod/schemas/auth.schema";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
