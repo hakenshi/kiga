@@ -21,6 +21,8 @@ import m0016 from './0016_equal_drax.sql';
 import m0017 from './0017_loud_grey_gargoyle.sql';
 import m0018 from './0018_low_jimmy_woo.sql';
 import m0019 from './0019_old_blur.sql';
+import m0020 from './0020_left_the_santerians.sql';
+import m0021 from './0021_daffy_thunderbolts.sql';
 
   export default {
     journal,
@@ -44,7 +46,9 @@ m0015,
 m0016,
 m0017,
 m0018,
-m0019
+m0019,
+m0020,
+m0021
     }
   }
   

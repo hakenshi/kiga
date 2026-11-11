@@ -141,6 +141,20 @@
       "when": 1793958767144,
       "tag": "0019_old_blur",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1794390229307,
+      "tag": "0020_left_the_santerians",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1794390362751,
+      "tag": "0021_daffy_thunderbolts",
+      "breakpoints": true
     }
   ]
 }
