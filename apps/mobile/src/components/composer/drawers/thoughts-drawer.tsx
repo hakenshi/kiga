@@ -25,7 +25,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import defaultThoughts from "@/lib/data/thoughts.json";
-import { createThoughtFormSchema } from "@/lib/db/zod/zod-schemas";
+import { createThoughtFormSchema } from "@/lib/db/zod/schemas/resource.schema";
 import { useComposer } from "../composer-context";
 
 export default function ThoughtsDrawer() {

@@ -45,7 +45,7 @@ import {
 import {
   createCategoryFormSchema,
   createReactionFormSchema,
-} from "@/lib/db/zod/zod-schemas";
+} from "@/lib/db/zod/schemas/resource.schema";
 import { useAuthStore } from "@/stores/auth-store";
 import { useComposer } from "../composer-context";
 
