@@ -3,7 +3,7 @@ import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
-import { newEntrySchema } from "@/lib/db/zod/zod-schemas";
+import { newEntrySchema } from "@/lib/db/zod/schemas/entry.schema";
 import * as schema from "@/lib/db/schema";
 import * as relations from "@/lib/db/relations";
 import {
