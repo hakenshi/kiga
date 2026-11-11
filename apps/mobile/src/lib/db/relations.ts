@@ -105,18 +105,8 @@ export const journalEntriesRelations = relations(journalEntries, ({ one, many })
   entryEmotions: many(entryEmotions),
   entryBehaviors: many(entryBehaviors),
   entryImages: many(entryImages),
-  replies: many(entryReplies, { relationName: "parentEntry" }),
-  parentReply: one(entryReplies, {
-    fields: [journalEntries.id],
-    references: [entryReplies.entryId],
-    relationName: "replyEntry",
-  }),
-  reposts: many(entryReposts, { relationName: "parentRepostEntry" }),
-  parentRepost: one(entryReposts, {
-    fields: [journalEntries.id],
-    references: [entryReposts.entryId],
-    relationName: "repostEntry",
-  }),
+  thread: many(entryReplies),
+  reposts: many(entryReposts),
 }));
 
 export const entryRepliesRelations = relations(entryReplies, ({ one }) => ({
@@ -125,11 +115,6 @@ export const entryRepliesRelations = relations(entryReplies, ({ one }) => ({
     references: [journalEntries.id],
     relationName: "replyEntry",
   }),
-  parentEntry: one(journalEntries, {
-    fields: [entryReplies.parentEntryId],
-    references: [journalEntries.id],
-    relationName: "parentEntry",
-  }),
 }));
 
 export const entryRepostsRelations = relations(entryReposts, ({ one }) => ({
@@ -137,11 +122,6 @@ export const entryRepostsRelations = relations(entryReposts, ({ one }) => ({
     fields: [entryReposts.entryId],
     references: [journalEntries.id],
     relationName: "repostEntry",
-  }),
-  parentEntry: one(journalEntries, {
-    fields: [entryReposts.parentEntryId],
-    references: [journalEntries.id],
-    relationName: "parentRepostEntry",
   }),
 }));
 
@@ -155,7 +135,6 @@ export const entryReactionsRelations = relations(entryReactions, ({ one }) => ({
     references: [reactions.id],
   }),
 }));
-
 export const entryThoughtsRelations = relations(entryThoughts, ({ one }) => ({
   entry: one(journalEntries, {
     fields: [entryThoughts.entryId],

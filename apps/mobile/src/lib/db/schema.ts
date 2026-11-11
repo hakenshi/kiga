@@ -138,11 +138,9 @@ export const entryBehaviors = sqliteTable("entry_behaviors", {
 export const entryReplies = sqliteTable("entry_replies", {
   id: integer().primaryKey({ autoIncrement: true }),
   entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
-  parentEntryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
-});
+})
 
 export const entryReposts = sqliteTable("entry_reposts", {
   id: integer().primaryKey({ autoIncrement: true }),
   entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
-  parentEntryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
 });
