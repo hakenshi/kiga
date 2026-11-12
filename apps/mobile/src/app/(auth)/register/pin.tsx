@@ -16,6 +16,9 @@ import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { birthDateSchema, registerPinSchema } from "@/lib/db/zod/schemas/auth.schema";
+import { DatabaseException } from "@/lib/exceptions/database/index.exception";
+import { DatabaseExceptionFilter } from "@/lib/exceptions/database/filter.exception";
+import { ValidationExceptionFilter } from "@/lib/exceptions/validation/filter.exception";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +27,7 @@ import { Check, DeleteIcon } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import { HStack } from "@/components/ui/hstack";
 import { View } from "react-native";
+import { z } from "zod";
 
 const KEYPAD_ROWS = [
   [1, 2, 3],
@@ -75,10 +79,13 @@ export default function PinPage() {
           pronoun: registerState.pronoun,
           pin: formData.pin,
         })
-        .returning();
+        .returning()
+        .catch((err: unknown) => {
+          throw DatabaseExceptionFilter.from(err);
+        });
 
       if (!createdUser) {
-        throw new Error("Falha ao registrar usuário.");
+        throw new DatabaseException("Falha ao registrar usuário.");
       }
 
       registerState.reset();
@@ -99,12 +106,17 @@ export default function PinPage() {
       router.replace("/home");
     } catch (err: unknown) {
       console.error("Erro ao cadastrar usuário:", err);
+      let message = "Ocorreu um erro ao finalizar o cadastro.";
+
+      if (err instanceof z.ZodError) {
+        message = ValidationExceptionFilter.from(err).message;
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+
       setError("pin", {
         type: "manual",
-        message:
-          err instanceof Error
-            ? err.message
-            : "Ocorreu um erro ao finalizar o cadastro.",
+        message,
       });
     }
   };

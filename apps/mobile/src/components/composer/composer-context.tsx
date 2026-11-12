@@ -1,4 +1,5 @@
 import { createContext, use, type PropsWithChildren } from "react";
+import { ProviderException } from "@/lib/exceptions/provider/index.exception";
 import { useStore } from "zustand";
 import type { ComposerSlice, ComposerStore } from "./composer-slice";
 
@@ -32,7 +33,7 @@ export function ComposerProvider({ store, actions, children }: ComposerProviderP
 function useComposerContext(): ComposerContextValue {
   const ctx = use(ComposerContext);
   if (!ctx) {
-    throw new Error("Componentes do Composer precisam estar dentro de um provider de composer.");
+    throw new ProviderException("Componentes do Composer precisam estar dentro de um provider de composer.");
   }
   return ctx;
 }

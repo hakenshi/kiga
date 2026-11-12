@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import {
   useFonts,
@@ -26,7 +26,9 @@ import {
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ToastBanner } from "@/components/toast-banner";
 import migrations from "../../drizzle/migrations";
-import db from "../lib/db";
+import db, { expo } from "@/lib/db";
+import { seedDatabase } from "@/lib/db/seed";
+import { DatabaseExceptionFilter } from "@/lib/exceptions/database/filter.exception";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
@@ -59,15 +61,28 @@ export default function RootLayout() {
   });
 
   const { success, error } = useMigrations(db, migrations);
+  const [seeded, setSeeded] = useState(false);
+  const [seedError, setSeedError] = useState("");
+
+  useEffect(() => {
+    if (!success) return;
+
+    try {
+      seedDatabase(expo);
+      setSeeded(true);
+    } catch (err) {
+      setSeedError(DatabaseExceptionFilter.from(err).message);
+    }
+  }, [success]);
 
   useEffect(() => {
     async function prepare() {
-      if ((fontsLoaded || fontError) && (success || error)) {
+      if ((fontsLoaded || fontError) && (seeded || seedError || error)) {
         await SplashScreen.hideAsync().catch(() => {});
       }
     }
     prepare();
-  }, [fontsLoaded, fontError, success, error]);
+  }, [fontsLoaded, fontError, seeded, seedError, error]);
 
   if (error) {
     return (
@@ -77,11 +92,19 @@ export default function RootLayout() {
     );
   }
 
+  if (seedError) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Erro ao preparar o banco: {seedError}</Text>
+      </View>
+    );
+  }
+
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
-  if (!success) {
+  if (!success || !seeded) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
