@@ -4,22 +4,9 @@ import { useToastStore } from "@/stores/toast-store";
 
 const PAGE_SIZE = 20;
 
-function sortEntries(entries: JournalEntryWithRelations[]): JournalEntryWithRelations[] {
-  return [...entries].sort((a, b) => {
-    const fixedA = a.fixed ? 1 : 0;
-    const fixedB = b.fixed ? 1 : 0;
-    if (fixedA !== fixedB) return fixedB - fixedA;
-
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
-    if (dateA !== dateB) return dateB - dateA;
-
-    return b.id - a.id;
-  });
-}
 
 interface JournalEntryState {
-  entries: JournalEntryWithRelations[];
+  entries: JournalEntry[];
   isLoading: boolean;
   hasMore: boolean;
   page: number;
@@ -28,11 +15,11 @@ interface JournalEntryState {
 interface JournalEntryActions {
   loadInitial: (userId: number) => Promise<void>;
   loadMore: (userId: number) => Promise<void>;
-  addEntry: (newEntry: JournalEntryWithRelations) => void;
-  updateEntry: (entryId: number, entryData: UpdateJournalEntryInput) => Promise<void>;
-  replaceEntry: (updatedEntry: JournalEntryWithRelations) => void;
+  addEntry: (newEntry: JournalEntry) => void;
+  updateEntry: (entryId: number, entryData: JournalEntryUpdate) => Promise<void>;
+  replaceEntry: (updatedEntry: JournalEntry) => void;
   deleteEntry: (entryId: number) => Promise<void>;
-  findEntry: (entryId: number) => Promise<JournalEntryWithRelations | null>;
+  findEntry: (entryId: number) => Promise<JournalEntry | null>;
   reset: () => void;
 }
 
@@ -45,7 +32,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
   loadInitial: async (userId) => {
     set(({ isLoading: true, page: 0, hasMore: true }))
     try {
-      const data = await EntryRepository.getFeed(userId, {
+      const data = await EntryRepository.findMany(userId, {
         limit: PAGE_SIZE,
         offset: 0,
       });
@@ -65,7 +52,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     set({ isLoading: true });
     try {
       const offset = page * PAGE_SIZE;
-      const data = await EntryRepository.getFeed(userId, {
+      const data = await EntryRepository.findMany(userId, {
         limit: PAGE_SIZE,
         offset,
       });
@@ -79,13 +66,13 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
       set({ isLoading: false });
     }
   },
-  addEntry: (newEntry: JournalEntryWithRelations) => {
+  addEntry: (newEntry: JournalEntry) => {
     set((s) => ({
       entries: sortEntries([newEntry, ...s.entries.filter((e) => e.id !== newEntry.id)]),
     }));
   },
   updateEntry: async (entryId, newEntryData) => {
-    await EntryRepository.updatePartial(entryId, newEntryData);
+    EntryRepository.update(entryId, newEntryData);
 
     set((s) => {
       const updated = s.entries.map((entry) =>
@@ -109,7 +96,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()((
     const { entries } = get();
     const cached = entries.find((e) => e.id === entryId);
     if (cached) return cached;
-    return await EntryRepository.getById(entryId);
+    return (await EntryRepository.findOne(entryId)) ?? null;
   },
   deleteEntry: async (entryId) => {
     const { entries } = get();

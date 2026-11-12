@@ -33,6 +33,7 @@ import { entryReactionsInsertSchema } from "@/lib/db/zod/schemas/entry/reaction.
 import { entryRepliesInsertSchema } from "@/lib/db/zod/schemas/entry/reply.schema";
 import { entryRepostInsertSchema } from "@/lib/db/zod/schemas/entry/repost.schema";
 import { entryThoughtsInsertSchema } from "@/lib/db/zod/schemas/entry/thought.schema";
+import { NotFoundException } from "@/lib/exceptions/not-found/index.exception";
 
 let testDb: any = null;
 const dbProxy = new Proxy({}, {
@@ -51,9 +52,9 @@ mock.module("@/lib/db", () => ({
 
 mock.module("expo-sqlite", () => ({
   openDatabaseSync: () => ({
-    execSync: () => {},
+    execSync: () => { },
     getFirstSync: () => null,
-    runSync: () => {},
+    runSync: () => { },
   }),
 }));
 
@@ -386,7 +387,7 @@ describe("EntryRepository", () => {
         EntryRepository.update(99999, {
           content: "Não existe",
         });
-      }).toThrow("Falha ao atualizar registro");
+      }).toThrow(NotFoundException);
     });
 
     it("EntryRepository.delete deve remover o relato e seus relacionamentos em cascata", async () => {
@@ -410,12 +411,12 @@ describe("EntryRepository", () => {
     });
 
     it("EntryRepository.findMany e findOne devem consultar com relacionamentos", async () => {
-      EntryRepository.create({
+      const firstEntry = EntryRepository.create({
         userId: testUserId,
         content: "Primeiro relato",
       });
 
-      EntryRepository.create({
+      const secondEntry = EntryRepository.create({
         userId: testUserId,
         content: "Segundo relato",
         emotions: [testEmotionId],
@@ -425,9 +426,12 @@ describe("EntryRepository", () => {
       expect(list).toHaveLength(2);
       expect(list[0].entryEmotions).toBeDefined();
 
-      const first = await EntryRepository.findOne(testUserId);
-      expect(first).toBeDefined();
-      expect(first.content).toBe("Segundo relato");
+      const first = await EntryRepository.findOne(firstEntry.id);
+      const second = await EntryRepository.findOne(secondEntry.id);
+      expect(first?.content).toBe("Primeiro relato");
+      expect(second?.content).toBe("Segundo relato");
+      expect(second?.entryEmotions[0].emotionId).toBe(testEmotionId);
+      expect(await EntryRepository.findOne(99999)).toBeUndefined();
     });
   });
 });

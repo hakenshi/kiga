@@ -1,18 +1,20 @@
-import db from "@/lib/db"
-import { entryBehaviors, entryEmotions, entryImages, entryReactions, entryReplies, entryReposts, entryThoughts, journalEntries } from "@/lib/db/schema"
-import { journalEntryInsertSchema, journalEntryUpdateSchema } from "@/lib/db/zod/schemas/entry/index.schema"
-import { entryBehaviorInsertSchema } from "@/lib/db/zod/schemas/entry/behavior.schema"
-import { entryEmotionsInsertSchema } from "@/lib/db/zod/schemas/entry/emotion.schema"
-import { entryImagesInsertSchema } from "@/lib/db/zod/schemas/entry/image.schema"
-import { entryReactionsInsertSchema } from "@/lib/db/zod/schemas/entry/reaction.schema"
-import { entryRepliesInsertSchema } from "@/lib/db/zod/schemas/entry/reply.schema"
-import { entryRepostInsertSchema } from "@/lib/db/zod/schemas/entry/repost.schema"
-import { entryThoughtsInsertSchema } from "@/lib/db/zod/schemas/entry/thought.schema"
-import { and, desc, eq, isNull } from "drizzle-orm"
-import { BaseRepository, Tx } from "./base-repository"
+import db from "@/lib/db";
+import { entryBehaviors, entryEmotions, entryImages, entryReactions, entryReplies, entryReposts, entryThoughts, journalEntries } from "@/lib/db/schema";
+import { entryBehaviorInsertSchema } from "@/lib/db/zod/schemas/entry/behavior.schema";
+import { entryEmotionsInsertSchema } from "@/lib/db/zod/schemas/entry/emotion.schema";
+import { entryImagesInsertSchema } from "@/lib/db/zod/schemas/entry/image.schema";
+import { journalEntryInsertSchema, journalEntryUpdateSchema } from "@/lib/db/zod/schemas/entry/index.schema";
+import { entryReactionsInsertSchema } from "@/lib/db/zod/schemas/entry/reaction.schema";
+import { entryRepliesInsertSchema } from "@/lib/db/zod/schemas/entry/reply.schema";
+import { entryRepostInsertSchema } from "@/lib/db/zod/schemas/entry/repost.schema";
+import { entryThoughtsInsertSchema } from "@/lib/db/zod/schemas/entry/thought.schema";
+import { DatabaseException } from "@/lib/exceptions/database/index.exception";
+import { NotFoundException } from "@/lib/exceptions/not-found/index.exception";
+import { and, desc, eq, isNull } from "drizzle-orm";
+import { BaseRepository, Tx } from "./base-repository";
 
 export class EntryRepository extends BaseRepository {
-  public static async findMany(userId: number, options: { limit: number, offset: number }) {
+  public static async findMany(userId: number, options: { limit: number, offset: number }): Promise<JournalEntry[]> {
     const { limit = 20, offset = 0 } = options
     return db.query.journalEntries.findMany({
       where: and(
@@ -29,19 +31,18 @@ export class EntryRepository extends BaseRepository {
         entryReactions: true,
         entryThoughts: true,
         mood: true,
-        reposts: true,
         thread: true,
+        reposts: true
       }
     })
   }
 
-  public static async findOne(userId: number) {
+  public static async findOne(entryId: number) {
     return db.query.journalEntries.findFirst({
       where: and(
-        eq(journalEntries.userId, userId),
+        eq(journalEntries.id, entryId),
         isNull(journalEntries.deletedAt)
       ),
-      orderBy: [desc(journalEntries.fixed), desc(journalEntries.deletedAt), desc(journalEntries.id)],
       with: {
         entryBehaviors: true,
         entryEmotions: true,
@@ -60,7 +61,7 @@ export class EntryRepository extends BaseRepository {
       const [newEntry] = this.insert(tx, data, journalEntryInsertSchema, journalEntries)
 
       if (!newEntry) {
-        throw new Error("Falha ao criar novo registro")
+        throw new DatabaseException("Falha ao criar novo registro")
       }
 
       this.insertRelations(tx, newEntry.id, data)
@@ -95,7 +96,7 @@ export class EntryRepository extends BaseRepository {
   public static update(entryId: number, data: JournalEntryUpdate) {
     const safeData = journalEntryUpdateSchema.safeParse(data)
     if (!safeData.success) {
-      throw new Error(safeData.error.message)
+      throw safeData.error
     }
 
     const values = safeData.data
@@ -104,7 +105,7 @@ export class EntryRepository extends BaseRepository {
       const [updatedEntry] = tx.update(journalEntries).set(values).where(eq(journalEntries.id, entryId)).returning().all()
 
       if (!updatedEntry) {
-        throw new Error("Falha ao atualizar registro")
+        throw new NotFoundException("Não foi possível atualizar o relato: registro não encontrado.")
       }
 
       if (values.behaviors) tx.delete(entryBehaviors).where(eq(entryBehaviors.entryId, entryId)).run()
