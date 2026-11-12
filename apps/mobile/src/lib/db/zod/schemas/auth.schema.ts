@@ -1,15 +1,13 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { genderEnum, profileImages, pronounEnum, users } from "../../schema";
-import {
-  behaviorSelectSchema,
-  categorySelectSchema,
-  emotionSelectSchema,
-  moodSelectSchema,
-  reactionSelectSchema,
-  thoughtSelectSchema,
-} from "./resource.schema";
-import { journalEntryWithRelationsSchema } from "./entry.schema";
+import { behaviorSelectSchema } from "./behavior/index.schema";
+import { categorySelectSchema } from "./category/index.schema";
+import { emotionSelectSchema } from "./emotion/index.schema";
+import { moodSelectSchema } from "./mood/index.schema";
+import { reactionSelectSchema } from "./reaction/index.schema";
+import { thoughtSelectSchema } from "./thought/index.schema";
+import { journalEntrySelectSchema } from "./entry/index.schema";
 
 // ─── TABELAS BASE (SELECT SCHEMAS VIA DRIZZLE-ZOD) ─────────────────────────
 export const userSelectBaseSchema = createSelectSchema(users).omit({
@@ -57,6 +55,8 @@ export const userInsertSchema = userInsertBaseSchema.transform((data) => ({
   firstName: data.firstName.trim(),
   secondName: data.secondName.trim(),
 }));
+
+export const userUpdateSchema = userInsertBaseSchema.partial();
 
 export const profileImageInsertSchema = createInsertSchema(profileImages, {
   url: (s) => s.min(1, "Informe o endereço da imagem"),
@@ -196,5 +196,5 @@ export const userWithRelationsSchema = userSelectBaseSchema.extend({
   behaviors: z.array(behaviorSelectSchema).optional(),
   moods: z.array(moodSelectSchema).optional(),
   profileImages: z.array(profileImageSelectSchema).optional(),
-  journalEntries: z.array(journalEntryWithRelationsSchema).optional(),
+  journalEntries: z.array(journalEntrySelectSchema).optional(),
 });
