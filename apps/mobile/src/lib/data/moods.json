@@ -1,0 +1,7 @@
+[
+  { "id": 1, "name": "Muito Mal", "userId": null, "deletedAt": null },
+  { "id": 2, "name": "Mal", "userId": null, "deletedAt": null },
+  { "id": 3, "name": "Neutro", "userId": null, "deletedAt": null },
+  { "id": 4, "name": "Bem", "userId": null, "deletedAt": null },
+  { "id": 5, "name": "Muito Bem", "userId": null, "deletedAt": null }
+]

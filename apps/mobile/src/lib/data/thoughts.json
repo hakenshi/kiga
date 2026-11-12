@@ -1,10 +1,10 @@
 [
-  { "name": "Não vou dar conta", "userId": null },
-  { "name": "Ele achou meu trabalho ruim", "userId": null },
-  { "name": "Vão achar que eu não sei o que estou fazendo", "userId": null },
-  { "name": "Eu sempre estrago tudo", "userId": null },
-  { "name": "Algo terrível vai acontecer", "userId": null },
-  { "name": "Não vai ter volta", "userId": null },
-  { "name": "Se não for perfeito, foi um fracasso", "userId": null },
-  { "name": "Eles estão me julgando", "userId": null }
+  { "id": 1, "name": "Não vou dar conta", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null },
+  { "id": 2, "name": "Ele achou meu trabalho ruim", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null },
+  { "id": 3, "name": "Vão achar que eu não sei o que estou fazendo", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null },
+  { "id": 4, "name": "Eu sempre estrago tudo", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null },
+  { "id": 5, "name": "Algo terrível vai acontecer", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null },
+  { "id": 6, "name": "Não vai ter volta", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null },
+  { "id": 7, "name": "Se não for perfeito, foi um fracasso", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null },
+  { "id": 8, "name": "Eles estão me julgando", "userId": null, "categoryId": null, "orderIndex": 0, "deletedAt": null }
 ]

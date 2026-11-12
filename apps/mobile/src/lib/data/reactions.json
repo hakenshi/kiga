@@ -1,30 +1,18 @@
 [
-  {
-    "name": "Fisiológicas / Corporais",
-    "userId": null,
-    "items": [
-      { "name": "Aperto no peito", "userId": null },
-      { "name": "Taquicardia", "userId": null },
-      { "name": "Nó na garganta", "userId": null },
-      { "name": "Tensão muscular", "userId": null },
-      { "name": "Sudorese", "userId": null },
-      { "name": "Respiração curta", "userId": null },
-      { "name": "Formigamento nas mãos", "userId": null },
-      { "name": "Tremores", "userId": null },
-      { "name": "Fadiga", "userId": null }
-    ]
-  },
-  {
-    "name": "Comportamentais",
-    "userId": null,
-    "items": [
-      { "name": "Isolamento", "userId": null },
-      { "name": "Procrastinação", "userId": null },
-      { "name": "Respiração 4-7-8", "userId": null },
-      { "name": "Roer unhas", "userId": null },
-      { "name": "Checar celular compulsivamente", "userId": null },
-      { "name": "Caminhada", "userId": null },
-      { "name": "Beber água gelada", "userId": null }
-    ]
-  }
+  { "id": 1, "name": "Aperto no peito", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 2, "name": "Taquicardia", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 3, "name": "Nó na garganta", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 4, "name": "Tensão muscular", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 5, "name": "Sudorese", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 6, "name": "Respiração curta", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 7, "name": "Formigamento nas mãos", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 8, "name": "Tremores", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 9, "name": "Fadiga", "userId": null, "categoryId": 11, "orderIndex": 0, "deletedAt": null },
+  { "id": 10, "name": "Isolamento", "userId": null, "categoryId": 12, "orderIndex": 0, "deletedAt": null },
+  { "id": 11, "name": "Procrastinação", "userId": null, "categoryId": 12, "orderIndex": 0, "deletedAt": null },
+  { "id": 12, "name": "Respiração 4-7-8", "userId": null, "categoryId": 12, "orderIndex": 0, "deletedAt": null },
+  { "id": 13, "name": "Roer unhas", "userId": null, "categoryId": 12, "orderIndex": 0, "deletedAt": null },
+  { "id": 14, "name": "Checar celular compulsivamente", "userId": null, "categoryId": 12, "orderIndex": 0, "deletedAt": null },
+  { "id": 15, "name": "Caminhada", "userId": null, "categoryId": 12, "orderIndex": 0, "deletedAt": null },
+  { "id": 16, "name": "Beber água gelada", "userId": null, "categoryId": 12, "orderIndex": 0, "deletedAt": null }
 ]

@@ -1,54 +1,24 @@
 [
-  {
-    "name": "Medo",
-    "userId": null,
-    "items": [
-      { "name": "Ansiedade", "userId": null },
-      { "name": "Insegurança", "userId": null },
-      { "name": "Preocupação", "userId": null },
-      { "name": "Vergonha", "userId": null },
-      { "name": "Pânico", "userId": null }
-    ]
-  },
-  {
-    "name": "Tristeza",
-    "userId": null,
-    "items": [
-      { "name": "Tristeza", "userId": null },
-      { "name": "Solidão", "userId": null },
-      { "name": "Culpa", "userId": null },
-      { "name": "Desânimo", "userId": null },
-      { "name": "Desamparo", "userId": null }
-    ]
-  },
-  {
-    "name": "Raiva",
-    "userId": null,
-    "items": [
-      { "name": "Raiva", "userId": null },
-      { "name": "Frustração", "userId": null },
-      { "name": "Irritação", "userId": null },
-      { "name": "Ressentimento", "userId": null }
-    ]
-  },
-  {
-    "name": "Sobrecarga",
-    "userId": null,
-    "items": [
-      { "name": "Sobrecarga", "userId": null },
-      { "name": "Esgotamento", "userId": null },
-      { "name": "Pressão", "userId": null },
-      { "name": "Confusão", "userId": null }
-    ]
-  },
-  {
-    "name": "Alegria & Alívio",
-    "userId": null,
-    "items": [
-      { "name": "Calma", "userId": null },
-      { "name": "Gratidão", "userId": null },
-      { "name": "Esperança", "userId": null },
-      { "name": "Alívio", "userId": null }
-    ]
-  }
+  { "id": 1, "name": "Ansiedade", "userId": null, "categoryId": 1, "orderIndex": 0, "deletedAt": null },
+  { "id": 2, "name": "Insegurança", "userId": null, "categoryId": 1, "orderIndex": 0, "deletedAt": null },
+  { "id": 3, "name": "Preocupação", "userId": null, "categoryId": 1, "orderIndex": 0, "deletedAt": null },
+  { "id": 4, "name": "Vergonha", "userId": null, "categoryId": 1, "orderIndex": 0, "deletedAt": null },
+  { "id": 5, "name": "Pânico", "userId": null, "categoryId": 1, "orderIndex": 0, "deletedAt": null },
+  { "id": 6, "name": "Tristeza", "userId": null, "categoryId": 2, "orderIndex": 0, "deletedAt": null },
+  { "id": 7, "name": "Solidão", "userId": null, "categoryId": 2, "orderIndex": 0, "deletedAt": null },
+  { "id": 8, "name": "Culpa", "userId": null, "categoryId": 2, "orderIndex": 0, "deletedAt": null },
+  { "id": 9, "name": "Desânimo", "userId": null, "categoryId": 2, "orderIndex": 0, "deletedAt": null },
+  { "id": 10, "name": "Desamparo", "userId": null, "categoryId": 2, "orderIndex": 0, "deletedAt": null },
+  { "id": 11, "name": "Raiva", "userId": null, "categoryId": 3, "orderIndex": 0, "deletedAt": null },
+  { "id": 12, "name": "Frustração", "userId": null, "categoryId": 3, "orderIndex": 0, "deletedAt": null },
+  { "id": 13, "name": "Irritação", "userId": null, "categoryId": 3, "orderIndex": 0, "deletedAt": null },
+  { "id": 14, "name": "Ressentimento", "userId": null, "categoryId": 3, "orderIndex": 0, "deletedAt": null },
+  { "id": 15, "name": "Sobrecarga", "userId": null, "categoryId": 4, "orderIndex": 0, "deletedAt": null },
+  { "id": 16, "name": "Esgotamento", "userId": null, "categoryId": 4, "orderIndex": 0, "deletedAt": null },
+  { "id": 17, "name": "Pressão", "userId": null, "categoryId": 4, "orderIndex": 0, "deletedAt": null },
+  { "id": 18, "name": "Confusão", "userId": null, "categoryId": 4, "orderIndex": 0, "deletedAt": null },
+  { "id": 19, "name": "Calma", "userId": null, "categoryId": 5, "orderIndex": 0, "deletedAt": null },
+  { "id": 20, "name": "Gratidão", "userId": null, "categoryId": 5, "orderIndex": 0, "deletedAt": null },
+  { "id": 21, "name": "Esperança", "userId": null, "categoryId": 5, "orderIndex": 0, "deletedAt": null },
+  { "id": 22, "name": "Alívio", "userId": null, "categoryId": 5, "orderIndex": 0, "deletedAt": null }
 ]
