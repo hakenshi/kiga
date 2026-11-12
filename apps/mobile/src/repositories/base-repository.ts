@@ -22,7 +22,7 @@ export abstract class BaseRepository {
   ) {
     const safeData = zodSchema.safeParse(data);
     if (!safeData.success) {
-      throw new Error(safeData.error.message);
+      throw safeData.error;
     }
 
     return tx.insert(drizzleSchema).values(safeData.data).returning().all();

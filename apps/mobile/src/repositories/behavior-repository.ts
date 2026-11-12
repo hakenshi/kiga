@@ -1,92 +1,89 @@
-import { and, asc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import db from "@/lib/db";
-import { behaviors, categories } from "@/lib/db/schema";
-import { ResourceRepository } from "./resource-repository";
+import { DatabaseException } from "@/lib/exceptions/database/index.exception";
+import { behaviors } from "@/lib/db/schema";
+import defaultBehaviors from "@/lib/data/behaviors.json";
+import {
+  behaviorInsertSchema,
+  behaviorUpdateSchema,
+} from "@/lib/db/zod/schemas/behavior/index.schema";
+import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
+import { BaseRepository } from "./base-repository";
 
-export abstract class BehaviorRepository {
-  static async getUserBehaviors(userId?: number): Promise<BehaviorItem[]> {
-    if (!userId) return [];
+export class BehaviorRepository extends BaseRepository {
+  public static create(data: BehaviorInsert) {
+    return db.transaction((tx) => {
+      const [newBehavior] = this.insert(tx, data, behaviorInsertSchema, behaviors);
 
-    const rawItems = await db
-      .select({
-        id: behaviors.id,
-        content: behaviors.content,
-        icon: behaviors.icon,
-        categoryId: behaviors.categoryId,
-        categoryName: categories.name,
-        userId: behaviors.userId,
-        orderIndex: behaviors.orderIndex,
-      })
-      .from(behaviors)
-      .leftJoin(
-        categories,
-        and(eq(behaviors.categoryId, categories.id), isNull(categories.deletedAt))
-      )
-      .where(
-        and(
-          isNull(behaviors.deletedAt),
-          eq(behaviors.userId, userId),
-          isNotNull(behaviors.icon)
-        )
-      )
-      .orderBy(asc(behaviors.orderIndex), asc(behaviors.id));
+      if (!newBehavior) {
+        throw new DatabaseException("Falha ao criar comportamento");
+      }
 
-    return rawItems.map((item) => ({
-      id: item.id,
-      content: item.content || "",
-      icon: item.icon,
-      categoryId: item.categoryId,
-      categoryName: item.categoryName ?? null,
-      userId: item.userId,
-      orderIndex: item.orderIndex,
-    }));
+      return newBehavior;
+    });
   }
 
-  static async createBehavior(
-    content: string,
-    icon?: string | null,
-    categoryNameOrId?: string | number | null,
-    userId?: number
-  ): Promise<BehaviorItem> {
-    const trimmed = content.trim();
-    const resolvedCat = await ResourceRepository.resolveCategoryId(
-      "behavior",
-      categoryNameOrId,
-      userId
-    );
+  public static async findMany(userId: number) {
+    const userBehaviors = await db.query.behaviors.findMany({
+      where: and(
+        eq(behaviors.userId, userId),
+        isNull(behaviors.deletedAt)
+      ),
+      orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
+      with: {
+        category: true,
+      },
+    });
 
-    const [inserted] = await db
-      .insert(behaviors)
-      .values({
-        content: trimmed,
-        icon: icon || null,
-        categoryId: resolvedCat.id,
-        orderIndex: Date.now(),
-        userId: userId ?? 1,
-      })
-      .returning();
+    const defaults = await db.query.behaviors.findMany({
+      where: and(
+        isNull(behaviors.userId),
+        isNull(behaviors.deletedAt),
+      ),
+      orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
+    })
 
-    return {
-      id: inserted.id,
-      content: inserted.content || "",
-      icon: inserted.icon,
-      categoryId: inserted.categoryId,
-      categoryName: resolvedCat.name,
-      userId: inserted.userId,
-      orderIndex: inserted.orderIndex,
-    };
+    return [...userBehaviors, ...defaults];
   }
 
-  static async deleteBehaviors(ids: number[]): Promise<void> {
-    if (ids.length === 0) return;
-    await db
+  public static async findById(id: number) {
+    return db.query.behaviors.findFirst({
+      where: and(
+        eq(behaviors.id, id),
+        isNull(behaviors.deletedAt)
+      ),
+      with: {
+        category: true,
+      },
+    });
+  }
+
+  public static update(id: number, data: BehaviorUpdate) {
+    const safeData = behaviorUpdateSchema.safeParse(data);
+    if (!safeData.success) {
+      throw safeData.error;
+    }
+
+    return db.transaction((tx) => {
+      const [updated] = tx
+        .update(behaviors)
+        .set(safeData.data)
+        .where(and(eq(behaviors.id, id), isNotNull(behaviors.userId)))
+        .returning()
+        .all();
+
+      if (!updated) {
+        throw new DatabaseException("O comportamento não foi encontrado ou não pode ser alterado.");
+      }
+
+      return updated;
+    });
+  }
+
+  public static async delete(id: number) {
+    return await db
       .update(behaviors)
       .set({ deletedAt: new Date() })
-      .where(and(inArray(behaviors.id, ids), isNotNull(behaviors.userId)));
+      .where(and(eq(behaviors.id, id), isNotNull(behaviors.userId)))
+      .returning();
   }
 }
-
-// ─── ALIASES PARA COMPATIBILIDADE ──────────────────────────────────────────
-export const getUserBehaviors = BehaviorRepository.getUserBehaviors;
-export const createBehavior = BehaviorRepository.createBehavior;
-export const deleteBehaviors = BehaviorRepository.deleteBehaviors;
