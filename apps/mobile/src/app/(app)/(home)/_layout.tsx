@@ -1,5 +1,5 @@
 import Logo from "@/components/common/logo";
-import { eachDayOfInterval, eachWeekOfInterval, endOfMonth, endOfWeek, format, getWeeksInMonth, isSameWeek, isThisWeek, startOfMonth, startOfWeek } from "date-fns"
+import { eachDayOfInterval, eachWeekOfInterval, endOfMonth, endOfWeek, format, getDate, getWeeksInMonth, isSameWeek, isThisWeek, startOfMonth, startOfWeek } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
@@ -85,19 +85,19 @@ export default function HomeLayout() {
               <Button variant="secondary" size="sm" onPress={() => setWeekDrawerOpen(true)} disabled={weekDrawerOpen} >
                 <ButtonIcon as={CalendarIcon} />
                 <ButtonText className="font-semibold">
-                  {isThisWeek(weekDaysStart) ? "Esta Semana" : "Outra Semana"} {startOfWeek(weekDaysStart).getDate()} - {endOfWeek(weekDaysEnd).getDate()}
+                  {isThisWeek(weekDaysStart) ? "Esta Semana" : "Outra Semana"} {getDate(startOfWeek(weekDaysStart))} - {getDate(endOfWeek(weekDaysEnd))}
                 </ButtonText>
                 <ButtonIcon as={ChevronDown} />
               </Button>
             </ButtonGroup>
             <ButtonGroup className="justify-center" space="md">
               {weekDaysInterval.map((wd, i) => (
-                <Button key={i} size="sm" variant={weekDaysCurrent !== null && wd.getDate() === weekDaysCurrent.getDate() ? "default" : "secondary"} onPress={() => updateWeekDaysCurrent(wd)} className="flex-col">
+                <Button key={i} size="sm" variant={weekDaysCurrent !== null && getDate(wd) === getDate(weekDaysCurrent) ? "default" : "secondary"} onPress={() => updateWeekDaysCurrent(wd)} className="flex-col">
                   <ButtonText>
                     {format(wd, "EEE", { locale: ptBR }).slice(0, 3)}
                   </ButtonText>
                   <ButtonText>
-                    {wd.getDate()}
+                    {getDate(wd)}
                   </ButtonText>
                 </Button>
               ))}
