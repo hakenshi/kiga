@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
 import {
   Drawer,
   DrawerBackdrop,
@@ -13,77 +13,38 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
-import { useEditPostStore } from "@/stores/edit-post-store";
 import { useRouter } from "expo-router";
 import {
-  Angry,
   EllipsisVerticalIcon,
   Eye,
-  Frown,
   HeartIcon,
-  Laugh,
-  Meh,
   PencilIcon,
   Pin,
   PinIcon,
   RefreshCcw,
   ReplyIcon,
-  Smile,
   TrashIcon,
 } from "lucide-react-native";
-import type { LucideIcon } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { RepostDrawer } from "./repost-drawer";
 
 interface Props {
-  entry?: JournalEntryWithRelations;
-  entryId: number;
-  liked: boolean;
-  fixed: boolean
+  entry: JournalEntry
 }
 
-import { resolveMoodConfig, type MoodStyleConfig } from "@/lib/mood-utils";
+import { resolveMoodConfig } from "@/lib/mood-utils";
+import { formatEntryDate } from "@/lib/utils";
 
-function formatEntryDate(rawDate?: Date | string | number | null): string {
-  if (!rawDate) return "";
-  const date = rawDate instanceof Date ? rawDate : new Date(rawDate);
-  if (Number.isNaN(date.getTime())) return "";
-
-  const now = new Date();
-  const isSameDay =
-    date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear();
-
-  const timeStr = date.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  if (isSameDay) {
-    return `Hoje · ${timeStr}`;
-  }
-
-  const dayMonth = date.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-  }).replace(".", "");
-
-  return `${dayMonth} · ${timeStr}`;
-}
-
-export default function EntryHeader({ entry, entryId, liked, fixed = false }: Props) {
+export default function EntryHeader({ entry }: Props) {
   const { user } = useAuthStore();
   const deleteEntry = useEntryStore((e) => e.deleteEntry);
   const updateEntry = useEntryStore((e) => e.updateEntry);
-  const startEditing = useEditPostStore((s) => s.startEditing);
+  const [editing, setEditing] = useState(false)
   const [open, setOpen] = useState(false);
   const [repostOpen, setRepostOpen] = useState(false);
 
   const isPureRepost = entry?.entryType === "repost" && !entry?.content?.trim();
-  const parentEntry = (entry?.parentRepost as any)?.parentEntry || (entry?.parentReply as any)?.parentEntry;
-  const displayEntry = isPureRepost && parentEntry ? parentEntry : entry;
 
   const moodConfig = resolveMoodConfig(displayEntry);
   const formattedDate = formatEntryDate(displayEntry?.date ?? displayEntry?.createdAt);
