@@ -1,3 +1,14 @@
+import { format, isToday, isValid } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+export function formatEntryDate(rawDate?: Date | string | number | null): string {
+  if (!rawDate) return "";
+  const date = new Date(rawDate);
+  if (!isValid(date)) return "";
+
+  return format(date, isToday(date) ? "'Hoje ·' HH:mm" : "dd 'de' MMM '·' HH:mm", { locale: ptBR });
+}
+
 /**
  * Aplica máscara de data no formato DD/MM/AAAA conforme o usuário digita.
  */

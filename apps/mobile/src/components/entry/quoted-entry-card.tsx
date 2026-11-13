@@ -5,21 +5,7 @@ import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
 import { resolveMoodConfig } from "@/lib/mood-utils";
 import { useAuthStore } from "@/stores/auth-store";
-
-function formatQuotedDate(rawDate?: Date | string | number | null) {
-  if (!rawDate) return "";
-  const d = new Date(rawDate);
-  if (isNaN(d.getTime())) return "";
-  const now = new Date();
-  const isSameDay =
-    d.getDate() === now.getDate() &&
-    d.getMonth() === now.getMonth() &&
-    d.getFullYear() === now.getFullYear();
-  const timeStr = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  if (isSameDay) return `Hoje · ${timeStr}`;
-  const dayMonth = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
-  return `${dayMonth} · ${timeStr}`;
-}
+import { formatEntryDate } from "@/lib/utils";
 
 export function QuotedEntryCard({ entry }: { entry: JournalEntryWithRelations }) {
   const router = useRouter();
@@ -51,7 +37,7 @@ export function QuotedEntryCard({ entry }: { entry: JournalEntryWithRelations })
           </Text>
           <Text className="text-zinc-400 text-xs">·</Text>
           <Text className="text-[11px] font-subtitle text-zinc-500">
-            {formatQuotedDate(entry.date)}
+            {formatEntryDate(entry.date)}
           </Text>
         </HStack>
 

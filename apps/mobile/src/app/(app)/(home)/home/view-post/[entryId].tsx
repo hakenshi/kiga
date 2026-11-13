@@ -34,21 +34,17 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useEntryStore } from "@/stores/journal-store";
 import { QuotedEntryCard } from "@/components/entry/quoted-entry-card";
 import { RepostDrawer } from "@/components/entry/repost-drawer";
+import { differenceInMinutes, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 function formatTimelineDelta(rootDate: Date, replyDate: Date): string {
-  const diffMs = replyDate.getTime() - rootDate.getTime();
-  const diffMinutes = Math.max(0, Math.floor(diffMs / (1000 * 60)));
+  const diffMinutes = Math.max(0, differenceInMinutes(replyDate, rootDate));
   const diffHours = Math.floor(diffMinutes / 60);
   const remainingMinutes = diffMinutes % 60;
   const diffDays = Math.floor(diffHours / 24);
 
-  const timeStr = replyDate.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const weekdayStr = replyDate
-    .toLocaleDateString("pt-BR", { weekday: "short" })
-    .replace(".", "");
+  const timeStr = format(replyDate, "HH:mm");
+  const weekdayStr = format(replyDate, "EEEEEE", { locale: ptBR });
   const capitalizedWeekday =
     weekdayStr.charAt(0).toUpperCase() + weekdayStr.slice(1);
 
@@ -72,18 +68,11 @@ function formatTimelineDelta(rootDate: Date, replyDate: Date): string {
 function formatFocalTime(rawDate?: Date | string | number | null) {
   if (!rawDate) return "";
   const d = new Date(rawDate);
-  const timeStr = d.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const weekdayStr = d
-    .toLocaleDateString("pt-BR", { weekday: "long" })
-    .replace("-feira", "");
+  const timeStr = format(d, "HH:mm");
+  const weekdayStr = format(d, "EEEE", { locale: ptBR }).replace("-feira", "");
   const capitalizedWeekday =
     weekdayStr.charAt(0).toUpperCase() + weekdayStr.slice(1);
-  const dayMonth = d
-    .toLocaleDateString("pt-BR", { day: "numeric", month: "short" })
-    .replace(".", "");
+  const dayMonth = format(d, "d 'de' MMM", { locale: ptBR });
   return `${capitalizedWeekday} · ${timeStr} · ${dayMonth}`;
 }
 
