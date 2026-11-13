@@ -191,7 +191,7 @@ export default function HomeLayout() {
         <Tabs.Screen name="statistics/index" options={{ title: "Estatísticas" }} />
         <Tabs.Screen name="profile/index" options={{ title: "Meu Kiga" }} />
         <Tabs.Screen
-          name="home/new-post/index"
+          name="home/(composer)"
           options={{
             href: null,
           }}
