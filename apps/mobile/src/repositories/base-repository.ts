@@ -1,7 +1,8 @@
 import db from "@/lib/db";
-import { SQLiteTable } from "drizzle-orm/sqlite-core";
-import { InferInsertModel } from "drizzle-orm";
+import { AnySQLiteColumn, SQLiteTable } from "drizzle-orm/sqlite-core";
+import { and, eq, InferInsertModel, isNull } from "drizzle-orm";
 import { z } from "zod";
+import { categories, CategoryType } from "@/lib/db/schema";
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -14,6 +15,7 @@ export interface IRepository<TInsert, TUpdate, TReturn = any> {
 }
 
 export abstract class BaseRepository {
+
   protected static insert<T extends SQLiteTable, Z extends z.ZodType<InferInsertModel<T>>>(
     tx: Tx,
     data: z.input<Z>,

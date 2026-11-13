@@ -31,6 +31,7 @@ export class MoodRepository extends BaseRepository {
       orderBy: [asc(moods.id)],
     });
 
+    const defaultMoods = await this.findDefaults(moods)
     return [...userMoods, ...defaultMoods];
   }
 
