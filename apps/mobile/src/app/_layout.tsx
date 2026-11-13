@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import {
   useFonts,
@@ -68,17 +68,18 @@ export default function RootLayout() {
     if (!success) return;
 
     try {
-      seedDatabase(expo);
+      seedDatabase();
       setSeeded(true);
     } catch (err) {
       setSeedError(DatabaseExceptionFilter.from(err).message);
     }
   }, [success]);
 
+
   useEffect(() => {
     async function prepare() {
       if ((fontsLoaded || fontError) && (seeded || seedError || error)) {
-        await SplashScreen.hideAsync().catch(() => {});
+        await SplashScreen.hideAsync().catch(() => { });
       }
     }
     prepare();
