@@ -21,13 +21,22 @@ export const journalEntrySelectSchema = createSelectSchema(journalEntries).exten
   reposts: entryRepostSelectSchema.array(),
 });
 
-export const journalEntryInsertSchema = createInsertSchema(journalEntries)
+const journalEntryInsertBaseSchema = createInsertSchema(journalEntries)
   .extend({
-    behaviors: z.array(z.number()).optional(),
-    emotions: z.array(z.number()).optional(),
-    images: z.array(z.string()).optional(),
-    reactions: z.array(z.number()).optional(),
-    thoughts: z.array(z.number()).optional(),
+    entryBehaviors: z.array(z.number()).optional(),
+    entryEmotions: z.array(z.number()).optional(),
+    entryImages: z.array(z.string()).optional(),
+    entryReactions: z.array(z.number()).optional(),
+    entryThoughts: z.array(z.number()).optional(),
+  }).omit({
+    createdAt: true,
+    deletedAt: true,
+    updatedAt: true,
   })
+
+
+export const journalEntryInsertSchema = journalEntryInsertBaseSchema.omit({
+  id: true
+})
 
 export const journalEntryUpdateSchema = journalEntryInsertSchema.partial();
