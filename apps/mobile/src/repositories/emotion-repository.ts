@@ -1,11 +1,11 @@
 import db from "@/lib/db";
 import { DatabaseException } from "@/lib/exceptions/database/index.exception";
-import { emotions } from "@/lib/db/schema";
+import { categories, emotions } from "@/lib/db/schema";
 import {
   emotionInsertSchema,
   emotionUpdateSchema,
 } from "@/lib/db/zod/schemas/emotion/index.schema";
-import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { BaseRepository } from "./base-repository";
 
 export class EmotionRepository extends BaseRepository {
@@ -22,31 +22,39 @@ export class EmotionRepository extends BaseRepository {
   }
 
   public static async findMany(userId: number) {
-    const userEmotions = await db.query.emotions.findMany({
+    const userEmotions = await db.query.categories.findMany({
       where: and(
-        eq(emotions.userId, userId),
-        isNull(emotions.deletedAt)
+        eq(categories.type, "emotion"),
+        eq(categories.userId, userId),
+        isNull(categories.deletedAt)
       ),
-      orderBy: [asc(emotions.orderIndex), asc(emotions.id)],
       with: {
-        category: true,
-      },
-    });
-
-    const defaults = await db.query.emotions.findMany({
-      where: and(
-        isNull(emotions.userId),
-        isNull(emotions.deletedAt),
-      ),
-      orderBy: [asc(emotions.orderIndex), asc(emotions.id)],
-      with: {
-        category: true,
-      },
+        emotions: {
+          where: and(
+            isNull(emotions.deletedAt),
+            eq(emotions.userId, userId)
+          )
+        }
+      }
     })
 
-    return [...userEmotions, ...defaults];
+    const defaults = await db.query.categories.findMany({
+      where: and(
+        eq(categories.type, "emotion"),
+        isNull(categories.userId),
+        isNull(categories.deletedAt)
+      ),
+      with: {
+        emotions: {
+          where: and(
+            isNull(emotions.deletedAt),
+            isNull(emotions.userId)
+          )
+        }
+      }
+    })
+    return [...userEmotions, ...defaults]
   }
-
   public static async findById(id: number) {
     return db.query.emotions.findFirst({
       where: and(

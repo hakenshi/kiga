@@ -1,8 +1,3 @@
-import { useState } from "react";
-import { Pressable, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Check,
   CornerDownLeft,
@@ -13,263 +8,58 @@ import {
   Trash2,
   X,
 } from "lucide-react-native";
-import NavButton from "@/components/common/nav-button";
 import { Button, ButtonText } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerBackdrop,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-} from "@/components/ui/drawer";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorText,
-} from "@/components/ui/form-control";
+import NavButton from "@/components/common/nav-button";
+import { Drawer, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerCloseButton, DrawerBody, DrawerFooter } from "@/components/ui/drawer";
+import { FormControl, FormControlError, FormControlErrorText } from "@/components/ui/form-control";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import defaultEmotions from "@/lib/data/emotions.json";
-import {
-  createCategoryItem,
-  createResourceItem,
-  deleteCategoryItem,
-  deleteResourceItems,
-  getUserCategories,
-  getUserResources,
-} from "@/repositories/resource-repository";
-import {
-  createCategoryFormSchema,
-  createEmotionFormSchema,
-} from "@/lib/db/zod/schemas/resource.schema";
 import { useAuthStore } from "@/stores/auth-store";
-import { useComposer } from "../composer-context";
+import { useEmotionStore } from "@/stores/emotion-store";
+import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ActiveForm = "none" | "item" | "category";
 
 export default function EmotionsDrawer() {
   const { top, bottom } = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
-  const [activeForm, setActiveForm] = useState<ActiveForm>("none");
-  const [customItems, setCustomItems] = useState<ResourceItem[]>([]);
-  const [userCategories, setUserCategories] = useState<Category[]>([]);
+  const [activeForm] = useState<ActiveForm>("none");
   const [searchQuery, setSearchQuery] = useState("");
-  const [deletingIds, setDeletingIds] = useState<number[]>([]);
+  const [deletingIds] = useState<number[]>([]);
 
   const user = useAuthStore((s) => s.user);
-  const emotions = useComposer((s) => s.emotions);
-  const toggleEmotion = useComposer((s) => s.toggleEmotion);
-  const removeEmotions = useComposer((s) => s.removeEmotions);
+  const categories = useEmotionStore((s) => s.categories);
+  const loadEmotions = useEmotionStore((s) => s.loadEmotions);
 
-  const itemForm = useForm<CreateEmotionFormSchema>({
-    resolver: zodResolver(createEmotionFormSchema),
-    defaultValues: {
-      name: "",
-      categoryName: defaultEmotions[0]?.name ?? null,
-    },
+  const [emotions, _setEmotions] = useState<{ id?: number; name: string }[]>([])
+
+  const itemForm = useForm<{ name: string; categoryName: string }>({
+    defaultValues: { name: "", categoryName: "" },
   });
-
-  const categoryForm = useForm<CreateCategoryFormSchema>({
-    resolver: zodResolver(createCategoryFormSchema),
-    defaultValues: {
-      name: "",
-    },
-  });
-
-  const loadCustom = async () => {
-    const [items, cats] = await Promise.all([
-      getUserResources("emotion", user?.id),
-      getUserCategories("emotion", user?.id),
-    ]);
-    setCustomItems(items);
-    setUserCategories(cats);
-  };
-
-  const handleOpen = async () => {
-    setDeletingIds([]);
-    setSearchQuery("");
-    setActiveForm("none");
-    itemForm.reset({
-      name: "",
-      categoryName: defaultEmotions[0]?.name ?? null,
-    });
-    categoryForm.reset({ name: "" });
-    setOpen(true);
-    await loadCustom();
-  };
-
-  const toggleForm = (target: ActiveForm) => {
-    setActiveForm((prev) => (prev === target ? "none" : target));
-  };
-
-  const onSubmitItem = async (data: CreateEmotionFormSchema) => {
-    const created = await createResourceItem(
-      "emotion",
-      data.name,
-      data.categoryName ?? null,
-      user?.id
-    );
-    setCustomItems((prev) => [...prev, created]);
-    toggleEmotion({ id: created.id, name: created.name });
-    itemForm.reset({
-      name: "",
-      categoryName: data.categoryName ?? defaultEmotions[0]?.name ?? null,
-    });
-    setActiveForm("none");
-  };
-
-  const onSubmitCategory = async (data: CreateCategoryFormSchema) => {
-    const createdCat = await createCategoryItem("emotion", data.name, user?.id);
-    setUserCategories((prev) => [...prev, createdCat]);
-    itemForm.setValue("categoryName", createdCat.name);
-    categoryForm.reset({ name: "" });
-    setActiveForm("none");
-  };
-
-  const handleInstantCreate = async (rawName: string) => {
-    const parsed = createEmotionFormSchema.safeParse({
-      name: rawName,
-      categoryName: null,
-    });
-    if (!parsed.success) return;
-    const created = await createResourceItem(
-      "emotion",
-      parsed.data.name,
-      null,
-      user?.id
-    );
-    setCustomItems((prev) => [...prev, created]);
-    toggleEmotion({ id: created.id, name: created.name });
-    setSearchQuery("");
-  };
-
-  const handleDeleteCategory = async (categoryId: number) => {
-    await deleteCategoryItem(categoryId);
-    await loadCustom();
-  };
-
-  const toggleDeleteId = (id: number) => {
-    setDeletingIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  };
-
-  const handleDeleteSelected = async () => {
-    if (deletingIds.length === 0) return;
-    await deleteResourceItems("emotion", deletingIds);
-    removeEmotions(deletingIds);
-    setDeletingIds([]);
-    await loadCustom();
-  };
-
-  const allCategoryNames = [
-    ...defaultEmotions.map((c) => c.name),
-    ...userCategories
-      .map((c) => c.name)
-      .filter(
-        (name) =>
-          !defaultEmotions.some(
-            (d) => d.name.toLowerCase() === name.toLowerCase()
-          )
-      ),
-  ];
-
+  const categoryForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
+  const uncategorizedCustom: { id: number; name: string }[] = [];
   const trimmedQuery = searchQuery.trim();
-  const normalizedQuery = trimmedQuery.toLowerCase();
-
-  const uncategorizedCustom = customItems
-    .filter(
-      (item) =>
-        !item.categoryName ||
-        !allCategoryNames.some(
-          (catName) => catName.toLowerCase() === item.categoryName?.toLowerCase()
-        )
-    )
-    .filter((item) =>
-      !normalizedQuery
-        ? true
-        : item.name.toLowerCase().includes(normalizedQuery)
-    );
-
-  const combinedCategories = allCategoryNames
-    .map((catName) => {
-      const defaultCat = defaultEmotions.find(
-        (d) => d.name.toLowerCase() === catName.toLowerCase()
-      );
-      const userCat = userCategories.find(
-        (u) => u.name.toLowerCase() === catName.toLowerCase()
-      );
-
-      const jsonItems = (defaultCat?.items ?? [])
-        .filter((item) =>
-          !normalizedQuery
-            ? true
-            : item.name.toLowerCase().includes(normalizedQuery)
-        )
-        .map((item) => ({
-          id: undefined as number | undefined,
-          name: item.name,
-          isCustom: false,
-        }));
-
-      const catCustomItems = customItems
-        .filter(
-          (item) =>
-            item.categoryName?.toLowerCase() === catName.toLowerCase()
-        )
-        .filter((item) =>
-          !normalizedQuery
-            ? true
-            : item.name.toLowerCase().includes(normalizedQuery)
-        )
-        .map((item) => ({
-          id: item.id,
-          name: item.name,
-          isCustom: true,
-        }));
-
-      return {
-        name: catName,
-        userCategoryId: defaultCat ? undefined : userCat?.id,
-        isUserCreated: !defaultCat && Boolean(userCat),
-        items: [...jsonItems, ...catCustomItems],
-      };
-    })
-    .filter(
-      (cat) =>
-        cat.items.length > 0 || (!normalizedQuery && cat.isUserCreated)
-    );
-
-  const exactMatchExists =
-    customItems.some((i) => i.name.toLowerCase() === normalizedQuery) ||
-    defaultEmotions.some((cat) =>
-      cat.items.some((i) => i.name.toLowerCase() === normalizedQuery)
-    );
-
-  const hasAnyMatch =
-    uncategorizedCustom.length > 0 ||
-    combinedCategories.some((c) => c.items.length > 0);
-
+  const exactMatchExists = false;
+  const hasAnyMatch = false;
   const isSelectionMode = deletingIds.length > 0;
 
   return (
     <>
-      <NavButton Icon={Drama} badge={emotions.length} onPress={handleOpen}>
+      <NavButton Icon={Drama} badge={emotions.length} onPress={() => {
+        if (!user) return;
+        setOpen(true);
+        loadEmotions(user.id);
+      }}>
         Emoções
       </NavButton>
-
       <Drawer
         isOpen={open}
-        onClose={() => {
-          setDeletingIds([]);
-          setSearchQuery("");
-          setActiveForm("none");
-          setOpen(false);
-        }}
+        onClose={() => setOpen(false)}
         size="full"
         anchor="bottom"
       >
@@ -301,7 +91,7 @@ export default function EmotionsDrawer() {
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery("")} hitSlop={8}>
+              <Pressable onPress={() => console.log("refactoring")} hitSlop={8}>
                 <X size={16} color="#9AA0AA" />
               </Pressable>
             )}
@@ -309,42 +99,38 @@ export default function EmotionsDrawer() {
 
           <HStack space="sm" className="mb-2">
             <Pressable
-              onPress={() => toggleForm("item")}
-              className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${
-                activeForm === "item"
-                  ? "bg-[#16181D] border-[#16181D]"
-                  : "bg-white border-[#E6E8EC]"
-              }`}
+              onPress={() => console.log("refactoring")}
+              className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${activeForm === "item"
+                ? "bg-[#16181D] border-[#16181D]"
+                : "bg-white border-[#E6E8EC]"
+                }`}
             >
               <Plus
                 size={15}
                 color={activeForm === "item" ? "#FFFFFF" : "#16181D"}
               />
               <Text
-                className={`text-xs font-semibold ${
-                  activeForm === "item" ? "text-white" : "text-[#16181D]"
-                }`}
+                className={`text-xs font-semibold ${activeForm === "item" ? "text-white" : "text-[#16181D]"
+                  }`}
               >
                 Nova emoção
               </Text>
             </Pressable>
 
             <Pressable
-              onPress={() => toggleForm("category")}
-              className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${
-                activeForm === "category"
-                  ? "bg-[#16181D] border-[#16181D]"
-                  : "bg-white border-[#E6E8EC]"
-              }`}
+              onPress={() => console.log("refactoring")}
+              className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${activeForm === "category"
+                ? "bg-[#16181D] border-[#16181D]"
+                : "bg-white border-[#E6E8EC]"
+                }`}
             >
               <FolderPlus
                 size={15}
                 color={activeForm === "category" ? "#FFFFFF" : "#16181D"}
               />
               <Text
-                className={`text-xs font-semibold ${
-                  activeForm === "category" ? "text-white" : "text-[#16181D]"
-                }`}
+                className={`text-xs font-semibold ${activeForm === "category" ? "text-white" : "text-[#16181D]"
+                  }`}
               >
                 Nova categoria
               </Text>
@@ -371,7 +157,7 @@ export default function EmotionsDrawer() {
                           maxLength={40}
                           autoFocus
                           returnKeyType="done"
-                          onSubmitEditing={itemForm.handleSubmit(onSubmitItem)}
+                          onSubmitEditing={() => console.log("refactoring")}
                         />
                       </Input>
                       <Button
@@ -379,7 +165,7 @@ export default function EmotionsDrawer() {
                         rounding="lg"
                         className="h-10 px-4 bg-[#16181D]"
                         disabled={itemForm.formState.isSubmitting}
-                        onPress={itemForm.handleSubmit(onSubmitItem)}
+                        onPress={() => console.log("refactoring")}
                       >
                         <ButtonText>Criar</ButtonText>
                       </Button>
@@ -402,27 +188,23 @@ export default function EmotionsDrawer() {
                       Categoria (opcional):
                     </Text>
                     <HStack className="flex-wrap gap-1.5">
-                      {allCategoryNames.map((catName) => {
+                      {categories.map(({ id, name: catName }) => {
                         const isSelected = field.value === catName;
                         return (
                           <Pressable
-                            key={catName}
-                            onPress={() =>
-                              field.onChange(isSelected ? null : catName)
-                            }
-                            className={`flex-row items-center h-7 rounded-lg px-2.5 gap-1 border ${
-                              isSelected
-                                ? "bg-[#E8F1FB] border-[#1E4E8C]"
-                                : "bg-white border-[#E6E8EC]"
-                            }`}
+                            key={id}
+                            onPress={() => console.log("refactoring")}
+                            className={`flex-row items-center h-7 rounded-lg px-2.5 gap-1 border ${isSelected
+                              ? "bg-[#E8F1FB] border-[#1E4E8C]"
+                              : "bg-white border-[#E6E8EC]"
+                              }`}
                           >
                             {isSelected && <Check size={12} color="#1E4E8C" />}
                             <Text
-                              className={`text-xs ${
-                                isSelected
-                                  ? "text-[#1E4E8C] font-semibold"
-                                  : "text-[#16181D]"
-                              }`}
+                              className={`text-xs ${isSelected
+                                ? "text-[#1E4E8C] font-semibold"
+                                : "text-[#16181D]"
+                                }`}
                             >
                               {catName}
                             </Text>
@@ -456,9 +238,7 @@ export default function EmotionsDrawer() {
                           maxLength={30}
                           autoFocus
                           returnKeyType="done"
-                          onSubmitEditing={categoryForm.handleSubmit(
-                            onSubmitCategory
-                          )}
+                          onSubmitEditing={() => console.log("refactoring")}
                         />
                       </Input>
                       <Button
@@ -466,7 +246,7 @@ export default function EmotionsDrawer() {
                         rounding="lg"
                         className="h-10 px-4 bg-[#16181D]"
                         disabled={categoryForm.formState.isSubmitting}
-                        onPress={categoryForm.handleSubmit(onSubmitCategory)}
+                        onPress={() => console.log("refactoring")}
                       >
                         <ButtonText>Criar</ButtonText>
                       </Button>
@@ -494,7 +274,7 @@ export default function EmotionsDrawer() {
                   </Text>
                 )}
                 <Pressable
-                  onPress={() => handleInstantCreate(trimmedQuery)}
+                  onPress={() => console.log("refactoring")}
                   className="flex-row items-center h-14 rounded-[14px] border-[1.5px] border-[#16181D] px-3.5 gap-3 active:opacity-80"
                 >
                   <View className="w-8 h-8 rounded-full bg-[#16181D] items-center justify-center">
@@ -520,11 +300,10 @@ export default function EmotionsDrawer() {
                     Sem categoria
                   </Text>
                   <Text
-                    className={`text-xs font-subtitle ${
-                      isSelectionMode
-                        ? "text-destructive font-subtitle-medium"
-                        : "text-[#9AA0AA]"
-                    }`}
+                    className={`text-xs font-subtitle ${isSelectionMode
+                      ? "text-destructive font-subtitle-medium"
+                      : "text-[#9AA0AA]"
+                      }`}
                   >
                     {isSelectionMode
                       ? `${deletingIds.length} selecionada(s)`
@@ -543,33 +322,25 @@ export default function EmotionsDrawer() {
                     return (
                       <Pressable
                         key={item.id}
-                        onPress={() => {
-                          if (isSelectionMode) {
-                            toggleDeleteId(item.id);
-                          } else {
-                            toggleEmotion({ id: item.id, name: item.name });
-                          }
-                        }}
-                        onLongPress={() => toggleDeleteId(item.id)}
-                        className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${
-                          isMarkedForDelete
-                            ? "bg-destructive/10 border-destructive"
-                            : isSelected
-                              ? "bg-[#E8F1FB] border-[#E8F1FB]"
-                              : "bg-white border-[#E6E8EC]"
-                        }`}
+                        onPress={() => console.log("refactoring")}
+                        onLongPress={() => console.log("refactoring")}
+                        className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${isMarkedForDelete
+                          ? "bg-destructive/10 border-destructive"
+                          : isSelected
+                            ? "bg-[#E8F1FB] border-[#E8F1FB]"
+                            : "bg-white border-[#E6E8EC]"
+                          }`}
                       >
                         {isSelected && !isMarkedForDelete && (
                           <Check size={14} color="#1E4E8C" />
                         )}
                         <Text
-                          className={`text-[14px] ${
-                            isMarkedForDelete
-                              ? "text-destructive font-semibold"
-                              : isSelected
-                                ? "text-[#1E4E8C] font-semibold"
-                                : "text-[#16181D] font-normal"
-                          }`}
+                          className={`text-[14px] ${isMarkedForDelete
+                            ? "text-destructive font-semibold"
+                            : isSelected
+                              ? "text-[#1E4E8C] font-semibold"
+                              : "text-[#16181D] font-normal"
+                            }`}
                         >
                           {item.name}
                         </Text>
@@ -581,32 +352,28 @@ export default function EmotionsDrawer() {
             )}
 
             <VStack space="lg" className="pb-4">
-              {combinedCategories.map((cat) => (
-                <VStack key={cat.name} space="sm">
+              {categories.map((cat) => (
+                <VStack key={cat.id} space="sm">
                   <HStack className="justify-between items-center">
                     <Text className="text-[13px] font-subtitle-medium text-[#5A606B]">
                       {cat.name}
                     </Text>
-                    {cat.isUserCreated && (
+                    {cat.userId !== null && (
                       <HStack space="sm" className="items-center">
                         <Text className="text-xs font-subtitle text-[#9AA0AA]">
                           Criada por você
                         </Text>
-                        {cat.userCategoryId !== undefined && (
-                          <Pressable
-                            onPress={() =>
-                              handleDeleteCategory(cat.userCategoryId!)
-                            }
-                            hitSlop={8}
-                          >
-                            <Trash2 size={14} color="#ef4444" />
-                          </Pressable>
-                        )}
+                        <Pressable
+                          onPress={() => console.log("refactoring")}
+                          hitSlop={8}
+                        >
+                          <Trash2 size={14} color="#ef4444" />
+                        </Pressable>
                       </HStack>
                     )}
                   </HStack>
                   <HStack className="flex-wrap gap-2">
-                    {cat.items.map((item) => {
+                    {cat.emotions.map((item) => {
                       const isSelected = emotions.some(
                         (e) =>
                           (item.id !== undefined && e.id === item.id) ||
@@ -617,49 +384,37 @@ export default function EmotionsDrawer() {
 
                       return (
                         <Pressable
-                          key={item.id ? `c-${item.id}` : `d-${item.name}`}
-                          onPress={() => {
-                            if (isSelectionMode && item.id !== undefined) {
-                              toggleDeleteId(item.id);
-                            } else if (!isSelectionMode) {
-                              toggleEmotion(
-                                item.id !== undefined
-                                  ? { id: item.id, name: item.name }
-                                  : { name: item.name }
-                              );
-                            }
-                          }}
+                          key={item.id}
+                          onPress={() => console.log("refactoring")}
                           onLongPress={
-                            item.isCustom && item.id !== undefined
-                              ? () => toggleDeleteId(item.id!)
+                            item.userId !== null
+                              ? () => console.log("refactoring")
                               : undefined
                           }
-                          className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${
-                            isMarkedForDelete
-                              ? "bg-destructive/10 border-destructive"
-                              : isSelected
-                                ? "bg-[#E8F1FB] border-[#E8F1FB]"
-                                : "bg-white border-[#E6E8EC]"
-                          }`}
+                          className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${isMarkedForDelete
+                            ? "bg-destructive/10 border-destructive"
+                            : isSelected
+                              ? "bg-[#E8F1FB] border-[#E8F1FB]"
+                              : "bg-white border-[#E6E8EC]"
+                            }`}
                         >
                           {isSelected && !isMarkedForDelete && (
                             <Check size={14} color="#1E4E8C" />
                           )}
                           <Text
-                            className={`text-[14px] ${
-                              isMarkedForDelete
-                                ? "text-destructive font-semibold"
-                                : isSelected
-                                  ? "text-[#1E4E8C] font-semibold"
-                                  : "text-[#16181D] font-normal"
-                            }`}
+                            className={`text-[14px] ${isMarkedForDelete
+                              ? "text-destructive font-semibold"
+                              : isSelected
+                                ? "text-[#1E4E8C] font-semibold"
+                                : "text-[#16181D] font-normal"
+                              }`}
                           >
                             {item.name}
                           </Text>
                         </Pressable>
                       );
                     })}
-                    {cat.items.length === 0 && (
+                    {cat.emotions.length === 0 && (
                       <Text className="text-xs text-[#9AA0AA] italic">
                         Nenhuma emoção nesta categoria ainda.
                       </Text>
@@ -677,7 +432,7 @@ export default function EmotionsDrawer() {
                   variant="outline"
                   rounding="2xl"
                   className="flex-1 h-[52px]"
-                  onPress={() => setDeletingIds([])}
+                  onPress={() => console.log("refactoring")}
                 >
                   <ButtonText>Cancelar</ButtonText>
                 </Button>
@@ -685,7 +440,7 @@ export default function EmotionsDrawer() {
                   variant="destructive"
                   rounding="2xl"
                   className="flex-1 h-[52px]"
-                  onPress={handleDeleteSelected}
+                  onPress={() => console.log("refactoring")}
                 >
                   <Trash2 size={16} color="#fafafa" />
                   <ButtonText>Excluir ({deletingIds.length})</ButtonText>
