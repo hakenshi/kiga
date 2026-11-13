@@ -23,6 +23,10 @@ import m0018 from './0018_low_jimmy_woo.sql';
 import m0019 from './0019_old_blur.sql';
 import m0020 from './0020_left_the_santerians.sql';
 import m0021 from './0021_daffy_thunderbolts.sql';
+import m0022 from './0022_unknown_the_watchers.sql';
+import m0023 from './0023_lovely_harry_osborn.sql';
+import m0024 from './0024_pretty_ted_forrester.sql';
+import m0025 from './0025_fixed_echo.sql';
 
   export default {
     journal,
@@ -48,7 +52,11 @@ m0017,
 m0018,
 m0019,
 m0020,
-m0021
+m0021,
+m0022,
+m0023,
+m0024,
+m0025
     }
   }
   

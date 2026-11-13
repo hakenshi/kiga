@@ -64,10 +64,6 @@ export const thoughtsRelation = relations(thoughts, ({ one, many }) => ({
     fields: [thoughts.userId],
     references: [users.id],
   }),
-  category: one(categories, {
-    fields: [thoughts.categoryId],
-    references: [categories.id],
-  }),
   entryThoughts: many(entryThoughts),
 }));
 

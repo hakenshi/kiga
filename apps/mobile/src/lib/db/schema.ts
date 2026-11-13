@@ -9,8 +9,13 @@ export type Pronoun = (typeof pronounEnum)[number];
 export const journalEntryType = ["post", "reply", "repost"] as const;
 export type JournalEntryType = (typeof journalEntryType)[number];
 
-export const categoryTypeEnum = ["emotion", "thought", "reaction", "behavior"] as const;
+export const categoryTypeEnum = ["emotion", "reaction", "behavior"] as const;
 export type CategoryType = (typeof categoryTypeEnum)[number];
+
+export const seeds = sqliteTable("seeds", {
+  version: integer().primaryKey(),
+  apliedAt: integer({ mode: "timestamp" }).notNull().$defaultFn(() => new Date())
+})
 
 export const users = sqliteTable("users", {
   id: integer().primaryKey({ autoIncrement: true }),
@@ -45,13 +50,16 @@ export const moods = sqliteTable("moods", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().references(() => users.id, { onDelete: "cascade" }),
   name: text().notNull(),
+  label: text().notNull(),
+  icon: text().notNull(),
+  color: text().notNull(),
+  border: text().notNull(),
   deletedAt: integer({ mode: "timestamp" }),
 });
 
 export const thoughts = sqliteTable("thoughts", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().references(() => users.id, { onDelete: "cascade" }),
-  categoryId: integer().references(() => categories.id, { onDelete: "set null" }),
   name: text().notNull(),
   orderIndex: integer().notNull().default(0),
   deletedAt: integer({ mode: "timestamp" }),
@@ -82,7 +90,6 @@ export const journalEntries = sqliteTable("journal_entries", {
   liked: integer({ mode: "boolean" }).notNull().default(false),
   fixed: integer({ mode: "boolean" }).notNull().default(false),
   entryType: text({ enum: journalEntryType }),
-  title: text(),
   content: text().notNull(),
   date: integer({ mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   deletedAt: integer({ mode: "timestamp" }),

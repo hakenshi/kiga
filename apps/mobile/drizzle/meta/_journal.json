@@ -155,6 +155,34 @@
       "when": 1794390362751,
       "tag": "0021_daffy_thunderbolts",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1794471285300,
+      "tag": "0022_unknown_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1794516597356,
+      "tag": "0023_lovely_harry_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1794522097991,
+      "tag": "0024_pretty_ted_forrester",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1794524412360,
+      "tag": "0025_fixed_echo",
+      "breakpoints": true
     }
   ]
 }
