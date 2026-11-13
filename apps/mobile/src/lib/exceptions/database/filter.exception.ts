@@ -80,8 +80,7 @@ export class DatabaseExceptionFilter {
     }
 
     return new DatabaseException(
-      "Não foi possível concluir a operação no banco de dados.",
-      rawMessage
+      rawMessage as string
     );
   }
 }
