@@ -1,4 +1,5 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { isFuture, isValid } from "date-fns";
 import { z } from "zod/v4";
 import { genderEnum, profileImages, pronounEnum, users } from "../../schema";
 import { behaviorSelectSchema } from "./behavior/index.schema";
@@ -75,11 +76,11 @@ export const birthDateSchema = z
   ])
   .transform((val, ctx) => {
     if (val instanceof Date) {
-      if (isNaN(val.getTime())) {
+      if (!isValid(val)) {
         ctx.addIssue({ code: "custom", message: "Data de nascimento inválida" });
         return z.NEVER;
       }
-      if (val > new Date()) {
+      if (isFuture(val)) {
         ctx.addIssue({ code: "custom", message: "A data de nascimento não pode ser no futuro" });
         return z.NEVER;
       }
@@ -109,7 +110,7 @@ export const birthDateSchema = z
       }
       const date = new Date(Date.UTC(y, m - 1, d));
       if (
-        isNaN(date.getTime()) ||
+        !isValid(date) ||
         date.getUTCFullYear() !== y ||
         date.getUTCMonth() !== m - 1 ||
         date.getUTCDate() !== d
@@ -117,7 +118,7 @@ export const birthDateSchema = z
         ctx.addIssue({ code: "custom", message: "Data de nascimento inválida" });
         return z.NEVER;
       }
-      if (date > new Date()) {
+      if (isFuture(date)) {
         ctx.addIssue({ code: "custom", message: "A data de nascimento não pode ser no futuro" });
         return z.NEVER;
       }
@@ -125,7 +126,7 @@ export const birthDateSchema = z
     }
 
     const date = new Date(clean);
-    if (isNaN(date.getTime())) {
+    if (!isValid(date)) {
       ctx.addIssue({ code: "custom", message: "Data de nascimento inválida" });
       return z.NEVER;
     }
@@ -133,7 +134,7 @@ export const birthDateSchema = z
       ctx.addIssue({ code: "custom", message: "Ano de nascimento inválido" });
       return z.NEVER;
     }
-    if (date > new Date()) {
+    if (isFuture(date)) {
       ctx.addIssue({ code: "custom", message: "A data de nascimento não pode ser no futuro" });
       return z.NEVER;
     }
