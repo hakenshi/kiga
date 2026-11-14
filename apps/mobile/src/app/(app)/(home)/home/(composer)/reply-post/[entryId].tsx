@@ -1,19 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { CornerDownRight } from "lucide-react-native";
-
-import { Composer } from "@/components/composer/frame";
-import { useComposerDraftStore } from "@/components/composer/composer-slice";
-import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
-import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
-import { VStack } from "@/components/ui/vstack";
-import { EntryRepository } from "@/repositories/entry-repository";
-import { resolveMoodConfig } from "@/lib/mood-utils";
-import { useAuthStore } from "@/stores/auth-store";
-import { useEntryStore } from "@/stores/journal-store";
-import { useToastStore } from "@/stores/toast-store";
 //
 // function formatParentTime(rawDate?: Date | string | number | null) {
 //   if (!rawDate) return "";

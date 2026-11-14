@@ -1,7 +1,3 @@
-import { Composer } from "@/components/composer/frame";
-import { useEditPostStore } from "@/stores/edit-post-store";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
 import { Text } from "react-native";
 
 export default function EditEntryPage() {
