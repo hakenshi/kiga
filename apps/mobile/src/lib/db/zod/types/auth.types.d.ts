@@ -12,6 +12,7 @@ import type {
   userInsertBaseSchema,
   userInsertSchema,
   userSelectBaseSchema,
+  userUpdateSchema,
   userWithRelationsSchema,
 } from "../schemas/auth.schema";
 
