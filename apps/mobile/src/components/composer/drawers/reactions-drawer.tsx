@@ -1,64 +1,279 @@
-import { useState } from "react";
-import { Pressable, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Activity,
-  Check,
-  CornerDownLeft,
-  FolderPlus,
-  Plus,
-  Search,
-  Trash2,
-  X,
-} from "lucide-react-native";
+import { Activity, Check, FolderPlus, Search, Trash2, X } from "lucide-react-native";
 import NavButton from "@/components/common/nav-button";
 import { Button, ButtonText } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerBackdrop,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-} from "@/components/ui/drawer";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorText,
-} from "@/components/ui/form-control";
+import { Drawer, DrawerBackdrop, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader } from "@/components/ui/drawer";
+import { FormControl, FormControlError, FormControlErrorText } from "@/components/ui/form-control";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import defaultReactions from "@/lib/data/reactions.json";
-import {
-  createCategoryItem,
-  createResourceItem,
-  deleteCategoryItem,
-  deleteResourceItems,
-  getUserCategories,
-  getUserResources,
-} from "@/repositories/resource-repository";
-import {
-  createCategoryFormSchema,
-  createReactionFormSchema,
-} from "@/lib/db/zod/schemas/resource.schema";
+import { categoryCreateFormSchema } from "@/lib/db/zod/schemas/category/index.schema";
+import { toggleSelectedId } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
-import { useComposer } from "../composer-context";
+import { useCategoryStore } from "@/stores/category-store";
+import { useEntryCacheStore } from "@/stores/entry-cache-store";
+import { useReactionStore } from "@/stores/reaction-store";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type ActiveForm = "none" | "item" | "category";
+function getReactionItemClasses(isSelected: boolean, isMarkedForDelete: boolean) {
+  if (isMarkedForDelete) {
+    return {
+      button: "bg-destructive/10 border-destructive",
+      text: "text-destructive font-semibold",
+    };
+  }
+  if (isSelected) {
+    return {
+      button: "bg-[#FDF3E2] border-[#FDF3E2]",
+      text: "text-[#8A5A12] font-semibold",
+    };
+  }
+  return {
+    button: "bg-white border-[#E6E8EC]",
+    text: "text-[#16181D] font-normal",
+  };
+}
 
 export default function ReactionsDrawer() {
+  const { top, bottom } = useSafeAreaInsets();
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deletingIds, setDeletingIds] = useState<number[]>([]);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const userId = useAuthStore((s) => s.user!.id);
+  const reactions = useReactionStore((s) => s.reactions);
+  const searchReactions = useReactionStore((s) => s.searchReactions);
+  const loadReactions = useReactionStore((s) => s.loadReactions);
+  const deleteReactions = useReactionStore((s) => s.deleteReactions);
+  const addCategory = useCategoryStore((s) => s.addCategory);
+  const deleteCategory = useCategoryStore((s) => s.deleteCategory);
+  const selectedReactions = useEntryCacheStore((s) => s.entryReactions) ?? [];
+  const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
+  const isSelectionMode = deletingIds.length > 0;
+  const categoryForm = useForm<{ name: string }>({
+    resolver: zodResolver(categoryCreateFormSchema),
+    defaultValues: { name: "" },
+  });
+
+  const onSubmitCategory = async (data: { name: string }) => {
+    const category = await addCategory({ ...data, userId, type: "reaction" });
+    if (!category) return;
+    categoryForm.reset({ name: "" });
+    setShowCategoryForm(false);
+    await searchReactions(searchQuery, { userId });
+  };
+
+  const handleDeleteCategory = async (categoryId: number) => {
+    const deleted = await deleteCategory(categoryId);
+    if (!deleted) return;
+    await searchReactions(searchQuery, { userId });
+  };
+
+  const toggleReaction = (reactionId: number) => {
+    updateCachedEntry({ entryReactions: toggleSelectedId(selectedReactions, reactionId) });
+  };
+
+  const toggleDeleteId = (reactionId: number) => {
+    setDeletingIds(ids => toggleSelectedId(ids, reactionId));
+  };
+
+  const handleReactionPress = (reactionId: number) => {
+    if (isSelectionMode) {
+      toggleDeleteId(reactionId);
+    } else {
+      toggleReaction(reactionId);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    const deleted = deleteReactions(deletingIds, userId);
+    if (!deleted) return;
+    updateCachedEntry({
+      entryReactions: selectedReactions.filter(id => !deletingIds.includes(id)),
+    });
+    setDeletingIds([]);
+    await searchReactions(searchQuery, { userId });
+  };
+
+  const handleOpen = () => {
+    setSearchQuery("");
+    setDeletingIds([]);
+    setShowCategoryForm(false);
+    categoryForm.reset({ name: "" });
+    setOpen(true);
+    loadReactions(userId);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    searchReactions(query, { userId });
+  };
 
   return (
-    <NavButton Icon={Activity}  >
-      Reações
-    </NavButton >
-
-  )
+    <>
+      <NavButton Icon={Activity} badge={selectedReactions.length} onPress={handleOpen}>
+        Reações
+      </NavButton>
+      <Drawer isOpen={open} onClose={() => setOpen(false)} size="full" anchor="bottom">
+        <DrawerBackdrop />
+        <DrawerContent
+          className="h-full rounded-none px-6 bg-white"
+          style={{ paddingTop: top + 12, paddingBottom: bottom + 16 }}
+        >
+          <DrawerHeader className="pb-4 flex-row items-center gap-3">
+            <DrawerCloseButton className="w-10 h-10 rounded-full bg-[#F2F3F5] items-center justify-center p-0 active:opacity-75">
+              <X size={18} color="#16181D" />
+            </DrawerCloseButton>
+            <VStack space="xs" className="flex-1">
+              <Text className="text-[18px] font-heading text-[#16181D]">
+                Reações e sensações
+              </Text>
+              <Text className="text-xs font-subtitle text-[#5A606B]">
+                Registre sensações físicas ou reações do momento
+              </Text>
+            </VStack>
+          </DrawerHeader>
+          <Input className="h-11 rounded-xl bg-[#F2F3F5] border-transparent data-[focus=true]:bg-white data-[focus=true]:border-[#16181D] shadow-none px-3.5 mb-2.5">
+            <Search size={18} color="#9AA0AA" />
+            <InputField
+              value={searchQuery}
+              onChangeText={handleSearch}
+              placeholder="Buscar reação corporal..."
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => handleSearch("")} hitSlop={8}>
+                <X size={16} color="#9AA0AA" />
+              </Pressable>
+            )}
+          </Input>
+          <Button
+            variant="outline"
+            rounding="xl"
+            className="h-10 mb-2"
+            onPress={() => setShowCategoryForm(show => !show)}
+          >
+            <FolderPlus size={15} color="#16181D" />
+            <ButtonText>Nova categoria</ButtonText>
+          </Button>
+          {showCategoryForm && (
+            <VStack space="sm" className="mb-3 p-3.5 rounded-xl bg-[#F2F3F5] border border-[#E6E8EC]">
+              <Controller
+                control={categoryForm.control}
+                name="name"
+                render={({ field, fieldState }) => (
+                  <FormControl isInvalid={Boolean(fieldState.error)}>
+                    <HStack space="sm" className="items-center">
+                      <Input className="flex-1 h-10 rounded-lg bg-white border-[#E6E8EC] shadow-none px-3">
+                        <InputField
+                          value={field.value}
+                          onChangeText={field.onChange}
+                          onBlur={field.onBlur}
+                          placeholder="Nome da nova categoria..."
+                          maxLength={30}
+                          autoFocus
+                          returnKeyType="done"
+                          onSubmitEditing={categoryForm.handleSubmit(onSubmitCategory)}
+                        />
+                      </Input>
+                      <Button
+                        size="sm"
+                        rounding="lg"
+                        className="h-10 px-4 bg-[#16181D]"
+                        disabled={categoryForm.formState.isSubmitting}
+                        onPress={categoryForm.handleSubmit(onSubmitCategory)}
+                      >
+                        <ButtonText>Criar</ButtonText>
+                      </Button>
+                    </HStack>
+                    <FormControlError>
+                      <FormControlErrorText>{fieldState.error?.message}</FormControlErrorText>
+                    </FormControlError>
+                  </FormControl>
+                )}
+              />
+            </VStack>
+          )}
+          <DrawerBody className="flex-1 mt-2 mb-2" showsVerticalScrollIndicator={false}>
+            <VStack space="lg" className="pb-4">
+              {reactions.map(category => (
+                <VStack key={category.id} space="sm">
+                  <HStack className="justify-between items-center">
+                    <Text className="text-[13px] font-subtitle-medium text-[#5A606B]">
+                      {category.name}
+                    </Text>
+                    {category.userId !== null && (
+                      <Pressable onPress={() => handleDeleteCategory(category.id)} hitSlop={8}>
+                        <Trash2 size={14} color="#ef4444" />
+                      </Pressable>
+                    )}
+                  </HStack>
+                  <HStack className="flex-wrap gap-2">
+                    {category.reactions.map(item => {
+                      const isSelected = selectedReactions.includes(item.id);
+                      const isMarkedForDelete = deletingIds.includes(item.id);
+                      const isDisabled = isSelectionMode && item.userId === null;
+                      const itemClasses = getReactionItemClasses(isSelected, isMarkedForDelete);
+                      return (
+                        <Pressable
+                          key={item.id}
+                          disabled={isDisabled}
+                          onPress={() => handleReactionPress(item.id)}
+                          onLongPress={item.userId !== null ? () => toggleDeleteId(item.id) : undefined}
+                          className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${itemClasses.button} ${isDisabled ? "opacity-40" : ""}`}
+                        >
+                          {isSelected && !isMarkedForDelete && <Check size={14} color="#8A5A12" />}
+                          <Text className={`text-[14px] ${itemClasses.text}`}>
+                            {item.name}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                    {category.reactions.length === 0 && (
+                      <Text className="text-xs text-[#9AA0AA] italic">
+                        Nenhuma reação nesta categoria ainda.
+                      </Text>
+                    )}
+                  </HStack>
+                </VStack>
+              ))}
+              {reactions.length === 0 && (
+                <Text className="text-sm font-subtitle text-[#5A606B]">
+                  Nenhuma reação encontrada.
+                </Text>
+              )}
+            </VStack>
+          </DrawerBody>
+          <DrawerFooter className="pt-2">
+            {isSelectionMode && (
+              <HStack space="sm" className="w-full">
+                <Button variant="outline" rounding="2xl" className="flex-1 h-[52px]" onPress={() => setDeletingIds([])}>
+                  <ButtonText>Cancelar</ButtonText>
+                </Button>
+                <Button variant="destructive" rounding="2xl" className="flex-1 h-[52px]" onPress={handleDeleteSelected}>
+                  <Trash2 size={16} color="#fafafa" />
+                  <ButtonText>Excluir ({deletingIds.length})</ButtonText>
+                </Button>
+              </HStack>
+            )}
+            {!isSelectionMode && (
+              <Button rounding="2xl" className="w-full h-[52px] bg-[#16181D]" onPress={() => setOpen(false)}>
+                <ButtonText className="text-[15px] font-semibold text-white">
+                  {selectedReactions.length === 0 && "Concluir"}
+                  {selectedReactions.length > 0 &&
+                    `Adicionar ${selectedReactions.length} ${selectedReactions.length === 1 ? "reação" : "reações"}`}
+                </ButtonText>
+              </Button>
+            )}
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
   // const { top, bottom } = useSafeAreaInsets();
   // const [open, setOpen] = useState(false);
   // const [activeForm, setActiveForm] = useState<ActiveForm>("none");

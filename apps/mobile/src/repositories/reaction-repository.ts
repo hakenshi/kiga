@@ -1,12 +1,17 @@
 import db from "@/lib/db";
 import { DatabaseException } from "@/lib/exceptions/database/index.exception";
-import { reactions } from "@/lib/db/schema";
+import { categories, reactions } from "@/lib/db/schema";
 import {
   reactionInsertSchema,
   reactionUpdateSchema,
 } from "@/lib/db/zod/schemas/reaction/index.schema";
-import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { BaseRepository } from "./base-repository";
+
+export interface ReactionFilterOptions {
+  userId: number;
+  categoryId?: number;
+}
 
 export class ReactionRepository extends BaseRepository {
   public static create(data: ReactionInsert) {
@@ -21,30 +26,56 @@ export class ReactionRepository extends BaseRepository {
     });
   }
 
-  public static async findMany(userId: number) {
-    const userReactions = await db.query.reactions.findMany({
+  public static findMany(userId: number) {
+    return this.search("", { userId });
+  }
+
+  public static async search(query: string, filters: ReactionFilterOptions) {
+    query = query.trim();
+    const { userId, categoryId } = filters;
+    const nameFilter = this.searchText(reactions.name, query);
+    const categoryFilter = categoryId === undefined ? undefined : eq(categories.id, categoryId);
+    const userReactions = await db.query.categories.findMany({
       where: and(
-        eq(reactions.userId, userId),
-        isNull(reactions.deletedAt)
+        eq(categories.type, "reaction"),
+        eq(categories.userId, userId),
+        isNull(categories.deletedAt),
+        categoryFilter,
       ),
-      orderBy: [asc(reactions.orderIndex), asc(reactions.id)],
       with: {
-        category: true,
+        reactions: {
+          where: and(
+            isNull(reactions.deletedAt),
+            eq(reactions.userId, userId),
+            nameFilter,
+          ),
+          orderBy: [asc(reactions.orderIndex), asc(reactions.id)],
+        },
       },
     });
 
-    const defaults = await db.query.reactions.findMany({
+    const defaults = await db.query.categories.findMany({
       where: and(
-        isNull(reactions.userId),
-        isNull(reactions.deletedAt)
+        eq(categories.type, "reaction"),
+        isNull(categories.userId),
+        isNull(categories.deletedAt),
+        categoryFilter,
       ),
-      orderBy: [asc(reactions.orderIndex), asc(reactions.id)],
       with: {
-        category: true,
+        reactions: {
+          where: and(
+            isNull(reactions.deletedAt),
+            or(isNull(reactions.userId), eq(reactions.userId, userId)),
+            nameFilter,
+          ),
+          orderBy: [asc(reactions.orderIndex), asc(reactions.id)],
+        },
       },
 
     })
-    return [...userReactions, ...defaults];
+    const results = [...userReactions, ...defaults];
+    if (query === "") return results;
+    return results.filter(category => category.reactions.length > 0);
   }
 
   public static async findById(id: number) {
@@ -81,11 +112,14 @@ export class ReactionRepository extends BaseRepository {
     });
   }
 
-  public static async delete(id: number) {
-    return await db
+  public static delete(ids: number[], userId: number) {
+    return db
       .update(reactions)
       .set({ deletedAt: new Date() })
-      .where(and(eq(reactions.id, id), isNotNull(reactions.userId)))
-      .returning();
+      .where(and(
+        inArray(reactions.id, ids),
+        eq(reactions.userId, userId),
+      ))
+      .returning().all();
   }
 }
