@@ -8,7 +8,7 @@ import Media from "./media";
 
 export default function ComposerTextArea() {
   const firstName = useAuthStore((s) => s.user?.firstName);
-  const cachedContent = useEntryCacheStore(e => e.content)
+  const cachedContent = useEntryCacheStore(e => e.entry.content)
   const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
 
   return (

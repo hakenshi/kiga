@@ -3,10 +3,8 @@ import BehaviorsDrawer from "@/components/composer/drawers/behaviors-drawer";
 import EmotionsDrawer from "@/components/composer/drawers/emotions-drawer";
 import ReactionsDrawer from "@/components/composer/drawers/reactions-drawer";
 import ThoughtsDrawer from "@/components/composer/drawers/thoughts-drawer";
-import ComposerFooter from "@/components/composer/footer";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { countWords } from "@/lib/utils";
 import { Slot, useRouter } from "expo-router";
 import { ImageIcon, Lock, X } from "lucide-react-native";
 import { KeyboardAvoidingView, Pressable, Text, View } from "react-native";
@@ -15,10 +13,15 @@ import * as ImagePicker from "expo-image-picker";
 import { Button, ButtonText } from "@/components/ui/button";
 import MoodRow from "@/components/composer/mood-row";
 import { useEntryCacheStore } from "@/stores/entry-cache-store";
+import { countWords } from "@/lib/utils";
+import { useEntryStore } from "@/stores/journal-store";
+import { entryImages } from "@/lib/db/schema";
+import { useAuthStore } from "@/stores/auth-store";
+import { journalEntryInsertSchema, journalEntryUpdateSchema } from "@/lib/db/zod/schemas/entry/index.schema";
+import { useToastStore } from "@/stores/toast-store";
 
 function WordCount() {
-  // const wordCount = useComposer((s) => countWords(s.content));
-  const wordCount = 1
+  const wordCount = useEntryCacheStore(s => countWords(s.content ?? ""));
   return (
     <Text className="text-xs font-subtitle text-[#9AA0AA]">
       {wordCount} {wordCount === 1 ? "palavra" : "palavras"}
@@ -27,7 +30,7 @@ function WordCount() {
 }
 
 function PhotoButton() {
-  const imageCount = 0
+  const imageCount = useEntryCacheStore(s => s.entryImages?.length ?? 0);
 
   const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
 
@@ -51,9 +54,27 @@ function PhotoButton() {
 }
 export default function ComposerLayout() {
   const { bottom, top } = useSafeAreaInsets();
-  const title = "thing"
   const router = useRouter()
   const close = () => router.back()
+  const addEntry = useEntryStore(e => e.addEntry)
+  const clearCachedEntry = useEntryCacheStore(e => e.clearCachedEntry)
+  const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
+  const userId = useAuthStore(e => e.user!.id)
+  const cachedEntry = useEntryCacheStore(e => e.entry)
+  const submit = () => {
+    updateCachedEntry({ userId, entryType: "post" })
+    const safeEntry = journalEntryInsertSchema.safeParse(cachedEntry)
+
+    if (!safeEntry.success) {
+      console.log("deu xabu", safeEntry.error.message)
+      return
+    }
+
+    addEntry(safeEntry.data)
+    clearCachedEntry()
+    router.back()
+  }
+
   return (
     <VStack className="flex-1 bg-white" style={{ paddingBottom: bottom }}>
       <VStack style={{ paddingTop: top }} className="bg-white border-b border-gray-100">
@@ -67,13 +88,8 @@ export default function ComposerLayout() {
               <X size={22} color="#16181D" />
             </Pressable>
           </View>
-          <VStack className="items-center justify-center flex-1 px-2">
-            <Text>
-              {title}
-            </Text>
-          </VStack>
           <View className="min-w-[40px] items-end justify-center">
-            <Button>
+            <Button onPress={submit} disabled={!cachedEntry}>
               <ButtonText>
                 Salvar
               </ButtonText>

@@ -1,9 +1,9 @@
 import { Angry, Frown, Meh, Smile, Laugh } from "lucide-react-native";
-import { Pressable, Text } from "react-native";
+import { Text } from "react-native";
 import { HStack } from "../ui/hstack";
 import { useEntryCacheStore } from "@/stores/entry-cache-store";
 import { useState } from "react";
-import { Button, ButtonIcon, ButtonText } from "../ui/button";
+import { Button, ButtonIcon } from "../ui/button";
 
 const MOOD_OPTIONS = [
   { value: 1, label: "Muito Mal", Icon: Angry },
@@ -29,7 +29,7 @@ export default function MoodRow() {
       console.log(isSelected ? "selected" : "not sele")
       setIsSelected(!isSelected)
     }
-    updateEntryCache({ moodId })
+    updateEntryCache({ moodId: value })
   }
   return (
     <HStack className="justify-between px-4 py-3 items-center border-b border-border">
