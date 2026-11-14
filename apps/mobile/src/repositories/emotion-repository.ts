@@ -5,8 +5,13 @@ import {
   emotionInsertSchema,
   emotionUpdateSchema,
 } from "@/lib/db/zod/schemas/emotion/index.schema";
-import { and, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { BaseRepository } from "./base-repository";
+
+export interface EmotionFilterOptions {
+  userId: number;
+  categoryId?: number;
+}
 
 export class EmotionRepository extends BaseRepository {
   public static create(data: EmotionInsert) {
@@ -21,18 +26,28 @@ export class EmotionRepository extends BaseRepository {
     });
   }
 
-  public static async findMany(userId: number) {
+  public static findMany(userId: number) {
+    return this.search("", { userId });
+  }
+
+  public static async search(query: string, filters: EmotionFilterOptions) {
+    query = query.trim();
+    const { userId, categoryId } = filters;
+    const nameFilter = this.searchText(emotions.name, query);
+    const categoryFilter = categoryId === undefined ? undefined : eq(categories.id, categoryId);
     const userEmotions = await db.query.categories.findMany({
       where: and(
         eq(categories.type, "emotion"),
         eq(categories.userId, userId),
-        isNull(categories.deletedAt)
+        isNull(categories.deletedAt),
+        categoryFilter,
       ),
       with: {
         emotions: {
           where: and(
             isNull(emotions.deletedAt),
-            eq(emotions.userId, userId)
+            eq(emotions.userId, userId),
+            nameFilter,
           )
         }
       }
@@ -42,18 +57,22 @@ export class EmotionRepository extends BaseRepository {
       where: and(
         eq(categories.type, "emotion"),
         isNull(categories.userId),
-        isNull(categories.deletedAt)
+        isNull(categories.deletedAt),
+        categoryFilter,
       ),
       with: {
         emotions: {
           where: and(
             isNull(emotions.deletedAt),
-            isNull(emotions.userId)
+            or(isNull(emotions.userId), eq(emotions.userId, userId)),
+            nameFilter,
           )
         }
       }
     })
-    return [...userEmotions, ...defaults]
+    const results = [...userEmotions, ...defaults];
+    if (query === "") return results;
+    return results.filter(category => category.emotions.length > 0);
   }
   public static async findById(id: number) {
     return db.query.emotions.findFirst({
@@ -89,11 +108,14 @@ export class EmotionRepository extends BaseRepository {
     });
   }
 
-  public static async delete(id: number) {
-    return await db
+  public static delete(ids: number[], userId: number) {
+    return db
       .update(emotions)
       .set({ deletedAt: new Date() })
-      .where(and(eq(emotions.id, id), isNotNull(emotions.userId)))
-      .returning();
+      .where(and(
+        inArray(emotions.id, ids),
+        eq(emotions.userId, userId),
+      ))
+      .returning().all();
   }
 }

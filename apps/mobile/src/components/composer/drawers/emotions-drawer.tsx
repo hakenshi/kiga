@@ -16,8 +16,13 @@ import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+import { categoryCreateFormSchema } from "@/lib/db/zod/schemas/category/index.schema";
+import { toggleSelectedId } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCategoryStore } from "@/stores/category-store";
 import { useEmotionStore } from "@/stores/emotion-store";
+import { useEntryCacheStore } from "@/stores/entry-cache-store";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Pressable, View } from "react-native";
@@ -25,35 +30,116 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ActiveForm = "none" | "item" | "category";
 
+function getEmotionItemClasses(isSelected: boolean, isMarkedForDelete: boolean) {
+  if (isMarkedForDelete) {
+    return {
+      button: "bg-destructive/10 border-destructive",
+      text: "text-destructive font-semibold",
+    };
+  }
+  if (isSelected) {
+    return {
+      button: "bg-[#E8F1FB] border-[#E8F1FB]",
+      text: "text-[#1E4E8C] font-semibold",
+    };
+  }
+  return {
+    button: "bg-white border-[#E6E8EC]",
+    text: "text-[#16181D] font-normal",
+  };
+}
+
 export default function EmotionsDrawer() {
   const { top, bottom } = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
-  const [activeForm] = useState<ActiveForm>("none");
+  const [activeForm, setActiveForm] = useState<ActiveForm>("none");
+  const [deletingIds, setDeletingIds] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [deletingIds] = useState<number[]>([]);
 
-  const user = useAuthStore((s) => s.user);
-  const categories = useEmotionStore((s) => s.categories);
+  const userId = useAuthStore((s) => s.user!.id);
+  const emotions = useEmotionStore((s) => s.emotions);
   const loadEmotions = useEmotionStore((s) => s.loadEmotions);
+  const hasEmotion = useEmotionStore((s) => s.hasEmotion);
+  const searchEmotions = useEmotionStore((s) => s.searchEmotions);
+  const deleteEmotions = useEmotionStore((s) => s.deleteEmotions);
+  const categories = useCategoryStore((s) => s.categories);
+  const loadCategories = useCategoryStore((s) => s.loadCategories);
+  const addCategory = useCategoryStore((s) => s.addCategory);
+  const deleteCategory = useCategoryStore((s) => s.deleteCategory);
 
-  const [emotions, _setEmotions] = useState<{ id?: number; name: string }[]>([])
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    searchEmotions(query, { userId });
+  };
+
+  const selectedEmotions = useEntryCacheStore((s) => s.entryEmotions) ?? [];
+  const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
+
+  const toggleEmotion = (emotionId: number) => {
+    updateCachedEntry({ entryEmotions: toggleSelectedId(selectedEmotions, emotionId) });
+  };
 
   const itemForm = useForm<{ name: string; categoryName: string }>({
     defaultValues: { name: "", categoryName: "" },
   });
-  const categoryForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
+  const categoryForm = useForm<{ name: string }>({
+    resolver: zodResolver(categoryCreateFormSchema),
+    defaultValues: { name: "" },
+  });
   const uncategorizedCustom: { id: number; name: string }[] = [];
-  const trimmedQuery = searchQuery.trim();
-  const exactMatchExists = false;
-  const hasAnyMatch = false;
   const isSelectionMode = deletingIds.length > 0;
+
+  const toggleForm = (form: ActiveForm) => {
+    setActiveForm(current => current === form ? "none" : form);
+  };
+
+  const onSubmitCategory = async (data: { name: string }) => {
+    const category = await addCategory({ ...data, userId, type: "emotion" });
+    if (!category) return;
+    itemForm.setValue("categoryName", category.name);
+    categoryForm.reset({ name: "" });
+    setActiveForm("none");
+    await searchEmotions(searchQuery, { userId });
+  };
+
+  const handleDeleteCategory = async (categoryId: number) => {
+    const deleted = await deleteCategory(categoryId);
+    if (!deleted) return;
+    await searchEmotions(searchQuery, { userId });
+  };
+
+  const toggleDeleteId = (emotionId: number) => {
+    setDeletingIds(ids => toggleSelectedId(ids, emotionId));
+  };
+
+  const handleEmotionPress = (emotionId: number) => {
+    if (isSelectionMode) {
+      toggleDeleteId(emotionId);
+    } else {
+      toggleEmotion(emotionId);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    const deleted = deleteEmotions(deletingIds, userId);
+    if (!deleted) return;
+    updateCachedEntry({
+      entryEmotions: selectedEmotions.filter(id => !deletingIds.includes(id)),
+    });
+    setDeletingIds([]);
+    await searchEmotions(searchQuery, { userId });
+  };
 
   return (
     <>
-      <NavButton Icon={Drama} badge={emotions.length} onPress={() => {
-        if (!user) return;
+      <NavButton Icon={Drama} badge={selectedEmotions.length} onPress={() => {
+        setSearchQuery("");
+        setActiveForm("none");
+        setDeletingIds([]);
+        categoryForm.reset({ name: "" });
         setOpen(true);
-        loadEmotions(user.id);
+        loadEmotions(userId);
+        loadCategories(userId, "emotion");
       }}>
         Emoções
       </NavButton>
@@ -86,12 +172,12 @@ export default function EmotionsDrawer() {
             <Search size={18} color="#9AA0AA" />
             <InputField
               value={searchQuery}
-              onChangeText={setSearchQuery}
+              onChangeText={handleSearch}
               placeholder="Buscar emoção..."
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
-              <Pressable onPress={() => console.log("refactoring")} hitSlop={8}>
+              <Pressable onPress={() => handleSearch("")} hitSlop={8}>
                 <X size={16} color="#9AA0AA" />
               </Pressable>
             )}
@@ -99,7 +185,7 @@ export default function EmotionsDrawer() {
 
           <HStack space="sm" className="mb-2">
             <Pressable
-              onPress={() => console.log("refactoring")}
+              onPress={() => toggleForm("item")}
               className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${activeForm === "item"
                 ? "bg-[#16181D] border-[#16181D]"
                 : "bg-white border-[#E6E8EC]"
@@ -118,7 +204,7 @@ export default function EmotionsDrawer() {
             </Pressable>
 
             <Pressable
-              onPress={() => console.log("refactoring")}
+              onPress={() => toggleForm("category")}
               className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${activeForm === "category"
                 ? "bg-[#16181D] border-[#16181D]"
                 : "bg-white border-[#E6E8EC]"
@@ -193,7 +279,7 @@ export default function EmotionsDrawer() {
                         return (
                           <Pressable
                             key={id}
-                            onPress={() => console.log("refactoring")}
+                            onPress={() => field.onChange(isSelected ? "" : catName)}
                             className={`flex-row items-center h-7 rounded-lg px-2.5 gap-1 border ${isSelected
                               ? "bg-[#E8F1FB] border-[#1E4E8C]"
                               : "bg-white border-[#E6E8EC]"
@@ -238,7 +324,7 @@ export default function EmotionsDrawer() {
                           maxLength={30}
                           autoFocus
                           returnKeyType="done"
-                          onSubmitEditing={() => console.log("refactoring")}
+                          onSubmitEditing={categoryForm.handleSubmit(onSubmitCategory)}
                         />
                       </Input>
                       <Button
@@ -246,7 +332,7 @@ export default function EmotionsDrawer() {
                         rounding="lg"
                         className="h-10 px-4 bg-[#16181D]"
                         disabled={categoryForm.formState.isSubmitting}
-                        onPress={() => console.log("refactoring")}
+                        onPress={categoryForm.handleSubmit(onSubmitCategory)}
                       >
                         <ButtonText>Criar</ButtonText>
                       </Button>
@@ -266,9 +352,9 @@ export default function EmotionsDrawer() {
             className="flex-1 mt-2 mb-2"
             showsVerticalScrollIndicator={false}
           >
-            {trimmedQuery.length > 0 && !exactMatchExists && (
+            {searchQuery.length > 0 && !hasEmotion(searchQuery) && (
               <VStack space="sm" className="mb-5">
-                {!hasAnyMatch && (
+                {emotions.length === 0 && (
                   <Text className="text-sm font-subtitle text-[#5A606B]">
                     Nenhuma emoção com esse nome ainda.
                   </Text>
@@ -282,7 +368,7 @@ export default function EmotionsDrawer() {
                   </View>
                   <VStack className="flex-1">
                     <Text className="text-[15px] font-heading text-[#16181D]">
-                      Criar “{trimmedQuery}”
+                      Criar “{searchQuery}”
                     </Text>
                     <Text className="text-xs font-subtitle text-[#5A606B]">
                       Adicionar às suas emoções
@@ -312,35 +398,22 @@ export default function EmotionsDrawer() {
                 </HStack>
                 <HStack className="flex-wrap gap-2">
                   {uncategorizedCustom.map((item) => {
-                    const isSelected = emotions.some(
-                      (e) =>
-                        e.id === item.id ||
-                        e.name.toLowerCase() === item.name.toLowerCase()
-                    );
+                    const isSelected = selectedEmotions.includes(item.id);
                     const isMarkedForDelete = deletingIds.includes(item.id);
+                    const itemClasses = getEmotionItemClasses(isSelected, isMarkedForDelete);
 
                     return (
                       <Pressable
                         key={item.id}
-                        onPress={() => console.log("refactoring")}
-                        onLongPress={() => console.log("refactoring")}
-                        className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${isMarkedForDelete
-                          ? "bg-destructive/10 border-destructive"
-                          : isSelected
-                            ? "bg-[#E8F1FB] border-[#E8F1FB]"
-                            : "bg-white border-[#E6E8EC]"
-                          }`}
+                        onPress={() => handleEmotionPress(item.id)}
+                        onLongPress={() => toggleDeleteId(item.id)}
+                        className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${itemClasses.button}`}
                       >
                         {isSelected && !isMarkedForDelete && (
                           <Check size={14} color="#1E4E8C" />
                         )}
                         <Text
-                          className={`text-[14px] ${isMarkedForDelete
-                            ? "text-destructive font-semibold"
-                            : isSelected
-                              ? "text-[#1E4E8C] font-semibold"
-                              : "text-[#16181D] font-normal"
-                            }`}
+                          className={`text-[14px] ${itemClasses.text}`}
                         >
                           {item.name}
                         </Text>
@@ -352,7 +425,7 @@ export default function EmotionsDrawer() {
             )}
 
             <VStack space="lg" className="pb-4">
-              {categories.map((cat) => (
+              {emotions.map((cat) => (
                 <VStack key={cat.id} space="sm">
                   <HStack className="justify-between items-center">
                     <Text className="text-[13px] font-subtitle-medium text-[#5A606B]">
@@ -364,7 +437,7 @@ export default function EmotionsDrawer() {
                           Criada por você
                         </Text>
                         <Pressable
-                          onPress={() => console.log("refactoring")}
+                          onPress={() => handleDeleteCategory(cat.id)}
                           hitSlop={8}
                         >
                           <Trash2 size={14} color="#ef4444" />
@@ -374,40 +447,28 @@ export default function EmotionsDrawer() {
                   </HStack>
                   <HStack className="flex-wrap gap-2">
                     {cat.emotions.map((item) => {
-                      const isSelected = emotions.some(
-                        (e) =>
-                          (item.id !== undefined && e.id === item.id) ||
-                          e.name.toLowerCase() === item.name.toLowerCase()
-                      );
-                      const isMarkedForDelete =
-                        item.id !== undefined && deletingIds.includes(item.id);
+                      const isSelected = selectedEmotions.includes(item.id);
+                      const isMarkedForDelete = deletingIds.includes(item.id);
+                      const isDisabled = isSelectionMode && item.userId === null;
+                      const itemClasses = getEmotionItemClasses(isSelected, isMarkedForDelete);
 
                       return (
                         <Pressable
                           key={item.id}
-                          onPress={() => console.log("refactoring")}
+                          disabled={isDisabled}
+                          onPress={() => handleEmotionPress(item.id)}
                           onLongPress={
                             item.userId !== null
-                              ? () => console.log("refactoring")
+                              ? () => toggleDeleteId(item.id)
                               : undefined
                           }
-                          className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${isMarkedForDelete
-                            ? "bg-destructive/10 border-destructive"
-                            : isSelected
-                              ? "bg-[#E8F1FB] border-[#E8F1FB]"
-                              : "bg-white border-[#E6E8EC]"
-                            }`}
+                          className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${itemClasses.button} ${isDisabled ? "opacity-40" : ""}`}
                         >
                           {isSelected && !isMarkedForDelete && (
                             <Check size={14} color="#1E4E8C" />
                           )}
                           <Text
-                            className={`text-[14px] ${isMarkedForDelete
-                              ? "text-destructive font-semibold"
-                              : isSelected
-                                ? "text-[#1E4E8C] font-semibold"
-                                : "text-[#16181D] font-normal"
-                              }`}
+                            className={`text-[14px] ${itemClasses.text}`}
                           >
                             {item.name}
                           </Text>
@@ -426,13 +487,13 @@ export default function EmotionsDrawer() {
           </DrawerBody>
 
           <DrawerFooter className="pt-2">
-            {isSelectionMode ? (
+            {isSelectionMode && (
               <HStack space="sm" className="w-full">
                 <Button
                   variant="outline"
                   rounding="2xl"
                   className="flex-1 h-[52px]"
-                  onPress={() => console.log("refactoring")}
+                  onPress={() => setDeletingIds([])}
                 >
                   <ButtonText>Cancelar</ButtonText>
                 </Button>
@@ -440,24 +501,23 @@ export default function EmotionsDrawer() {
                   variant="destructive"
                   rounding="2xl"
                   className="flex-1 h-[52px]"
-                  onPress={() => console.log("refactoring")}
+                  onPress={handleDeleteSelected}
                 >
                   <Trash2 size={16} color="#fafafa" />
                   <ButtonText>Excluir ({deletingIds.length})</ButtonText>
                 </Button>
               </HStack>
-            ) : (
+            )}
+            {!isSelectionMode && (
               <Button
                 rounding="2xl"
                 className="w-full h-[52px] bg-[#16181D]"
                 onPress={() => setOpen(false)}
               >
                 <ButtonText className="text-[15px] font-semibold text-white">
-                  {emotions.length === 0
-                    ? "Concluir"
-                    : emotions.length === 1
-                      ? "Adicionar 1 emoção"
-                      : `Adicionar ${emotions.length} emoções`}
+                  {selectedEmotions.length === 0 && "Concluir"}
+                  {selectedEmotions.length > 0 &&
+                    `Adicionar ${selectedEmotions.length} ${selectedEmotions.length === 1 ? "emoção" : "emoções"}`}
                 </ButtonText>
               </Button>
             )}
