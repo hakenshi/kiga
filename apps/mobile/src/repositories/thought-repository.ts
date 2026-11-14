@@ -8,6 +8,10 @@ import {
 import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
 import { BaseRepository } from "./base-repository";
 
+export interface ThoughtFilterOptions {
+  userId: number;
+}
+
 export class ThoughtRepository extends BaseRepository {
   public static create(data: ThoughtInsert) {
     return db.transaction((tx) => {
@@ -21,27 +25,30 @@ export class ThoughtRepository extends BaseRepository {
     });
   }
 
-  public static async findMany(userId: number) {
+  public static findMany(userId: number) {
+    return this.search("", { userId });
+  }
+
+  public static async search(query: string, filters: ThoughtFilterOptions) {
+    query = query.trim();
+    const { userId } = filters;
+    const nameFilter = this.searchText(thoughts.name, query);
     const userThoughts = await db.query.thoughts.findMany({
       where: and(
         eq(thoughts.userId, userId),
-        isNull(thoughts.deletedAt)
+        isNull(thoughts.deletedAt),
+        nameFilter,
       ),
       orderBy: [asc(thoughts.orderIndex), asc(thoughts.id)],
-      with: {
-        category: true,
-      },
     });
 
     const defaults = await db.query.thoughts.findMany({
       where: and(
         isNull(thoughts.userId),
         isNull(thoughts.deletedAt),
+        nameFilter,
       ),
       orderBy: [asc(thoughts.orderIndex), asc(thoughts.id)],
-      with: {
-        category: true,
-      },
     })
 
     return [...userThoughts, ...defaults];
@@ -53,9 +60,6 @@ export class ThoughtRepository extends BaseRepository {
         eq(thoughts.id, id),
         isNull(thoughts.deletedAt)
       ),
-      with: {
-        category: true,
-      },
     });
   }
 
