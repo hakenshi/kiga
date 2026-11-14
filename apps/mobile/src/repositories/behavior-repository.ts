@@ -1,13 +1,17 @@
 import db from "@/lib/db";
 import { DatabaseException } from "@/lib/exceptions/database/index.exception";
-import { behaviors } from "@/lib/db/schema";
-import defaultBehaviors from "@/lib/data/behaviors.json";
+import { behaviors, categories } from "@/lib/db/schema";
 import {
   behaviorInsertSchema,
   behaviorUpdateSchema,
 } from "@/lib/db/zod/schemas/behavior/index.schema";
-import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { BaseRepository } from "./base-repository";
+
+export interface BehaviorFilterOptions {
+  userId: number;
+  categoryId?: number;
+}
 
 export class BehaviorRepository extends BaseRepository {
   public static create(data: BehaviorInsert) {
@@ -22,27 +26,56 @@ export class BehaviorRepository extends BaseRepository {
     });
   }
 
-  public static async findMany(userId: number) {
-    const userBehaviors = await db.query.behaviors.findMany({
+  public static findMany(userId: number) {
+    return this.search("", { userId });
+  }
+
+  public static async search(query: string, filters: BehaviorFilterOptions) {
+    query = query.trim();
+    const { userId, categoryId } = filters;
+    const contentFilter = this.searchText(behaviors.content, query);
+    const categoryFilter = categoryId === undefined ? undefined : eq(categories.id, categoryId);
+    const userBehaviors = await db.query.categories.findMany({
       where: and(
-        eq(behaviors.userId, userId),
-        isNull(behaviors.deletedAt)
+        eq(categories.type, "behavior"),
+        eq(categories.userId, userId),
+        isNull(categories.deletedAt),
+        categoryFilter,
       ),
-      orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
       with: {
-        category: true,
+        behaviors: {
+          where: and(
+            isNull(behaviors.deletedAt),
+            eq(behaviors.userId, userId),
+            contentFilter,
+          ),
+          orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
+        },
       },
     });
 
-    const defaults = await db.query.behaviors.findMany({
+    const defaults = await db.query.categories.findMany({
       where: and(
-        isNull(behaviors.userId),
-        isNull(behaviors.deletedAt),
+        eq(categories.type, "behavior"),
+        isNull(categories.userId),
+        isNull(categories.deletedAt),
+        categoryFilter,
       ),
-      orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
+      with: {
+        behaviors: {
+          where: and(
+            isNull(behaviors.deletedAt),
+            or(isNull(behaviors.userId), eq(behaviors.userId, userId)),
+            contentFilter,
+          ),
+          orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
+        },
+      },
     })
 
-    return [...userBehaviors, ...defaults];
+    const results = [...userBehaviors, ...defaults];
+    if (query === "") return results;
+    return results.filter(category => category.behaviors.length > 0);
   }
 
   public static async findById(id: number) {
@@ -79,11 +112,14 @@ export class BehaviorRepository extends BaseRepository {
     });
   }
 
-  public static async delete(id: number) {
-    return await db
+  public static delete(ids: number[], userId: number) {
+    return db
       .update(behaviors)
       .set({ deletedAt: new Date() })
-      .where(and(eq(behaviors.id, id), isNotNull(behaviors.userId)))
-      .returning();
+      .where(and(
+        inArray(behaviors.id, ids),
+        eq(behaviors.userId, userId),
+      ))
+      .returning().all();
   }
 }
