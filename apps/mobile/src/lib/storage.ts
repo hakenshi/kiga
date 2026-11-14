@@ -28,6 +28,7 @@ function getDatabase() {
  * Storage síncrono para Zustand apoiado pelo SQLite local (kiga.db).
  * Substitui o SecureStore/AsyncStorage sem precisar de novas dependências.
  */
+
 export const appStorage: StateStorage = {
   getItem: (key: string): string | null => {
     const db = getDatabase();

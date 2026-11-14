@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import {
   useFonts,
@@ -26,16 +26,24 @@ import {
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { ToastBanner } from "@/components/toast-banner";
 import migrations from "../../drizzle/migrations";
-import db, { expo } from "@/lib/db";
+import db from "@/lib/db";
 import { seedDatabase } from "@/lib/db/seed";
 import { DatabaseExceptionFilter } from "@/lib/exceptions/database/filter.exception";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { useEntryCacheStore } from "@/stores/entry-cache-store";
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
+  const tickExpiration = useEntryCacheStore(s => s.tickExpiration);
+
+  useEffect(() => {
+    const interval = setInterval(tickExpiration, 1000);
+    return () => clearInterval(interval);
+  }, [tickExpiration]);
+
   const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
