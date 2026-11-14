@@ -10,13 +10,21 @@ import { entryRepliesSelectSchema } from "@/lib/db/zod/schemas/entry/reply.schem
 import { entryImagesSelectSchema } from "@/lib/db/zod/schemas/entry/image.schema";
 import { entryRepostSelectSchema } from "@/lib/db/zod/schemas/entry/repost.schema";
 import { entryThoughtsSelectSchema } from "@/lib/db/zod/schemas/entry/thought.schema";
+import { behaviorSelectSchema } from "@/lib/db/zod/schemas/behavior/index.schema";
+import { emotionSelectSchema } from "@/lib/db/zod/schemas/emotion/index.schema";
+import { moodSelectSchema } from "@/lib/db/zod/schemas/mood/index.schema";
+import { reactionSelectSchema } from "@/lib/db/zod/schemas/reaction/index.schema";
+import { thoughtSelectSchema } from "@/lib/db/zod/schemas/thought/index.schema";
 
 export const journalEntrySelectSchema = createSelectSchema(journalEntries).extend({
-  entryBehaviors: entryBehaviorSelectSchema.array(),
-  entryEmotions: entryEmotionsSelectSchema.array(),
+  entryBehaviors: entryBehaviorSelectSchema.extend({ behavior: behaviorSelectSchema }).array(),
+  entryEmotions: entryEmotionsSelectSchema.extend({ emotion: emotionSelectSchema }).array(),
   entryImages: entryImagesSelectSchema.array(),
-  entryReactions: entryReactionsSelectSchema.array(),
-  entryThoughts: entryThoughtsSelectSchema.array(),
+  entryReactions: entryReactionsSelectSchema.extend({ reaction: reactionSelectSchema }).array(),
+  entryThoughts: entryThoughtsSelectSchema.extend({ thought: thoughtSelectSchema }).array(),
+  mood: moodSelectSchema.nullable(),
+  isRepost: z.boolean(),
+  isPureRepost: z.boolean(),
   thread: entryRepliesSelectSchema.array(),
   reposts: entryRepostSelectSchema.array(),
 });

@@ -1,17 +1,21 @@
 import { create } from "zustand";
 import { EntryRepository } from "@/repositories/entry-repository";
+import type { EntryFilterOptions } from "@/repositories/entry-repository";
 import { useToastStore } from "@/stores/toast-store";
 
 const PAGE_SIZE = 20;
 
 interface JournalEntryState {
   entries: JournalEntry[];
+  searchResults: JournalEntry[];
+  query: string;
   isLoading: boolean;
   hasMore: boolean;
   page: number;
 }
 interface JournalEntryActions {
   loadInitial: (userId: number) => Promise<void>; loadMore: (userId: number) => Promise<void>;
+  searchEntries: (query: string, filters: EntryFilterOptions) => void;
   addEntry: (newEntry: JournalEntryInsert) => void;
   updateEntry: (entryId: number, entryData: JournalEntryUpdate) => void
   deleteEntry: (entryId: number) => Promise<void>;
@@ -19,9 +23,27 @@ interface JournalEntryActions {
   reset: () => void;
 }
 
+export function selectEntries(state: JournalEntryState) {
+  return state.query === "" ? state.entries : state.searchResults;
+}
+
+export function getEntryBody(entry: JournalEntry) {
+  const behaviors = entry.entryBehaviors.map(item => item.behavior);
+
+  return {
+    images: entry.entryImages.map(item => item.imageUrl),
+    behaviors: behaviors.filter(behavior => Boolean(behavior.icon)),
+    reports: behaviors.filter((behavior): behavior is Behavior & { content: string } =>
+      !behavior.icon && behavior.content !== null && behavior.content.trim().length > 0
+    ),
+  };
+}
+
 export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
   ((set, get) => ({
     entries: [],
+    searchResults: [],
+    query: "",
     hasMore: false,
     isLoading: false,
     page: 0,
@@ -47,8 +69,8 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
       }
     },
     loadMore: async (userId) => {
-      const { isLoading, hasMore, page, entries } = get();
-      if (!hasMore || isLoading) return;
+      const { isLoading, hasMore, page, entries, query } = get();
+      if (!hasMore || isLoading || query !== "") return;
       set({ isLoading: true });
       try {
         const offset = page * PAGE_SIZE;
@@ -66,30 +88,51 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
         set({ isLoading: false });
       }
     },
+    searchEntries: (query, filters) => {
+      query = query.trim();
+      if (query === "") {
+        set({ query, searchResults: [] });
+        return;
+      }
+
+      try {
+        const searchResults = EntryRepository.search(query, filters);
+        set({ query, searchResults });
+      } catch (error) {
+        set({ query, searchResults: [] });
+        useToastStore.getState().showError("Falha ao buscar relatos.", error);
+      }
+    },
     addEntry: (newEntry: JournalEntryInsert) => {
-      EntryRepository.create(newEntry)
+      const entry = EntryRepository.create(newEntry)
       set((s) => ({
-        entries: s.entries.map(e => ({ ...newEntry, ...e }))
+        entries: [entry, ...s.entries]
       }));
+      if (get().query !== "") {
+        get().searchEntries(get().query, { userId: entry.userId });
+      }
     },
     updateEntry: (entryId, newEntryData) => {
-      EntryRepository.update(entryId, newEntryData);
+      const entry = EntryRepository.update(entryId, newEntryData);
       set((s) => {
-        const updated = s.entries.map(e => e.id === entryId ? { ...newEntryData, ...e } : e)
+        const updated = s.entries.map(e => e.id === entryId ? entry : e)
         return {
-          entries: updated
+          entries: updated,
         }
       })
+      if (get().query !== "") {
+        get().searchEntries(get().query, { userId: entry.userId });
+      }
     },
     findEntry: async (entryId) => {
-      const { entries } = get();
-      const cached = entries.find((e) => e.id === entryId);
+      const { entries, searchResults } = get();
+      const cached = entries.find((e) => e.id === entryId) ?? searchResults.find((e) => e.id === entryId);
       if (cached) return cached;
       return (await EntryRepository.findOne(entryId)) ?? null;
     },
     deleteEntry: async (entryId) => {
-      const { entries } = get();
-      const target = entries.find((i) => i.id === entryId);
+      const { entries, searchResults } = get();
+      const target = entries.find((i) => i.id === entryId) ?? searchResults.find((i) => i.id === entryId);
       if (!target) return;
 
       const targetIndex = entries.findIndex((i) => i.id === entryId);
@@ -97,6 +140,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
       // 1. Remove da tela imediatamente (otimista, sem travar o usuário)
       set((s) => ({
         entries: s.entries.filter((e) => e.id !== entryId),
+        searchResults: s.searchResults.filter((e) => e.id !== entryId),
       }));
 
       let isUndone = false;
@@ -111,9 +155,10 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
           // Restaura na tela caso falhe no banco
           set((s) => {
             const next = [...s.entries];
-            next.splice(targetIndex, 0, target);
+            if (targetIndex !== -1) next.splice(targetIndex, 0, target);
             return { entries: next };
           });
+          get().searchEntries(get().query, { userId: target.userId });
         }
       };
 
@@ -129,9 +174,10 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
           // Restaura na mesma posição do feed
           set((s) => {
             const next = [...s.entries];
-            next.splice(targetIndex, 0, target);
+            if (targetIndex !== -1) next.splice(targetIndex, 0, target);
             return { entries: next };
           });
+          get().searchEntries(get().query, { userId: target.userId });
         },
         4500
       );
@@ -139,6 +185,8 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
     reset: () => {
       set({
         entries: [],
+        searchResults: [],
+        query: "",
         isLoading: false,
         hasMore: false,
         page: 0,
