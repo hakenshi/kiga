@@ -1,13 +1,16 @@
 import db from "@/lib/db";
 import { DatabaseException } from "@/lib/exceptions/database/index.exception";
 import { moods } from "@/lib/db/schema";
-import defaultMoods from "@/lib/data/moods.json";
 import {
   moodInsertSchema,
   moodUpdateSchema,
 } from "@/lib/db/zod/schemas/mood/index.schema";
 import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
 import { BaseRepository } from "./base-repository";
+
+export interface MoodFilterOptions {
+  userId: number;
+}
 
 export class MoodRepository extends BaseRepository {
   public static create(data: MoodInsert) {
@@ -22,16 +25,27 @@ export class MoodRepository extends BaseRepository {
     });
   }
 
-  public static async findMany(userId: number) {
+  public static findMany(userId: number) {
+    return this.search("", { userId });
+  }
+
+  public static async search(query: string, filters: MoodFilterOptions) {
+    query = query.trim();
+    const { userId } = filters;
+    const nameFilter = this.searchText(moods.name, query);
     const userMoods = await db.query.moods.findMany({
       where: and(
         eq(moods.userId, userId),
-        isNull(moods.deletedAt)
+        isNull(moods.deletedAt),
+        nameFilter,
       ),
       orderBy: [asc(moods.id)],
     });
 
-    const defaultMoods = await this.findDefaults(moods)
+    const defaultMoods = await db.query.moods.findMany({
+      where: and(isNull(moods.userId), isNull(moods.deletedAt), nameFilter),
+      orderBy: [asc(moods.id)],
+    });
     return [...userMoods, ...defaultMoods];
   }
 
