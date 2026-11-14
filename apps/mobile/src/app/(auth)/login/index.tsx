@@ -8,9 +8,7 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { HStack } from "@/components/ui/hstack";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -18,7 +16,7 @@ import { loginSchema } from "@/lib/db/zod/schemas/auth.schema";
 import { useAuthStore } from "@/stores/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { eq } from "drizzle-orm";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { AtSign, Eye, EyeOff, Lock } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -28,7 +26,6 @@ import { useEntryStore } from "@/stores/journal-store";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [useCloud, setUseCloud] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const loadInitial = useEntryStore((e) => e.loadInitial);
@@ -189,20 +186,16 @@ export default function LoginPage() {
           </AuthButtonNext>
 
           <ButtonGroup className="justify-center items-center">
-            <Button
-              variant="link"
-              className="shadow-none"
-              onPress={() => router.navigate("/")}
-            >
-              <ButtonText>Início</ButtonText>
-            </Button>
-            <Button
-              variant="link"
-              className="shadow-none"
-              onPress={() => router.navigate("/(auth)/register")}
-            >
-              <ButtonText>Criar uma conta</ButtonText>
-            </Button>
+            <Link href="/" asChild>
+              <Button variant="link" className="shadow-none">
+                <ButtonText>Início</ButtonText>
+              </Button>
+            </Link>
+            <Link href="/(auth)/register" asChild>
+              <Button variant="link" className="shadow-none">
+                <ButtonText>Criar uma conta</ButtonText>
+              </Button>
+            </Link>
           </ButtonGroup>
         </VStack>
       </AuthButtonsContainer>

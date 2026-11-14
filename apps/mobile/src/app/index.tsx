@@ -4,11 +4,10 @@ import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAuthStore } from "@/stores/auth-store";
-import { Redirect, useRouter } from "expo-router";
+import { Link, Redirect } from "expo-router";
 import { ArrowRightIcon, UserIcon } from "lucide-react-native";
 
 export default function Index() {
-  const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   if (isAuthenticated) {
@@ -30,22 +29,26 @@ export default function Index() {
         </Text>
       </VStack>
       <VStack space="md" className="w-full justify-end">
-        <Button onPress={() => router.push("/(auth)/register")}>
-          <ButtonIcon as={UserIcon} size="md" />
-          <ButtonText>
-            Começar agora - Criar Conta
-          </ButtonText>
-        </Button>
+        <Link href="/(auth)/register" push asChild>
+          <Button>
+            <ButtonIcon as={UserIcon} size="md" />
+            <ButtonText>
+              Começar agora - Criar Conta
+            </ButtonText>
+          </Button>
+        </Link>
         <HStack className="items-center justify-center pt-8 gap-1">
           <Text className="text-muted-foreground text-sm">
             Já possui uma conta?
           </Text>
-          <Button variant="ghost" className="shadow-none" onPress={() => router.push("/(auth)/login")}>
-            <ButtonText className="font-bold">
-              Fazer Login
-            </ButtonText>
-            <ButtonIcon as={ArrowRightIcon} size="sm" />
-          </Button>
+          <Link href="/(auth)/login" push asChild>
+            <Button variant="ghost" className="shadow-none">
+              <ButtonText className="font-bold">
+                Fazer Login
+              </ButtonText>
+              <ButtonIcon as={ArrowRightIcon} size="sm" />
+            </Button>
+          </Link>
         </HStack>
       </VStack>
     </VStack >
