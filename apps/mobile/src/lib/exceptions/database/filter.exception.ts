@@ -10,10 +10,7 @@ export class DatabaseExceptionFilter {
       return new DatabaseException("Erro inesperado de banco de dados");
     }
 
-    let rawMessage = err;
-    if (err instanceof Error) {
-      rawMessage = err.message;
-    }
+    const rawMessage = err instanceof Error ? err.message : err;
     const lower = rawMessage.toLowerCase();
 
     if (lower.includes("unique constraint failed") && lower.includes("users.username")) {
@@ -80,7 +77,7 @@ export class DatabaseExceptionFilter {
     }
 
     return new DatabaseException(
-      rawMessage as string
+      rawMessage
     );
   }
 }
