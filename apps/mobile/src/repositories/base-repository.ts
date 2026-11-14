@@ -1,8 +1,8 @@
-import db from "@/lib/db";
-import { AnySQLiteColumn, SQLiteTable } from "drizzle-orm/sqlite-core";
-import { and, eq, InferInsertModel, isNull } from "drizzle-orm";
-import { z } from "zod";
-import { categories, CategoryType } from "@/lib/db/schema";
+import type db from "@/lib/db";
+import type { SQLiteColumn, SQLiteTable } from "drizzle-orm/sqlite-core";
+import type { InferInsertModel } from "drizzle-orm";
+import { like } from "drizzle-orm";
+import type { z } from "zod";
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -15,6 +15,10 @@ export interface IRepository<TInsert, TUpdate, TReturn = any> {
 }
 
 export abstract class BaseRepository {
+  protected static searchText(column: SQLiteColumn, query: string) {
+    if (query === "") return;
+    return like(column, `%${query}%`);
+  }
 
   protected static insert<T extends SQLiteTable, Z extends z.ZodType<InferInsertModel<T>>>(
     tx: Tx,

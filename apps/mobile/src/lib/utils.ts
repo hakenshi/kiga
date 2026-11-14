@@ -38,3 +38,10 @@ export function countWords(str: string): number {
   if (!str) return 0;
   return str.trim().split(/\s+/).filter(Boolean).length;
 }
+
+export function toggleSelectedId(selectedIds: number[], id: number): number[] {
+  if (selectedIds.includes(id)) {
+    return selectedIds.filter(selectedId => selectedId !== id);
+  }
+  return [...selectedIds, id];
+}
