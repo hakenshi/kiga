@@ -9,7 +9,12 @@ import React from 'react';
 import { Pressable, Text, View, type PressableProps } from 'react-native';
 
 const SCOPE = 'BADGE';
-const Root = withStyleContext(Pressable, SCOPE);
+// withStyleContext encaminha a ref à instância nativa, não ao tipo do componente.
+const Root = withStyleContext(Pressable, SCOPE) as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof Pressable> &
+    { context?: Record<string, unknown> } &
+    React.RefAttributes<React.ComponentRef<typeof Pressable>>
+>;
 
 const badgeStyle = tva({
   base: 'flex-row items-center justify-center border h-fit',
