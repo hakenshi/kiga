@@ -1,5 +1,5 @@
 import Logo from "@/components/common/logo";
-import { eachDayOfInterval, eachWeekOfInterval, endOfMonth, endOfWeek, format, getDate, getWeeksInMonth, isSameWeek, isThisWeek, startOfMonth, startOfWeek } from "date-fns"
+import { eachDayOfInterval, eachWeekOfInterval, endOfMonth, endOfWeek, format, getDate, isSameWeek, isThisWeek, startOfMonth, startOfWeek } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Button, ButtonGroup, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
@@ -7,7 +7,7 @@ import { Input, InputField, InputIcon } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import { Tabs, usePathname } from "expo-router";
 import { CalendarIcon, ChartBar, ChevronDown, HomeIcon, SearchIcon, SettingsIcon, SlidersHorizontalIcon, UserIcon } from "lucide-react-native";
-import { use, useState } from "react";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Drawer, DrawerBackdrop, DrawerBody, DrawerCloseButton, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
@@ -32,7 +32,6 @@ export default function HomeLayout() {
   const weekDaysEnd = useFeedFilterStore(f => f.end)
   const weekDaysInterval = useFeedFilterStore(f => f.interval)
   const weekDaysCurrent = useFeedFilterStore(f => f.current)
-  const query = useFeedFilterStore(f => f.query)
   const updateWeekDaysCurrent = useFeedFilterStore(f => f.updateCurrent)
   const updateQuery = useFeedFilterStore(f => f.updateQuery)
   const monthWeeks = eachWeekOfInterval({ start: startOfMonth(date), end: endOfMonth(date) }).map(w => {
