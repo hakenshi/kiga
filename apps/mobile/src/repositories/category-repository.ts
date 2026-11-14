@@ -1,15 +1,17 @@
 import db from "@/lib/db";
 import { DatabaseException } from "@/lib/exceptions/database/index.exception";
 import { categories, CategoryType } from "@/lib/db/schema";
-import defaultBehaviors from "@/lib/data/behaviors.json";
-import defaultcategories from "@/lib/data/categories.json";
-import defaultReactions from "@/lib/data/reactions.json";
 import {
   categoryInsertSchema,
   categoryUpdateSchema,
 } from "@/lib/db/zod/schemas/category/index.schema";
 import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
 import { BaseRepository } from "./base-repository";
+
+export interface CategoryFilterOptions {
+  userId: number;
+  type?: CategoryType;
+}
 
 export class CategoryRepository extends BaseRepository {
   public static create(data: CategoryInsert) {
@@ -24,12 +26,20 @@ export class CategoryRepository extends BaseRepository {
     });
   }
 
-  public static async findMany(userId: number, type?: CategoryType) {
+  public static findMany(userId: number, type?: CategoryType) {
+    return this.search("", { userId, type });
+  }
+
+  public static async search(query: string, filters: CategoryFilterOptions) {
+    query = query.trim();
+    const { userId, type } = filters;
+    const nameFilter = this.searchText(categories.name, query);
     const userCategories = await db.query.categories.findMany({
       where: and(
         eq(categories.userId, userId),
         type ? eq(categories.type, type) : undefined,
-        isNull(categories.deletedAt)
+        isNull(categories.deletedAt),
+        nameFilter,
       ),
       orderBy: [asc(categories.orderIndex), asc(categories.id)],
     });
@@ -37,7 +47,9 @@ export class CategoryRepository extends BaseRepository {
     const defaults = await db.query.categories.findMany({
       where: and(
         isNull(categories.userId),
+        type ? eq(categories.type, type) : undefined,
         isNull(categories.deletedAt),
+        nameFilter,
       ),
       orderBy: [asc(categories.orderIndex), asc(categories.id)],
     })
