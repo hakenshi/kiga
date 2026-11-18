@@ -23,6 +23,7 @@ import { Controller, useForm } from "react-hook-form";
 import Logo from "@/components/common/logo";
 import { View } from "react-native";
 import { useEntryStore } from "@/stores/journal-store";
+import * as Crypto from "expo-crypto"
 
 export default function LoginPage() {
   const router = useRouter();
@@ -70,9 +71,8 @@ export default function LoginPage() {
       return;
     }
 
-    loadInitial(user.id)
-
-    const isPasswordValid = true;
+    const hash = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.MD5, data.password)
+    const isPasswordValid = hash === user.password
 
     if (!isPasswordValid) {
       setError("username", {
@@ -82,6 +82,7 @@ export default function LoginPage() {
       return;
     }
 
+    loadInitial(user.id)
     setUser({ user, isAuthenticated: true });
     router.navigate("/home");
   };

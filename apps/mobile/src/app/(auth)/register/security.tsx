@@ -18,6 +18,7 @@ import { useRouter } from "expo-router";
 import { Eye, EyeOff, KeyRound, Lock } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import * as Crypto from "expo-crypto";
 
 export default function SecurityPage() {
   const router = useRouter();
@@ -43,7 +44,12 @@ export default function SecurityPage() {
         return;
       }
 
-      useRegisterStore.getState().updateRegister({ password: data.password });
+      const hashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.MD5,
+        data.password
+      );
+
+      useRegisterStore.getState().updateRegister({ password: hashedPassword });
       router.push("/(auth)/register/identity");
     });
   };
