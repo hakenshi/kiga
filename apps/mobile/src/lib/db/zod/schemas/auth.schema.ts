@@ -1,5 +1,5 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { isFuture, isValid } from "date-fns";
+import { format, isFuture, isValid, parse } from "date-fns";
 import { z } from "zod/v4";
 import { genderEnum, profileImages, pronounEnum, users } from "../../schema";
 import { behaviorSelectSchema } from "./behavior/index.schema";
@@ -47,7 +47,9 @@ export const userInsertBaseSchema = createInsertSchema(users, {
       .min(2, "O sobrenome deve ter no mínimo 2 caracteres"),
   gender: z.enum(genderEnum, { error: "Selecione um gênero" }),
   pronoun: z.enum(pronounEnum, { error: "Selecione um pronome" }),
-});
+}).omit({
+  createdAt: true,
+})
 
 export const userInsertSchema = userInsertBaseSchema.transform((data) => ({
   ...data,
@@ -59,7 +61,9 @@ export const userInsertSchema = userInsertBaseSchema.transform((data) => ({
 
 export const userUpdateSchema = userInsertBaseSchema.partial();
 
+
 export const profileImageInsertSchema = createInsertSchema(profileImages, {
+
   url: (s) => s.min(1, "Informe o endereço da imagem"),
 });
 
@@ -69,124 +73,35 @@ export const loginSchema = userInsertBaseSchema.pick({
   password: true,
 });
 
-export const birthDateSchema = z
-  .union([
-    z.date(),
-    z.string().trim().min(1, "Informe a data de nascimento"),
-  ])
-  .transform((val, ctx) => {
-    if (val instanceof Date) {
-      if (!isValid(val)) {
-        ctx.addIssue({ code: "custom", message: "Data de nascimento inválida" });
-        return z.NEVER;
-      }
-      if (isFuture(val)) {
-        ctx.addIssue({ code: "custom", message: "A data de nascimento não pode ser no futuro" });
-        return z.NEVER;
-      }
-      return val;
-    }
-
-    const clean = val.trim();
-    if (clean.length === 0) {
-      ctx.addIssue({ code: "custom", message: "Informe a data de nascimento" });
-      return z.NEVER;
-    }
-
-    if (clean.includes("/")) {
-      const parts = clean.split("/");
-      if (parts.length !== 3 || clean.length !== 10) {
-        ctx.addIssue({ code: "custom", message: "Data incompleta. Use DD/MM/AAAA" });
-        return z.NEVER;
-      }
-      const [d, m, y] = parts.map(Number);
-      if (!d || !m || !y || isNaN(d) || isNaN(m) || isNaN(y)) {
-        ctx.addIssue({ code: "custom", message: "Data de nascimento inválida" });
-        return z.NEVER;
-      }
-      if (y < 1900) {
-        ctx.addIssue({ code: "custom", message: "Ano de nascimento inválido" });
-        return z.NEVER;
-      }
-      const date = new Date(Date.UTC(y, m - 1, d));
-      if (
-        !isValid(date) ||
-        date.getUTCFullYear() !== y ||
-        date.getUTCMonth() !== m - 1 ||
-        date.getUTCDate() !== d
-      ) {
-        ctx.addIssue({ code: "custom", message: "Data de nascimento inválida" });
-        return z.NEVER;
-      }
-      if (isFuture(date)) {
-        ctx.addIssue({ code: "custom", message: "A data de nascimento não pode ser no futuro" });
-        return z.NEVER;
-      }
-      return date;
-    }
-
-    const date = new Date(clean);
-    if (!isValid(date)) {
-      ctx.addIssue({ code: "custom", message: "Data de nascimento inválida" });
-      return z.NEVER;
-    }
-    if (date.getUTCFullYear() < 1900) {
-      ctx.addIssue({ code: "custom", message: "Ano de nascimento inválido" });
-      return z.NEVER;
-    }
-    if (isFuture(date)) {
-      ctx.addIssue({ code: "custom", message: "A data de nascimento não pode ser no futuro" });
-      return z.NEVER;
-    }
-    return date;
-  });
-
-export const registerNameSchema = userInsertBaseSchema
-  .pick({
-    firstName: true,
-    secondName: true,
-    username: true,
+const birthDateSchema = z.string({ error: "Insira uma data válida" }).trim().min(1, "Informe uma data de nascimento").transform((v, ctx) => {
+  const date = parse(v, "dd/MM/yyyy", new Date())
+  if (!isValid(date) || format(date, "dd/MM/yyyy") !== v) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Data inválida, use DD/MM/YYYY"
+    })
+    return z.NEVER
+  }
+  return date
+})
+  .refine((d) => d.getFullYear() >= 1920, {
+    message: "Ano de nascimento inválido"
   })
-  .extend({
-    birthDate: birthDateSchema,
-  });
-
-export const registerSecuritySchema = userInsertBaseSchema
-  .pick({
-    password: true,
+  .refine(d => !isFuture(d), {
+    message: "Você não é um viajante do tempo."
   })
-  .extend({
-    confirmPassword: userInsertBaseSchema.shape.password,
+
+export const registerSchema = userInsertBaseSchema.extend({
+  confirmPassword: userInsertBaseSchema.shape.password,
+  birthDate: birthDateSchema,
+}).omit({
+  id: true,
+})
+  .partial()
+  .refine(({ password, confirmPassword }) => !confirmPassword || !password || confirmPassword === password, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"]
   })
-  .refine(
-    (d) => d.password.toLowerCase().trim() === d.confirmPassword.toLowerCase().trim(),
-    {
-      message: "As senhas não coincidem",
-      path: ["confirmPassword"],
-    }
-  );
-
-export const registerIdentitySchema = userInsertBaseSchema.pick({
-  gender: true,
-  pronoun: true,
-});
-
-export const registerPinSchema = userInsertBaseSchema.pick({
-  pin: true,
-});
-
-export const registerSchema = userInsertBaseSchema
-  .extend({
-    confirmPassword: userInsertBaseSchema.shape.password,
-    birthDate: birthDateSchema,
-  })
-  .refine(
-    (d) => d.password.toLowerCase().trim() === d.confirmPassword.toLowerCase().trim(),
-    {
-      message: "As senhas não coincidem",
-      path: ["confirmPassword"],
-    }
-  );
 
 // ─── USUÁRIO COMPLETO COM RELACIONAMENTOS (SESSÃO) ─────────────────────────
 export const userWithRelationsSchema = userSelectBaseSchema.extend({

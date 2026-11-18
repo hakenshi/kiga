@@ -10,7 +10,8 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { VStack } from "@/components/ui/vstack";
-import { registerIdentitySchema } from "@/lib/db/zod/schemas/auth.schema";
+import { registerSchema } from "@/lib/db/zod/schemas/auth.schema";
+import { validate } from "@/lib/validate";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -35,31 +36,27 @@ export const PRONOUN_OPTIONS = [
 export default function IdentityPage() {
   const router = useRouter();
 
-  const gender = useRegisterStore((s) => s.gender);
-  const pronoun = useRegisterStore((s) => s.pronoun);
-  const setStep3Data = useRegisterStore((s) => s.setStep3Data);
+  const gender = useRegisterStore((s) => s.register.gender);
+  const pronoun = useRegisterStore((s) => s.register.pronoun);
+  const updateRegister = useRegisterStore((s) => s.updateRegister);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterIdentitySchema>({
-    resolver: zodResolver(registerIdentitySchema),
+  } = useForm<RegisterSchema["input"]>({
+    resolver: zodResolver(registerSchema, {}, { raw: true }),
     defaultValues: {
       gender,
       pronoun,
     },
   });
 
-  const submit = (formData: RegisterIdentitySchema) => {
-    const validatedData = registerIdentitySchema.safeParse(formData);
-
-    if (!validatedData.success) {
-      return;
-    }
-
-    setStep3Data(validatedData.data);
-    router.push("/(auth)/register/pin");
+  const submit = async (formData: RegisterSchema["input"]) => {
+    await validate<RegisterSchema>(registerSchema, formData, (data) => {
+      updateRegister(data);
+      router.push("/(auth)/register/pin");
+    });
   };
 
   const handleBack = () => {

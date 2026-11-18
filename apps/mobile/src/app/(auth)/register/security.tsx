@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/form-control";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
-import { registerSecuritySchema } from "@/lib/db/zod/schemas/auth.schema";
+import { registerSchema } from "@/lib/db/zod/schemas/auth.schema";
+import { validate } from "@/lib/validate";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -22,29 +23,29 @@ export default function SecurityPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const password = useRegisterStore((s) => s.password);
-  const confirmPassword = useRegisterStore((s) => s.confirmPassword);
-  const setStep2Data = useRegisterStore((s) => s.setStep2Data);
-
+  const password = useRegisterStore((s) => s.register.password);
+  const confirmPassword = useRegisterStore((s) => s.register.confirmPassword);
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterSecurityInput, any, RegisterSecuritySchema>({
-    resolver: zodResolver(registerSecuritySchema),
+  } = useForm<RegisterSchema["input"]>({
+    resolver: zodResolver(registerSchema, {}, { raw: true }),
     defaultValues: {
       password,
       confirmPassword,
     },
   });
 
-  const submit = (formData: RegisterSecuritySchema) => {
-    setStep2Data({
-      password: formData.password,
-      confirmPassword: formData.confirmPassword,
+  const submit = async (formData: RegisterSchema["input"]) => {
+    await validate<RegisterSchema>(registerSchema, formData, async (data) => {
+      if (!data.password) {
+        return;
+      }
+
+      useRegisterStore.getState().updateRegister({ password: data.password });
+      router.push("/(auth)/register/identity");
     });
-    router.push("/(auth)/register/identity");
   };
 
   const handleBack = () => {

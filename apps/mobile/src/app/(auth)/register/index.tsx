@@ -11,45 +11,39 @@ import {
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { registerNameSchema } from "@/lib/db/zod/schemas/auth.schema";
-import { formatDateMask, toMaskedDate } from "@/lib/utils";
+import { formatDateMask } from "@/lib/utils";
+import { validate } from "@/lib/validate";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { AtSign, Calendar, User } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
+import { registerSchema } from "@/lib/db/zod/schemas/auth.schema";
 
 export default function NamePage() {
   const router = useRouter();
-  const firstName = useRegisterStore((s) => s.firstName);
-  const secondName = useRegisterStore((s) => s.secondName);
-  const username = useRegisterStore((s) => s.username);
-  const birthDate = useRegisterStore((s) => s.birthDate);
-  const setStep1Data = useRegisterStore((s) => s.setStep1Data);
+  const { firstName, secondName, username, birthDate } = useRegisterStore.getState().getFormValues();
   const reset = useRegisterStore((s) => s.reset);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterNameInput, any, RegisterNameSchema>({
-    resolver: zodResolver(registerNameSchema),
+  } = useForm<RegisterSchema["input"]>({
+    resolver: zodResolver(registerSchema, {}, { raw: true }),
     defaultValues: {
       firstName,
       secondName,
       username,
-      birthDate: birthDate ? toMaskedDate(birthDate) : "",
+      birthDate,
     },
   });
 
-  const submit = (formData: RegisterNameSchema) => {
-    setStep1Data({
-      firstName: formData.firstName,
-      secondName: formData.secondName,
-      username: formData.username,
-      birthDate: formData.birthDate.toISOString(),
+  const submit = async (formData: RegisterSchema["input"]) => {
+    await validate<RegisterSchema>(registerSchema, formData, (data) => {
+      useRegisterStore.getState().updateRegister(data);
+      router.push("/(auth)/register/security");
     });
-    router.push("/(auth)/register/security");
   };
 
   const handleBack = () => {
@@ -180,7 +174,7 @@ export default function NamePage() {
                   keyboardType="numeric"
                   maxLength={10}
                   onChangeText={(text) => field.onChange(formatDateMask(text))}
-                  value={field.value as string}
+                  value={field.value}
                   onBlur={field.onBlur}
                   placeholder="DD/MM/AAAA"
                 />

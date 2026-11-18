@@ -15,10 +15,10 @@ import { Input, InputField } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { birthDateSchema, registerPinSchema } from "@/lib/db/zod/schemas/auth.schema";
+import { registerSchema } from "@/lib/db/zod/schemas/auth.schema";
 import { DatabaseException } from "@/lib/exceptions/database/index.exception";
 import { DatabaseExceptionFilter } from "@/lib/exceptions/database/filter.exception";
-import { ValidationExceptionFilter } from "@/lib/exceptions/validation/filter.exception";
+import { validate } from "@/lib/validate";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRegisterStore } from "@/stores/register-store";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +27,7 @@ import { Check, DeleteIcon } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import { HStack } from "@/components/ui/hstack";
 import { View } from "react-native";
-import { z } from "zod";
+import { safeParse } from "zod";
 
 const KEYPAD_ROWS = [
   [1, 2, 3],
@@ -42,83 +42,73 @@ export default function PinPage() {
   const {
     control,
     handleSubmit,
-    setError,
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterPinSchema>({
-    resolver: zodResolver(registerPinSchema),
+  } = useForm<RegisterSchema["input"]>({
+    resolver: zodResolver(registerSchema, {}, { raw: true }),
     defaultValues: {
       pin: "",
     },
   });
 
-  const submit = async (formData: RegisterPinSchema) => {
+  const submit = async (formData: RegisterSchema["input"]) => {
+    const { data, success, error } = registerSchema.safeParse(formData)
+    if (!success) {
+      console.log("error", error)
+      return
+    }
     const registerState = useRegisterStore.getState();
-
+    const { register } = registerState;
     if (
-      !registerState.firstName ||
-      !registerState.username ||
-      !registerState.password ||
-      !registerState.birthDate
+      !register.firstName ||
+      !register.secondName ||
+      !register.username ||
+      !register.password ||
+      !register.birthDate ||
+      !data.pin
     ) {
       router.push("/");
       return;
     }
 
-    try {
-      const [createdUser] = await db
-        .insert(users)
-        .values({
-          firstName: registerState.firstName,
-          secondName: registerState.secondName,
-          username: registerState.username,
-          password: registerState.password,
-          birthDate: birthDateSchema.parse(registerState.birthDate),
-          gender: registerState.gender,
-          pronoun: registerState.pronoun,
-          pin: formData.pin,
-        })
-        .returning()
-        .catch((err: unknown) => {
-          throw DatabaseExceptionFilter.from(err);
-        });
-
-      if (!createdUser) {
-        throw new DatabaseException("Falha ao registrar usuário.");
-      }
-
-      registerState.reset();
-
-      const sessionUser: User = {
-        id: createdUser.id,
-        firstName: createdUser.firstName,
-        secondName: createdUser.secondName,
-        username: createdUser.username,
-        birthDate: createdUser.birthDate,
-        gender: createdUser.gender,
-        pronoun: createdUser.pronoun,
-        createdAt: createdUser.createdAt,
-      };
-
-      setUser({ user: sessionUser, isAuthenticated: true });
-
-      router.replace("/home");
-    } catch (err: unknown) {
-      console.error("Erro ao cadastrar usuário:", err);
-      let message = "Ocorreu um erro ao finalizar o cadastro.";
-
-      if (err instanceof z.ZodError) {
-        message = ValidationExceptionFilter.from(err).message;
-      } else if (err instanceof Error) {
-        message = err.message;
-      }
-
-      setError("pin", {
-        type: "manual",
-        message,
+    const [createdUser] = await db
+      .insert(users)
+      .values({
+        firstName: register.firstName,
+        secondName: register.secondName,
+        username: register.username,
+        password: register.password,
+        birthDate: register.birthDate,
+        gender: register.gender,
+        pronoun: register.pronoun,
+        pin: data.pin,
+      })
+      .returning()
+      .catch((err: unknown) => {
+        throw DatabaseExceptionFilter.from(err);
       });
+
+    if (!createdUser) {
+      throw new DatabaseException("Falha ao registrar usuário.");
     }
+
+    registerState.reset();
+
+    const sessionUser: User = {
+      id: createdUser.id,
+      firstName: createdUser.firstName,
+      secondName: createdUser.secondName,
+      username: createdUser.username,
+      birthDate: createdUser.birthDate,
+      gender: createdUser.gender,
+      pronoun: createdUser.pronoun,
+      createdAt: createdUser.createdAt,
+    };
+
+    setUser({ user: sessionUser, isAuthenticated: true });
+
+    router.replace("/home");
   };
 
   // oxlint-disable-next-line react/incompatible-library
@@ -146,11 +136,10 @@ export default function PinPage() {
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Input
                     key={i}
-                    className={`h-16 w-14 rounded-2xl items-center justify-center border ${
-                      field.value?.[i]
-                        ? "border-foreground border-2 bg-secondary"
-                        : "border-border bg-background"
-                    }`}
+                    className={`h-16 w-14 rounded-2xl items-center justify-center border ${field.value?.[i]
+                      ? "border-foreground border-2 bg-secondary"
+                      : "border-border bg-background"
+                      }`}
                   >
                     <InputField
                       testID="register-pin-input"

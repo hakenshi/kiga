@@ -1,14 +1,9 @@
 import type { z } from "zod/v4";
 import type {
-  birthDateSchema,
   loginSchema,
   profileImageInsertSchema,
   profileImageSelectSchema,
-  registerIdentitySchema,
-  registerNameSchema,
-  registerPinSchema,
   registerSchema,
-  registerSecuritySchema,
   userInsertBaseSchema,
   userInsertSchema,
   userSelectBaseSchema,
@@ -29,11 +24,9 @@ declare global {
   type User = UserWithRelations;
 
   type LoginSchema = z.infer<typeof loginSchema>;
-  type RegisterSchema = z.infer<typeof registerSchema>;
-  type RegisterNameInput = z.input<typeof registerNameSchema>;
-  type RegisterNameSchema = z.infer<typeof registerNameSchema>;
-  type RegisterSecurityInput = z.input<typeof registerSecuritySchema>;
-  type RegisterSecuritySchema = z.infer<typeof registerSecuritySchema>;
-  type RegisterIdentitySchema = z.infer<typeof registerIdentitySchema>;
-  type RegisterPinSchema = z.infer<typeof registerPinSchema>;
+  type RegisterSchema = {
+    input: z.input<typeof registerSchema>
+    output: z.output<typeof registerSchema>
+    full: z.infer<typeof registerSchema>
+  }
 }
