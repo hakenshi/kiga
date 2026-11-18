@@ -23,7 +23,8 @@ export class NoteRepository extends BaseRepository {
     const rows = await db.query.notes.findMany({
       where: and(
         eq(notes.userId, userId),
-        isNull(notes.deletedAt)
+        isNull(notes.deletedAt),
+        eq(notes.noteType, "note")
       ),
       orderBy: [desc(notes.fixed), desc(notes.deletedAt), desc(notes.id)],
       limit,
