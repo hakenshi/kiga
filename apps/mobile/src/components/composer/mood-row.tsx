@@ -19,7 +19,7 @@ interface Props {
 export default function MoodRow({ moodId, onSelect }: Props) {
   return (
     <HStack className="justify-between px-4 py-3 items-center border-b border-border">
-      <Text className="text-[13px] font-subtitle text-muted-foreground">Como você está?</Text>
+      <Text className="text-sm font-subtitle text-muted-foreground">Como você está?</Text>
       <HStack className="items-center" space="xs">
         {MOOD_OPTIONS.map(({ value, Icon }) => {
           return (

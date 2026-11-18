@@ -321,10 +321,10 @@ export default function ImageCropperModal({
           </Pressable>
 
           <VStack className="items-center">
-            <Text className="text-[16px] font-heading text-zinc-900">
+            <Text className="text-base font-heading text-zinc-900">
               Ajustar imagem
             </Text>
-            <Text className="text-[11px] font-subtitle text-zinc-600">
+            <Text className="text-xs font-subtitle text-zinc-600">
               Arraste os cantos ou bordas para recortar
             </Text>
           </VStack>
@@ -339,7 +339,7 @@ export default function ImageCropperModal({
             ) : (
               <>
                 <Check size={16} color="#FFFFFF" />
-                <Text className="text-[13px] font-heading text-white">
+                <Text className="text-sm font-heading text-white">
                   Aplicar
                 </Text>
               </>

@@ -113,7 +113,7 @@ export const ImageCarousel = memo(function ImageCarousel({
               className="absolute bottom-2.5 right-2.5 h-7 px-3 rounded-full flex-row items-center justify-center gap-1.5 active:opacity-80 z-10"
             >
               <Crop size={13} color="#FFFFFF" />
-              <Text className="text-[11px] font-heading text-white">Recortar</Text>
+              <Text className="text-xs font-heading text-white">Recortar</Text>
             </Pressable>
           )}
         </View>
@@ -183,7 +183,7 @@ export const ImageCarousel = memo(function ImageCarousel({
                         className="absolute bottom-2.5 right-2.5 h-7 px-3 rounded-full flex-row items-center justify-center gap-1.5 active:opacity-80 z-10"
                       >
                         <Crop size={13} color="#FFFFFF" />
-                        <Text className="text-[11px] font-heading text-white">Recortar</Text>
+                        <Text className="text-xs font-heading text-white">Recortar</Text>
                       </Pressable>
                     )}
                   </View>
@@ -200,11 +200,10 @@ export const ImageCarousel = memo(function ImageCarousel({
             {/* Badge numérica de slide */}
             <View
               style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
-              className={`absolute ${
-                isComposerMode ? "top-2.5 left-2.5" : "top-2.5 right-2.5"
-              } px-2.5 py-1 rounded-full z-10 pointer-events-none`}
+              className={`absolute ${isComposerMode ? "top-2.5 left-2.5" : "top-2.5 right-2.5"
+                } px-2.5 py-1 rounded-full z-10 pointer-events-none`}
             >
-              <Text className="text-[11px] font-heading text-white">
+              <Text className="text-xs font-heading text-white">
                 {isComposerMode
                   ? `Foto ${activeIndex + 1} de ${total}`
                   : `${activeIndex + 1} / ${total}`}
@@ -219,9 +218,8 @@ export const ImageCarousel = memo(function ImageCarousel({
               return (
                 <View
                   key={`dot-${i}`}
-                  className={`rounded-full ${
-                    isActive ? "w-4 h-1.5 bg-zinc-900" : "w-1.5 h-1.5 bg-zinc-300"
-                  }`}
+                  className={`rounded-full ${isActive ? "w-4 h-1.5 bg-zinc-900" : "w-1.5 h-1.5 bg-zinc-300"
+                    }`}
                 />
               );
             })}

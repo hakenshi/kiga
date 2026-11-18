@@ -15,7 +15,7 @@ const formControlStyle = tva({
 });
 
 const formControlErrorIconStyle = tva({
-  base: 'text-destructive fill-none h-[18px] w-[18px]',
+  base: 'text-destructive fill-none h-4.5 w-4.5',
 });
 
 const formControlErrorStyle = tva({

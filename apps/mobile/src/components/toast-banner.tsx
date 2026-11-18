@@ -40,7 +40,7 @@ export const ToastBanner = memo(function ToastBanner() {
         </View>
 
         {/* Mensagem simples e direta */}
-        <Text className="text-white text-[13px] font-heading leading-tight flex-1">
+        <Text className="text-white text-sm font-heading leading-tight flex-1">
           {currentToast.message}
         </Text>
 

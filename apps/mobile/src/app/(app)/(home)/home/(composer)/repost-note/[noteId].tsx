@@ -54,7 +54,7 @@ export default function RepostNotePage() {
           <HStack className="justify-between items-center">
             <HStack className="items-center gap-2">
               <Avatar className="w-6 h-6 bg-zinc-200">
-                <AvatarFallbackText className="text-zinc-700 text-[10px] font-semibold">
+                <AvatarFallbackText className="text-zinc-700 text-xs font-semibold">
                   {context.authorInitial}
                 </AvatarFallbackText>
               </Avatar>
@@ -62,7 +62,7 @@ export default function RepostNotePage() {
                 {context.authorName}
               </Text>
               <Text className="text-zinc-400 text-xs">·</Text>
-              <Text className="text-[11px] font-subtitle text-zinc-500">
+              <Text className="text-xs font-subtitle text-zinc-500">
                 {context.formattedDate}
               </Text>
             </HStack>
@@ -73,28 +73,28 @@ export default function RepostNotePage() {
                 style={{ backgroundColor: context.mood.bg, borderColor: context.mood.border }}
               >
                 <context.mood.Icon size={10} color={context.mood.color} />
-                <Text className="text-[10px] font-medium" style={{ color: context.mood.color }}>
+                <Text className="text-xs font-medium" style={{ color: context.mood.color }}>
                   {context.mood.label}
                 </Text>
               </HStack>
             )}
           </HStack>
 
-          <Text numberOfLines={4} className="text-[13px] leading-5 text-zinc-700 font-body">
+          <Text numberOfLines={4} className="text-sm leading-5 text-zinc-700 font-body">
             {context.note.content}
           </Text>
 
           <HStack className="gap-1.5 flex-wrap pt-0.5">
             {context.thoughts.map((thought) => (
               <View key={thought.id} className="bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-md">
-                <Text numberOfLines={1} className="text-[10.5px] font-medium text-violet-900">
+                <Text numberOfLines={1} className="text-xs font-medium text-violet-900">
                   “{thought.name}”
                 </Text>
               </View>
             ))}
             {context.emotions.map((emotion) => (
               <View key={emotion.id} className="bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">
-                <Text numberOfLines={1} className="text-[10.5px] font-medium text-blue-900">
+                <Text numberOfLines={1} className="text-xs font-medium text-blue-900">
                   {emotion.name}
                 </Text>
               </View>

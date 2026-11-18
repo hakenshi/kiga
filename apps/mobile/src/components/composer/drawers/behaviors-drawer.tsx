@@ -127,7 +127,7 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
               <X size={18} color="#16181D" />
             </DrawerCloseButton>
             <VStack space="xs" className="flex-1">
-              <Text className="text-[18px] font-heading text-zinc-900">
+              <Text className="text-lg font-heading text-zinc-900">
                 O que você fez naquela hora?
               </Text>
               <Text className="text-xs font-subtitle text-zinc-600">
@@ -201,7 +201,7 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
               {behaviors.map(category => (
                 <VStack key={category.id} space="sm">
                   <HStack className="justify-between items-center">
-                    <Text className="text-[13px] font-subtitle-medium text-zinc-600">
+                    <Text className="text-sm font-subtitle-medium text-zinc-600">
                       {category.name}
                     </Text>
                     {category.userId !== null && (
@@ -223,12 +223,12 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
                           disabled={isDisabled}
                           onPress={() => handleBehaviorPress(item.id)}
                           onLongPress={item.userId !== null ? () => toggleDeleteId(item.id) : undefined}
-                          className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${itemClasses.button} ${isDisabled ? "opacity-40" : ""}`}
+                          className={`flex-row items-center h-8.5 rounded-lg px-3 gap-1.5 border ${itemClasses.button} ${isDisabled ? "opacity-40" : ""}`}
                         >
                           {isSelected && !isMarkedForDelete
                             ? <Check size={14} color="#1E4E8C" />
                             : <IconComponent size={14} color="#5A606B" />}
-                          <Text className={`text-[14px] ${itemClasses.text}`}>
+                          <Text className={`text-sm ${itemClasses.text}`}>
                             {item.content}
                           </Text>
                         </Pressable>
@@ -252,18 +252,18 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
           <DrawerFooter className="pt-2">
             {isSelectionMode && (
               <HStack space="sm" className="w-full">
-                <Button variant="outline" rounding="2xl" className="flex-1 h-[52px]" onPress={() => setDeletingIds([])}>
+                <Button variant="outline" rounding="2xl" className="flex-1 h-13" onPress={() => setDeletingIds([])}>
                   <ButtonText>Cancelar</ButtonText>
                 </Button>
-                <Button variant="destructive" rounding="2xl" className="flex-1 h-[52px]" onPress={handleDeleteSelected}>
+                <Button variant="destructive" rounding="2xl" className="flex-1 h-13" onPress={handleDeleteSelected}>
                   <Trash2 size={16} color="#fafafa" />
                   <ButtonText>Excluir ({deletingIds.length})</ButtonText>
                 </Button>
               </HStack>
             )}
             {!isSelectionMode && (
-              <Button rounding="2xl" className="w-full h-[52px] bg-zinc-900" onPress={() => setOpen(false)}>
-                <ButtonText className="text-[15px] font-semibold text-white">
+              <Button rounding="2xl" className="w-full h-13 bg-zinc-900" onPress={() => setOpen(false)}>
+                <ButtonText className="text-base font-semibold text-white">
                   {selectedBehaviors.length === 0 && "Concluir"}
                   {selectedBehaviors.length > 0 &&
                     `Adicionar ${selectedBehaviors.length} comportamento${selectedBehaviors.length === 1 ? "" : "s"}`}

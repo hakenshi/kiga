@@ -74,10 +74,10 @@ const alertDialogContentStyle = tva({
   base: 'bg-white rounded-2xl p-6 overflow-hidden border border-gray-100',
   parentVariants: {
     size: {
-      xs: 'w-[60%] max-w-[360px]',
-      sm: 'w-[70%] max-w-[420px]',
-      md: 'w-[85%] max-w-[480px]',
-      lg: 'w-[90%] max-w-[540px]',
+      xs: 'w-3/5 max-w-90',
+      sm: 'w-7/10 max-w-105',
+      md: 'w-17/20 max-w-120',
+      lg: 'w-9/10 max-w-135',
       full: 'w-full',
     },
   },

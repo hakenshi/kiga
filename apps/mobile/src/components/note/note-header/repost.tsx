@@ -6,7 +6,7 @@ export default function Repost() {
   return (
     <HStack className="items-center gap-1.5 pb-0.5">
       <RefreshCcw size={12} color="#71717A" />
-      <Text className="text-[11.5px] font-subtitle-medium text-zinc-500">
+      <Text className="text-xs font-subtitle-medium text-zinc-500">
         Revisitou uma nota
       </Text>
     </HStack>

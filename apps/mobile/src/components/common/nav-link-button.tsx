@@ -25,7 +25,7 @@ export default function NavLinkButton({ Icon, onPress, path, className, children
           <Icon size={20} color={isActive ? "#18181b" : "#71717a"} />
         </View>
         <Text
-          className={`text-[11px] mt-1 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground font-normal"
+          className={`text-xs mt-1 ${isActive ? "text-foreground font-semibold" : "text-muted-foreground font-normal"
             }`}
         >
           {children}

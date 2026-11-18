@@ -147,13 +147,13 @@ export default function ReplyNotePage() {
                   {context.authorInitial}
                 </AvatarFallbackText>
               </Avatar>
-              <View className="w-[2px] bg-zinc-200 flex-1 my-1" />
+              <View className="w-0.5 bg-zinc-200 flex-1 my-1" />
             </VStack>
 
             <VStack className="flex-1 pb-4 gap-2">
               <HStack className="justify-between items-center">
                 <HStack className="items-center gap-1.5 flex-wrap">
-                  <Text className="text-[13px] font-subtitle-semibold text-zinc-900">
+                  <Text className="text-sm font-subtitle-semibold text-zinc-900">
                     {context.authorName}
                   </Text>
                   <Text className="text-zinc-400 text-xs">·</Text>
@@ -168,28 +168,28 @@ export default function ReplyNotePage() {
                     style={{ backgroundColor: context.mood.bg, borderColor: context.mood.border }}
                   >
                     <context.mood.Icon size={11} color={context.mood.color} />
-                    <Text className="text-[10.5px] font-medium" style={{ color: context.mood.color }}>
+                    <Text className="text-xs font-medium" style={{ color: context.mood.color }}>
                       {context.mood.label}
                     </Text>
                   </HStack>
                 )}
               </HStack>
 
-              <Text numberOfLines={3} className="text-[13.5px] leading-5 text-zinc-700 font-body">
+              <Text numberOfLines={3} className="text-sm leading-5 text-zinc-700 font-body">
                 {context.note.content}
               </Text>
 
               <HStack className="gap-1.5 flex-wrap pt-0.5">
                 {context.thoughts.map((thought) => (
                   <View key={thought.id} className="bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-md">
-                    <Text numberOfLines={1} className="text-[11px] font-medium text-violet-900">
+                    <Text numberOfLines={1} className="text-xs font-medium text-violet-900">
                       “{thought.name}”
                     </Text>
                   </View>
                 ))}
                 {context.emotions.map((emotion) => (
                   <View key={emotion.id} className="bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">
-                    <Text numberOfLines={1} className="text-[11px] font-medium text-blue-900">
+                    <Text numberOfLines={1} className="text-xs font-medium text-blue-900">
                       {emotion.name}
                     </Text>
                   </View>
@@ -198,7 +198,7 @@ export default function ReplyNotePage() {
 
               <HStack className="items-center gap-1.5 pt-0.5">
                 <CornerDownRight size={12} color="#71717A" />
-                <Text className="text-[11.5px] font-subtitle text-zinc-500">
+                <Text className="text-xs font-subtitle text-zinc-500">
                   Respondendo à sua nota de {context.formattedDate}
                 </Text>
               </HStack>
@@ -213,11 +213,11 @@ export default function ReplyNotePage() {
             </Avatar>
             <VStack className="flex-1 gap-2">
               <HStack className="items-center gap-2">
-                <Text className="text-[13px] font-subtitle-semibold text-zinc-900">
+                <Text className="text-sm font-subtitle-semibold text-zinc-900">
                   {context.currentAuthorName}
                 </Text>
                 <View className="bg-zinc-100 border border-zinc-200 rounded-full px-2 py-0.5">
-                  <Text className="text-[10.5px] font-semibold text-zinc-700">Reflexão</Text>
+                  <Text className="text-xs font-semibold text-zinc-700">Reflexão</Text>
                 </View>
               </HStack>
 

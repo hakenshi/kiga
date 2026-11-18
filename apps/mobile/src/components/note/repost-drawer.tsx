@@ -56,7 +56,7 @@ function RevisitAction({ note, onClose }: { note: Note; onClose: () => void }) {
         <RefreshCcw size={18} color="#18181B" />
       </View>
       <VStack className="flex-1">
-        <Text className="text-[14px] font-subtitle-semibold text-zinc-900">
+        <Text className="text-sm font-subtitle-semibold text-zinc-900">
           Revisitar
         </Text>
         <Text className="text-xs font-subtitle text-zinc-500">
@@ -84,7 +84,7 @@ function QuoteAction({ noteId, onClose }: { noteId: number; onClose: () => void 
         <Pencil size={18} color="#18181B" />
       </View>
       <VStack className="flex-1">
-        <Text className="text-[14px] font-subtitle-semibold text-zinc-900">
+        <Text className="text-sm font-subtitle-semibold text-zinc-900">
           Citar nota
         </Text>
         <Text className="text-xs font-subtitle text-zinc-500">

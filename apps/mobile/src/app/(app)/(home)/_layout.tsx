@@ -180,7 +180,7 @@ export default function HomeLayout() {
                       <tab.icon size={20} color={isFocused ? "#18181b" : "#71717a"} />
                     </View>
                     <Text
-                      className={`text-[11px] mt-1 ${isFocused
+                      className={`text-xs mt-1 ${isFocused
                         ? "text-foreground font-semibold"
                         : "text-muted-foreground font-normal"
                         }`}

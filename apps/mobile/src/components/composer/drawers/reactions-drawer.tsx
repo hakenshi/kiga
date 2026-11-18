@@ -126,7 +126,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
               <X size={18} color="#16181D" />
             </DrawerCloseButton>
             <VStack space="xs" className="flex-1">
-              <Text className="text-[18px] font-heading text-zinc-900">
+              <Text className="text-lg font-heading text-zinc-900">
                 Reações e sensações
               </Text>
               <Text className="text-xs font-subtitle text-zinc-600">
@@ -200,7 +200,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
               {reactions.map(category => (
                 <VStack key={category.id} space="sm">
                   <HStack className="justify-between items-center">
-                    <Text className="text-[13px] font-subtitle-medium text-zinc-600">
+                    <Text className="text-sm font-subtitle-medium text-zinc-600">
                       {category.name}
                     </Text>
                     {category.userId !== null && (
@@ -221,10 +221,10 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
                           disabled={isDisabled}
                           onPress={() => handleReactionPress(item.id)}
                           onLongPress={item.userId !== null ? () => toggleDeleteId(item.id) : undefined}
-                          className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${itemClasses.button} ${isDisabled ? "opacity-40" : ""}`}
+                          className={`flex-row items-center h-8.5 rounded-lg px-3 gap-1.5 border ${itemClasses.button} ${isDisabled ? "opacity-40" : ""}`}
                         >
                           {isSelected && !isMarkedForDelete && <Check size={14} color="#8A5A12" />}
-                          <Text className={`text-[14px] ${itemClasses.text}`}>
+                          <Text className={`text-sm ${itemClasses.text}`}>
                             {item.name}
                           </Text>
                         </Pressable>
@@ -248,18 +248,18 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
           <DrawerFooter className="pt-2">
             {isSelectionMode && (
               <HStack space="sm" className="w-full">
-                <Button variant="outline" rounding="2xl" className="flex-1 h-[52px]" onPress={() => setDeletingIds([])}>
+                <Button variant="outline" rounding="2xl" className="flex-1 h-13" onPress={() => setDeletingIds([])}>
                   <ButtonText>Cancelar</ButtonText>
                 </Button>
-                <Button variant="destructive" rounding="2xl" className="flex-1 h-[52px]" onPress={handleDeleteSelected}>
+                <Button variant="destructive" rounding="2xl" className="flex-1 h-13" onPress={handleDeleteSelected}>
                   <Trash2 size={16} color="#fafafa" />
                   <ButtonText>Excluir ({deletingIds.length})</ButtonText>
                 </Button>
               </HStack>
             )}
             {!isSelectionMode && (
-              <Button rounding="2xl" className="w-full h-[52px] bg-zinc-900" onPress={() => setOpen(false)}>
-                <ButtonText className="text-[15px] font-semibold text-white">
+              <Button rounding="2xl" className="w-full h-13 bg-zinc-900" onPress={() => setOpen(false)}>
+                <ButtonText className="text-base font-semibold text-white">
                   {selectedReactions.length === 0 && "Concluir"}
                   {selectedReactions.length > 0 &&
                     `Adicionar ${selectedReactions.length} ${selectedReactions.length === 1 ? "reação" : "reações"}`}
@@ -498,7 +498,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //             <X size={18} color="#16181D" />
   //           </DrawerCloseButton>
   //           <VStack space="xs" className="flex-1">
-  //             <Text className="text-[18px] font-heading text-zinc-900">
+  //             <Text className="text-lg font-heading text-zinc-900">
   //               Reações e sensações
   //             </Text>
   //             <Text className="text-xs font-subtitle text-zinc-600">
@@ -710,13 +710,13 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //               )}
   //               <Pressable
   //                 onPress={() => handleInstantCreate(trimmedQuery)}
-  //                 className="flex-row items-center h-14 rounded-[14px] border-[1.5px] border-zinc-900 px-3.5 gap-3 active:opacity-80"
+  //                 className="flex-row items-center h-14 rounded-xl border-2 border-zinc-900 px-3.5 gap-3 active:opacity-80"
   //               >
   //                 <View className="w-8 h-8 rounded-full bg-zinc-900 items-center justify-center">
   //                   <Plus size={16} color="#FFFFFF" />
   //                 </View>
   //                 <VStack className="flex-1">
-  //                   <Text className="text-[15px] font-heading text-zinc-900">
+  //                   <Text className="text-base font-heading text-zinc-900">
   //                     Criar “{trimmedQuery}”
   //                   </Text>
   //                   <Text className="text-xs font-subtitle text-zinc-600">
@@ -731,7 +731,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //           {uncategorizedCustom.length > 0 && (
   //             <VStack className="mb-5" space="sm">
   //               <HStack className="justify-between items-end">
-  //                 <Text className="text-[13px] font-subtitle-medium text-zinc-600">
+  //                 <Text className="text-sm font-subtitle-medium text-zinc-600">
   //                   Sem categoria
   //                 </Text>
   //                 <Text
@@ -769,7 +769,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //                         }
   //                       }}
   //                       onLongPress={() => toggleDeleteId(item.id)}
-  //                       className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${
+  //                       className={`flex-row items-center h-8.5 rounded-lg px-3 gap-1.5 border ${
   //                         isMarkedForDelete
   //                           ? "bg-destructive/10 border-destructive"
   //                           : isSelected
@@ -781,7 +781,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //                         <Check size={14} color="#8A5A12" />
   //                       )}
   //                       <Text
-  //                         className={`text-[14px] ${
+  //                         className={`text-sm ${
   //                           isMarkedForDelete
   //                             ? "text-destructive font-semibold"
   //                             : isSelected
@@ -802,7 +802,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //             {combinedCategories.map((cat) => (
   //               <VStack key={cat.name} space="sm">
   //                 <HStack className="justify-between items-center">
-  //                   <Text className="text-[13px] font-subtitle-medium text-zinc-600">
+  //                   <Text className="text-sm font-subtitle-medium text-zinc-600">
   //                     {cat.name}
   //                   </Text>
   //                   {cat.isUserCreated && (
@@ -852,7 +852,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //                             ? () => toggleDeleteId(item.id!)
   //                             : undefined
   //                         }
-  //                         className={`flex-row items-center h-[34px] rounded-[10px] px-3 gap-1.5 border ${
+  //                         className={`flex-row items-center h-8.5 rounded-lg px-3 gap-1.5 border ${
   //                           isMarkedForDelete
   //                             ? "bg-destructive/10 border-destructive"
   //                             : isSelected
@@ -864,7 +864,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //                           <Check size={14} color="#8A5A12" />
   //                         )}
   //                         <Text
-  //                           className={`text-[14px] ${
+  //                           className={`text-sm ${
   //                             isMarkedForDelete
   //                               ? "text-destructive font-semibold"
   //                               : isSelected
@@ -894,7 +894,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //               <Button
   //                 variant="outline"
   //                 rounding="2xl"
-  //                 className="flex-1 h-[52px]"
+  //                 className="flex-1 h-13"
   //                 onPress={() => setDeletingIds([])}
   //               >
   //                 <ButtonText>Cancelar</ButtonText>
@@ -902,7 +902,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //               <Button
   //                 variant="destructive"
   //                 rounding="2xl"
-  //                 className="flex-1 h-[52px]"
+  //                 className="flex-1 h-13"
   //                 onPress={handleDeleteSelected}
   //               >
   //                 <Trash2 size={16} color="#fafafa" />
@@ -912,10 +912,10 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   //           ) : (
   //             <Button
   //               rounding="2xl"
-  //               className="w-full h-[52px] bg-zinc-900"
+  //               className="w-full h-13 bg-zinc-900"
   //               onPress={() => setOpen(false)}
   //             >
-  //               <ButtonText className="text-[15px] font-semibold text-white">
+  //               <ButtonText className="text-base font-semibold text-white">
   //                 {reactions.length === 0
   //                   ? "Concluir"
   //                   : reactions.length === 1

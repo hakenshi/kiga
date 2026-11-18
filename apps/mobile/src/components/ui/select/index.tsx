@@ -40,7 +40,7 @@ const selectIconStyle = tva({
       '2xs': 'h-3 w-3',
       'xs': 'h-3.5 w-3.5',
       'sm': 'h-4 w-4',
-      'md': 'h-[18px] w-[18px]',
+      'md': 'h-4.5 w-4.5',
       'lg': 'h-5 w-5',
       'xl': 'h-6 w-6',
     },
@@ -72,7 +72,7 @@ const selectTriggerStyle = tva({
 });
 
 const selectInputStyle = tva({
-  base: 'px-3 placeholder:text-foreground/50 web:w-full h-full text-foreground/90 pointer-events-none web:outline-none ios:leading-[0px] py-0',
+  base: 'px-3 placeholder:text-foreground/50 web:w-full h-full text-foreground/90 pointer-events-none web:outline-none ios:leading-0 py-0',
   parentVariants: {
     size: {
       xl: 'text-xl',

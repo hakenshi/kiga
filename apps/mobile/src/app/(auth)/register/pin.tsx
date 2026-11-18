@@ -169,7 +169,7 @@ export default function PinPage() {
         />
 
         {/* Teclado Numérico Responsivo (Grid 3x4 com flex-1) */}
-        <VStack space="md" className="w-full max-w-[340px] self-center py-2 flex-1 justify-center">
+        <VStack space="md" className="w-full max-w-85 self-center py-2 flex-1 justify-center">
           {KEYPAD_ROWS.map((row, rowIndex) => (
             <HStack key={rowIndex} space="md" className="w-full justify-between">
               {row.map((item, colIndex) => {
@@ -183,7 +183,7 @@ export default function PinPage() {
                       key={colIndex}
                       variant="secondary"
                       rounding="2xl"
-                      className="flex-1 h-14 sm:h-16 items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
+                      className="flex-1 h-14 sm:h-16 items-center justify-center border border-border active:opacity-60 active:scale-95"
                       onPress={() =>
                         setValue("pin", pin.slice(0, -1), {
                           shouldValidate: true,
@@ -200,7 +200,7 @@ export default function PinPage() {
                     key={colIndex}
                     variant="secondary"
                     rounding="2xl"
-                    className="flex-1 h-14 sm:h-16 items-center justify-center border border-border active:opacity-60 active:scale-[0.95]"
+                    className="flex-1 h-14 sm:h-16 items-center justify-center border border-border active:opacity-60 active:scale-95"
                     onPress={() => {
                       if (pin.length < 6) {
                         setValue("pin", pin + item, {

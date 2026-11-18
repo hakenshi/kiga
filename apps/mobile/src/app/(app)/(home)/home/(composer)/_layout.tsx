@@ -110,7 +110,7 @@ export default function ComposerLayout() {
     <VStack className="flex-1 bg-white" style={{ paddingBottom: bottom }}>
       <VStack style={{ paddingTop: top }} className="bg-white border-b border-gray-100">
         <HStack className="px-4 h-14 justify-between items-center">
-          <View className="min-w-[40px] items-start justify-center">
+          <View className="min-w-10 items-start justify-center">
             <Pressable
               onPress={close}
               className="w-10 h-10 rounded-full items-center justify-center active:bg-gray-100"
@@ -119,7 +119,7 @@ export default function ComposerLayout() {
               <X size={22} color="#16181D" />
             </Pressable>
           </View>
-          <View className="min-w-[40px] items-end justify-center">
+          <View className="min-w-10 items-end justify-center">
             <Button onPress={submit}>
               <ButtonText>
                 Salvar

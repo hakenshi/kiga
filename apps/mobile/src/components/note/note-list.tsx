@@ -34,10 +34,10 @@ function EmptyList() {
       <View className="w-14 h-14 rounded-full bg-zinc-100 items-center justify-center">
         <Sparkles size={24} color="#71717A" />
       </View>
-      <Text className="text-[15px] font-heading text-zinc-900 text-center">
+      <Text className="text-base font-heading text-zinc-900 text-center">
         {query === "" ? "Seu diário está em branco" : "Nenhuma nota encontrada"}
       </Text>
-      <Text className="text-xs font-subtitle text-zinc-500 text-center max-w-[260px]">
+      <Text className="text-xs font-subtitle text-zinc-500 text-center max-w-65">
         {query === ""
           ? "Registre como você está se sentindo ou um pensamento que passou pela sua cabeça."
           : "Tente buscar por outro texto."}

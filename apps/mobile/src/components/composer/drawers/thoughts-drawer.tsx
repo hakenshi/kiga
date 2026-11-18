@@ -76,7 +76,7 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
               <X size={18} color="#16181D" />
             </DrawerCloseButton>
             <VStack space="xs" className="flex-1">
-              <Text className="text-[18px] font-heading text-zinc-900">
+              <Text className="text-lg font-heading text-zinc-900">
                 Pensamentos automáticos
               </Text>
               <Text className="text-xs font-subtitle text-zinc-600">
@@ -156,7 +156,7 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
                       }`}
                   >
                     {isSelected && <Check size={16} color="#4B3B8F" />}
-                    <Text className={`text-[14px] flex-1 ${isSelected
+                    <Text className={`text-sm flex-1 ${isSelected
                       ? "text-violet-900 font-medium"
                       : "text-zinc-900 font-normal"
                       }`}>
@@ -173,8 +173,8 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
             </VStack>
           </DrawerBody>
           <DrawerFooter className="pt-2">
-            <Button rounding="2xl" className="w-full h-[52px] bg-zinc-900" onPress={() => setOpen(false)}>
-              <ButtonText className="text-[15px] font-semibold text-white">
+            <Button rounding="2xl" className="w-full h-13 bg-zinc-900" onPress={() => setOpen(false)}>
+              <ButtonText className="text-base font-semibold text-white">
                 {selectedThoughts.length === 0 && "Concluir"}
                 {selectedThoughts.length > 0 &&
                   `Adicionar ${selectedThoughts.length} pensamento${selectedThoughts.length === 1 ? "" : "s"}`}

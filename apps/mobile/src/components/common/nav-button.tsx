@@ -74,7 +74,7 @@ export default function NavButton({
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.8}
-        className={`text-[11px] mt-1 text-center w-full ${
+        className={`text-xs mt-1 text-center w-full ${
           isHighlighted
             ? "text-zinc-900 font-subtitle-semibold"
             : "text-zinc-500 font-subtitle"

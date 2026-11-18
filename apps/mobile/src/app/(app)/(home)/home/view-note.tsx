@@ -66,10 +66,10 @@ export default function ViewNotePage() {
               <ArrowLeft size={20} color="#18181B" />
             </Pressable>
             <VStack>
-              <Text className="text-[15px] font-heading text-zinc-900">
+              <Text className="text-base font-heading text-zinc-900">
                 Nota
               </Text>
-              <Text className="text-[11.5px] font-subtitle text-zinc-500">
+              <Text className="text-xs font-subtitle text-zinc-500">
                 Nota do diário
               </Text>
             </VStack>
