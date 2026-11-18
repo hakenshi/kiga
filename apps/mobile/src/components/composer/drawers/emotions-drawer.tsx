@@ -72,11 +72,11 @@ export default function EmotionsDrawer() {
     searchEmotions(query, { userId });
   };
 
-  const selectedEmotions = useEntryCacheStore((s) => s.entryEmotions) ?? [];
+  const selectedEmotions = useEntryCacheStore((s) => s.noteEmotions) ?? [];
   const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
 
   const toggleEmotion = (emotionId: number) => {
-    updateCachedEntry({ entryEmotions: toggleSelectedId(selectedEmotions, emotionId) });
+    updateCachedEntry({ noteEmotions: toggleSelectedId(selectedEmotions, emotionId) });
   };
 
   const itemForm = useForm<{ name: string; categoryName: string }>({
@@ -124,7 +124,7 @@ export default function EmotionsDrawer() {
     const deleted = deleteEmotions(deletingIds, userId);
     if (!deleted) return;
     updateCachedEntry({
-      entryEmotions: selectedEmotions.filter(id => !deletingIds.includes(id)),
+      noteEmotions: selectedEmotions.filter(id => !deletingIds.includes(id)),
     });
     setDeletingIds([]);
     await searchEmotions(searchQuery, { userId });

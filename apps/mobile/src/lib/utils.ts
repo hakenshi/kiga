@@ -1,7 +1,7 @@
 import { format, isToday, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-export function formatEntryDate(rawDate?: Date | string | number | null): string {
+export function formatNoteDate(rawDate?: Date | string | number | null): string {
   if (!rawDate) return "";
   const date = new Date(rawDate);
   if (!isValid(date)) return "";

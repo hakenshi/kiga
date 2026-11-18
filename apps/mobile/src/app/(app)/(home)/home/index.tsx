@@ -3,25 +3,25 @@ import { Link, useFocusEffect } from "expo-router";
 import { useCallback } from "react";
 import { PlusIcon } from "lucide-react-native";
 import EntryList from "@/components/entry/entry-list";
-import { selectEntries, useEntryStore } from "@/stores/journal-store";
+import { selectNotes, useNoteStore } from "@/stores/note-store";
 import { useFeedFilterStore } from "@/stores/feed-filter-store";
 import { useAuthStore } from "@/stores/auth-store";
 
 
 export default function HomePage() {
 
-  const entries = useEntryStore(selectEntries)
-  const searchEntries = useEntryStore(e => e.searchEntries)
+  const notes = useNoteStore(selectNotes)
+  const searchNotes = useNoteStore(e => e.searchNotes)
   const query = useFeedFilterStore(f => f.query)
   const userId = useAuthStore(s => s.user!.id)
 
   useFocusEffect(useCallback(() => {
-    searchEntries(query, { userId });
-  }, [query, userId, searchEntries]));
+    searchNotes(query, { userId });
+  }, [query, userId, searchNotes]));
 
   return (
     <View className="flex-1 bg-zinc-50">
-      <EntryList entries={entries} />
+      <EntryList notes={notes} />
       <Link href="/home/new-post" asChild>
         <Pressable
           className="absolute right-5 bottom-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg active:scale-95"

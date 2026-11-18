@@ -6,8 +6,8 @@ export type Gender = (typeof genderEnum)[number];
 export const pronounEnum = ["he_him", "she_her", "they_them", "other"] as const;
 export type Pronoun = (typeof pronounEnum)[number];
 
-export const journalEntryType = ["post", "reply", "repost"] as const;
-export type JournalEntryType = (typeof journalEntryType)[number];
+export const noteTypeEnum = ["note", "reply", "repost"] as const;
+export type NoteType = (typeof noteTypeEnum)[number];
 
 export const categoryTypeEnum = ["emotion", "reaction", "behavior"] as const;
 export type CategoryType = (typeof categoryTypeEnum)[number];
@@ -83,13 +83,13 @@ export const reactions = sqliteTable("reactions", {
   deletedAt: integer({ mode: "timestamp" }),
 });
 
-export const journalEntries = sqliteTable("journal_entries", {
+export const notes = sqliteTable("notes", {
   id: integer().primaryKey({ autoIncrement: true }),
   userId: integer().notNull().references(() => users.id, { onDelete: "cascade" }),
   moodId: integer().references(() => moods.id, { onDelete: "set null" }),
   liked: integer({ mode: "boolean" }).notNull().default(false),
   fixed: integer({ mode: "boolean" }).notNull().default(false),
-  entryType: text({ enum: journalEntryType }),
+  noteType: text({ enum: noteTypeEnum }),
   content: text().notNull(),
   date: integer({ mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   deletedAt: integer({ mode: "timestamp" }),
@@ -97,30 +97,30 @@ export const journalEntries = sqliteTable("journal_entries", {
   updatedAt: integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
 });
 
-export const entryReactions = sqliteTable("entry_reactions", {
+export const noteReactions = sqliteTable("note_reactions", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }), reactionId: integer().notNull().references(() => reactions.id, { onDelete: "cascade" }),
-}, (t) => [unique().on(t.entryId, t.reactionId),]);
+  noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }), reactionId: integer().notNull().references(() => reactions.id, { onDelete: "cascade" }),
+}, (t) => [unique().on(t.noteId, t.reactionId),]);
 
-export const entryEmotions = sqliteTable("entry_emotions", {
+export const noteEmotions = sqliteTable("note_emotions", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }),
   emotionId: integer().notNull().references(() => emotions.id, { onDelete: "cascade" }),
 }, (t) => [
-  unique().on(t.entryId, t.emotionId),
+  unique().on(t.noteId, t.emotionId),
 ]);
 
-export const entryThoughts = sqliteTable("entry_thoughts", {
+export const noteThoughts = sqliteTable("note_thoughts", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }),
   thoughtsId: integer().notNull().references(() => thoughts.id, { onDelete: "cascade" }),
 }, (t) => [
-  unique().on(t.entryId, t.thoughtsId),
+  unique().on(t.noteId, t.thoughtsId),
 ]);
 
-export const entryImages = sqliteTable("entry_images", {
+export const noteImages = sqliteTable("note_images", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }),
   imageUrl: text().notNull(),
 });
 
@@ -135,19 +135,19 @@ export const behaviors = sqliteTable("behaviors", {
   createdAt: integer({ mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const entryBehaviors = sqliteTable("entry_behaviors", {
+export const noteBehaviors = sqliteTable("note_behaviors", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }),
   behaviorId: integer().notNull().references(() => behaviors.id),
-}, (t) => [unique().on(t.behaviorId, t.entryId)])
+}, (t) => [unique().on(t.behaviorId, t.noteId)])
 
 
-export const entryReplies = sqliteTable("entry_replies", {
+export const noteReplies = sqliteTable("note_replies", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }),
 })
 
-export const entryReposts = sqliteTable("entry_reposts", {
+export const noteReposts = sqliteTable("note_reposts", {
   id: integer().primaryKey({ autoIncrement: true }),
-  entryId: integer().notNull().references(() => journalEntries.id, { onDelete: "cascade" }),
+  noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }),
 });

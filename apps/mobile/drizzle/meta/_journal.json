@@ -183,6 +183,13 @@
       "when": 1794524412360,
       "tag": "0025_fixed_echo",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1795009017495,
+      "tag": "0026_normalize_notes",
+      "breakpoints": true
     }
   ]
 }

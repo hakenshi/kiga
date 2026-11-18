@@ -1,4 +1,4 @@
-import { useEntryStore } from "@/stores/journal-store";
+import { useNoteStore } from "@/stores/note-store";
 import { HeartIcon } from "lucide-react-native";
 import { Pressable, PressableProps, Text } from "react-native";
 
@@ -9,10 +9,10 @@ interface Props extends PressableProps {
 
 export default function KeepButton({ entryId, liked, ...rest }: Props) {
 
-  const updateEntry = useEntryStore((s) => s.updateEntry);
+  const updateNote = useNoteStore((s) => s.updateNote);
 
   const likeEntry = () => {
-    updateEntry(entryId, { liked: !liked });
+    updateNote(entryId, { liked: !liked });
   };
 
   return (

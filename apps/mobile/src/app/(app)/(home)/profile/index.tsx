@@ -6,14 +6,14 @@ import { Avatar, AvatarFallbackText, AvatarImage } from "@/components/ui/avatar"
 import { useAuthStore } from "@/stores/auth-store";
 import { LogOut } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEntryStore } from "@/stores/journal-store";
+import { useNoteStore } from "@/stores/note-store";
 
 export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const { top } = useSafeAreaInsets();
 
-  const resetEntries = useEntryStore((s) => s.reset);
+  const resetEntries = useNoteStore((s) => s.reset);
 
   return (
     <ScrollView

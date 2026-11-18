@@ -20,9 +20,9 @@ export default function ReplyPostPage() {
   // const router = useRouter();
   // const { entryId } = useLocalSearchParams<{ entryId: string }>();
   // const user = useAuthStore((s) => s.user);
-  // const addEntry = useEntryStore((s) => s.addEntry);
+  // const addNote = useNoteStore((s) => s.addNote);
   //
-  // const [rootEntry, setRootEntry] = useState<JournalEntryWithRelations | null>(null);
+  // const [rootEntry, setRootEntry] = useState<Note | null>(null);
   // const [existingRepliesCount, setExistingRepliesCount] = useState(0);
   // const [isLoadingThread, setIsLoadingThread] = useState(true);
   //
@@ -31,7 +31,7 @@ export default function ReplyPostPage() {
   //   const numId = Number(entryId);
   //   useComposerDraftStore.getState().reset();
   //   setIsLoadingThread(true);
-  //   EntryRepository.getThread(numId)
+  //   NoteRepository.getThread(numId)
   //     .then((thread) => {
   //       if (thread) {
   //         setRootEntry(thread.rootEntry);
@@ -57,7 +57,7 @@ export default function ReplyPostPage() {
   //
   //     useComposerDraftStore.setState({ isSaving: true });
   //     try {
-  //       const newReply = await EntryRepository.createReply({
+  //       const newReply = await NoteRepository.createReply({
   //         userId: user!.id,
   //         parentEntryId: rootEntry.id,
   //         content: state.content,
@@ -70,7 +70,7 @@ export default function ReplyPostPage() {
   //         date: state.entryDate,
   //       });
   //
-  //       addEntry(newReply);
+  //       addNote(newReply);
   //       state.reset();
   //       useToastStore.getState().showInfo("Reflexão adicionada à linha do tempo.");
   //       if (router.canGoBack()) {
@@ -91,10 +91,10 @@ export default function ReplyPostPage() {
   //   ? `${user?.firstName ?? ""} ${user?.secondName ?? ""}`.trim()
   //   : "Autor do pensamento";
   //
-  // const parentThoughts = (rootEntry?.entryThoughts ?? [])
+  // const parentThoughts = (rootEntry?.noteThoughts ?? [])
   //   .map((t) => t.thought?.name)
   //   .filter(Boolean);
-  // const parentEmotions = (rootEntry?.entryEmotions ?? [])
+  // const parentEmotions = (rootEntry?.noteEmotions ?? [])
   //   .map((e) => e.emotion?.name)
   //   .filter(Boolean);
   //

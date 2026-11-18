@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/stores/auth-store";
-import { getEntryBody, useEntryStore } from "@/stores/journal-store";
+import { getNoteBody, useNoteStore } from "@/stores/note-store";
 import { FlatList, View, ActivityIndicator, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import EntryBodyShell from "./entry-body";
@@ -26,7 +26,7 @@ import { VStack } from "@/components/ui/vstack";
 import { Sparkles } from "lucide-react-native";
 
 function EmptyList() {
-  const query = useEntryStore(s => s.query);
+  const query = useNoteStore(s => s.query);
 
   return (
     <VStack className="py-24 items-center justify-center px-6 gap-3">
@@ -46,20 +46,20 @@ function EmptyList() {
 }
 
 interface Props {
-  entries: JournalEntry[];
+  notes: Note[];
 }
 
-export default function EntryList({ entries }: Props) {
-  const loadMore = useEntryStore((s) => s.loadMore);
-  const hasMore = useEntryStore((s) => s.hasMore);
-  const isLoading = useEntryStore((s) => s.isLoading);
+export default function EntryList({ notes }: Props) {
+  const loadMore = useNoteStore((s) => s.loadMore);
+  const hasMore = useNoteStore((s) => s.hasMore);
+  const isLoading = useNoteStore((s) => s.isLoading);
   const userId = useAuthStore((s) => s.user!.id);
   const { top, bottom } = useSafeAreaInsets();
 
   return (
     <FlatList
       ListEmptyComponent={<EmptyList />}
-      data={entries}
+      data={notes}
       keyExtractor={(e) => String(e.id)}
       contentContainerStyle={{ paddingTop: top, paddingBottom: bottom + 88 }}
       showsHorizontalScrollIndicator={false}
@@ -74,14 +74,14 @@ export default function EntryList({ entries }: Props) {
       }}
       onEndReachedThreshold={0.4}
       ListFooterComponent={
-        isLoading && entries.length > 0 ? (
+        isLoading && notes.length > 0 ? (
           <View className="py-4 items-center justify-center">
             <ActivityIndicator size="small" />
           </View>
         ) : null
       }
       renderItem={({ item }) => {
-        const { images, behaviors, reports } = getEntryBody(item);
+        const { images, behaviors, reports } = getNoteBody(item);
 
         return (
           <EntryLinkShell entryId={item.id}>
@@ -95,9 +95,9 @@ export default function EntryList({ entries }: Props) {
               {item.content.length > 0 && <Content content={item.content} />}
               <ImageCarousel images={images} />
               <EntryTagsShell>
-                <ThoughtTags thoughts={item.entryThoughts} />
-                <EmotionTags emotions={item.entryEmotions} />
-                <ReactionTags reactions={item.entryReactions} />
+                <ThoughtTags thoughts={item.noteThoughts} />
+                <EmotionTags emotions={item.noteEmotions} />
+                <ReactionTags reactions={item.noteReactions} />
                 <BehaviorTags behaviors={behaviors} />
               </EntryTagsShell>
               {reports.map(behavior => (

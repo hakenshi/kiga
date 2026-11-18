@@ -4,7 +4,7 @@ import ImageCropperModal from "./drawers/image-cropper-modal";
 import { useEntryCacheStore } from "@/stores/entry-cache-store";
 
 export default function Media() {
-  const images = useEntryCacheStore(e => e.entryImages)
+  const images = useEntryCacheStore(e => e.noteImages)
   const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
   const [editingUri, setEditingUri] = useState<string | null>(null);
 
@@ -12,11 +12,11 @@ export default function Media() {
   console.log(images)
   const removeImage = (uri: string) => {
     const newImageArray = images.filter(i => !i.includes(uri))
-    updateCachedEntry({ entryImages: newImageArray })
+    updateCachedEntry({ noteImages: newImageArray })
   }
   const replaceImage = (editingUri: string, newUri: string) => {
     const newImageArray = images.map(i => i === editingUri ? newUri : i)
-    updateCachedEntry({ entryImages: newImageArray })
+    updateCachedEntry({ noteImages: newImageArray })
   }
   return (
     <>

@@ -3,7 +3,7 @@ import { Activity, ChevronDown, ChevronUp } from "lucide-react-native";
 import { useState } from "react";
 
 interface Props {
-  reactions: JournalEntry["entryReactions"];
+  reactions: Note["noteReactions"];
 }
 
 function Summary({ count, onExpand }: { count: number; onExpand: () => void }) {

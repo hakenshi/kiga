@@ -20,30 +20,30 @@ export class DatabaseExceptionFilter {
       );
     }
 
-    if (lower.includes("unique constraint failed") && lower.includes("entry_emotions")) {
+    if (lower.includes("unique constraint failed") && lower.includes("note_emotions")) {
       return new ConflictException(
-        "Esta emoção já foi vinculada a este relato.",
+        "Esta emoção já foi vinculada a esta nota.",
         rawMessage
       );
     }
 
-    if (lower.includes("unique constraint failed") && lower.includes("entry_behaviors")) {
+    if (lower.includes("unique constraint failed") && lower.includes("note_behaviors")) {
       return new ConflictException(
-        "Este comportamento já foi vinculado a este relato.",
+        "Este comportamento já foi vinculado a esta nota.",
         rawMessage
       );
     }
 
-    if (lower.includes("unique constraint failed") && lower.includes("entry_reactions")) {
+    if (lower.includes("unique constraint failed") && lower.includes("note_reactions")) {
       return new ConflictException(
-        "Esta reação já foi vinculada a este relato.",
+        "Esta reação já foi vinculada a esta nota.",
         rawMessage
       );
     }
 
-    if (lower.includes("unique constraint failed") && lower.includes("entry_thoughts")) {
+    if (lower.includes("unique constraint failed") && lower.includes("note_thoughts")) {
       return new ConflictException(
-        "Este pensamento já foi vinculado a este relato.",
+        "Este pensamento já foi vinculado a esta nota.",
         rawMessage
       );
     }

@@ -14,10 +14,10 @@ import { Button, ButtonText } from "@/components/ui/button";
 import MoodRow from "@/components/composer/mood-row";
 import { useEntryCacheStore } from "@/stores/entry-cache-store";
 import { countWords } from "@/lib/utils";
-import { useEntryStore } from "@/stores/journal-store";
-import { entryImages } from "@/lib/db/schema";
+import { useNoteStore } from "@/stores/note-store";
+import { noteImages } from "@/lib/db/schema";
 import { useAuthStore } from "@/stores/auth-store";
-import { journalEntryInsertSchema, journalEntryUpdateSchema } from "@/lib/db/zod/schemas/entry/index.schema";
+import { noteInsertSchema, noteUpdateSchema } from "@/lib/db/zod/schemas/note/index.schema";
 import { useToastStore } from "@/stores/toast-store";
 
 function WordCount() {
@@ -30,7 +30,7 @@ function WordCount() {
 }
 
 function PhotoButton() {
-  const imageCount = useEntryCacheStore(s => s.entryImages?.length ?? 0);
+  const imageCount = useEntryCacheStore(s => s.noteImages?.length ?? 0);
 
   const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
 
@@ -42,7 +42,7 @@ function PhotoButton() {
     });
     if (!result.canceled && result.assets.length > 0) {
       const uris = result.assets.map(a => a.uri)
-      updateCachedEntry({ entryImages: uris })
+      updateCachedEntry({ noteImages: uris })
     }
   };
 
@@ -56,21 +56,21 @@ export default function ComposerLayout() {
   const { bottom, top } = useSafeAreaInsets();
   const router = useRouter()
   const close = () => router.back()
-  const addEntry = useEntryStore(e => e.addEntry)
+  const addNote = useNoteStore(e => e.addNote)
   const clearCachedEntry = useEntryCacheStore(e => e.clearCachedEntry)
   const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
   const userId = useAuthStore(e => e.user!.id)
   const cachedEntry = useEntryCacheStore(e => e.entry)
   const submit = () => {
-    updateCachedEntry({ userId, entryType: "post" })
-    const safeEntry = journalEntryInsertSchema.safeParse(cachedEntry)
+    updateCachedEntry({ userId, noteType: "note" })
+    const safeEntry = noteInsertSchema.safeParse(cachedEntry)
 
     if (!safeEntry.success) {
       console.log("deu xabu", safeEntry.error.message)
       return
     }
 
-    addEntry(safeEntry.data)
+    addNote(safeEntry.data)
     clearCachedEntry()
     router.back()
   }

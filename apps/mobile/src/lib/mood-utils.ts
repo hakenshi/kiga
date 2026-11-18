@@ -46,12 +46,12 @@ export const MOOD_BY_ID: Record<number, MoodStyleConfig> = {
   },
 };
 
-export function resolveMoodConfig(entry?: {
+export function resolveMoodConfig(note?: {
   moodId?: number | null;
   mood?: { id?: number; name?: string } | null;
 }): MoodStyleConfig | null {
-  const moodId = entry?.moodId ?? entry?.mood?.id;
-  const moodName = entry?.mood?.name?.trim();
+  const moodId = note?.moodId ?? note?.mood?.id;
+  const moodName = note?.mood?.name?.trim();
 
   if (moodId && MOOD_BY_ID[moodId]) {
     const base = MOOD_BY_ID[moodId];

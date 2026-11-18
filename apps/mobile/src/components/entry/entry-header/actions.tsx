@@ -2,7 +2,7 @@ import { Drawer, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerCloseButton,
 import { HStack } from "@/components/ui/hstack";
 import { CloseIcon, Icon } from "@/components/ui/icon";
 import { useEntryCacheStore } from "@/stores/entry-cache-store";
-import { useEntryStore } from "@/stores/journal-store";
+import { useNoteStore } from "@/stores/note-store";
 import { useRouter } from "expo-router";
 import { EllipsisVerticalIcon, Eye, ReplyIcon, HeartIcon, PinIcon, PencilIcon, TrashIcon } from "lucide-react-native";
 import { useState } from "react";
@@ -16,18 +16,18 @@ interface Props {
 }
 
 export default function Actions({ entryId, fixed, liked }: Props) {
-  const deleteEntry = useEntryStore((e) => e.deleteEntry);
-  const updateEntry = useEntryStore((e) => e.updateEntry);
-  const findEntry = useEntryStore(e => e.findEntry)
+  const deleteNote = useNoteStore((e) => e.deleteNote);
+  const updateNote = useNoteStore((e) => e.updateNote);
+  const findNote = useNoteStore(e => e.findNote)
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const navigate = async () => {
-    const entry = await findEntry(entryId)
+    const entry = await findNote(entryId)
     if (!entry) return
     useEntryCacheStore.getState().updateCachedEntry({
       date: entry.date,
-      entryEmotions: entry.entryEmotions,
-      entryType: entry.type
+      noteEmotions: entry.noteEmotions,
+      noteType: entry.type
     })
     setOpen(false);
     router.push(`/home/edit-post/${entryId}`);
@@ -78,7 +78,7 @@ export default function Actions({ entryId, fixed, liked }: Props) {
                 <Text className="font-semibold text-gray-900">Responder</Text>
               </Pressable>
               <Pressable
-                onPress={() => updateEntry(entryId, { liked: !liked })}
+                onPress={() => updateNote(entryId, { liked: !liked })}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >
                 <HeartIcon
@@ -91,7 +91,7 @@ export default function Actions({ entryId, fixed, liked }: Props) {
                   {liked ? "Remover" : "Guardar"}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => updateEntry(entryId, { fixed: !fixed })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+              <Pressable onPress={() => updateNote(entryId, { fixed: !fixed })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
 
                 <PinIcon size={20} color="gray" />
                 <Text className="font-semibold text-gray-900">
@@ -108,7 +108,7 @@ export default function Actions({ entryId, fixed, liked }: Props) {
               <Pressable
                 onPress={() => {
                   setOpen(false);
-                  deleteEntry(entryId);
+                  deleteNote(entryId);
                 }}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >

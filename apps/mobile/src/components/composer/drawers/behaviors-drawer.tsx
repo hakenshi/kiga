@@ -52,7 +52,7 @@ export default function BehaviorsDrawer() {
   const deleteBehaviors = useBehaviorStore((s) => s.deleteBehaviors);
   const addCategory = useCategoryStore((s) => s.addCategory);
   const deleteCategory = useCategoryStore((s) => s.deleteCategory);
-  const selectedBehaviors = useEntryCacheStore((s) => s.entryBehaviors) ?? [];
+  const selectedBehaviors = useEntryCacheStore((s) => s.noteBehaviors) ?? [];
   const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
   const isSelectionMode = deletingIds.length > 0;
   const categoryForm = useForm<{ name: string }>({
@@ -75,7 +75,7 @@ export default function BehaviorsDrawer() {
   };
 
   const toggleBehavior = (behaviorId: number) => {
-    updateCachedEntry({ entryBehaviors: toggleSelectedId(selectedBehaviors, behaviorId) });
+    updateCachedEntry({ noteBehaviors: toggleSelectedId(selectedBehaviors, behaviorId) });
   };
 
   const toggleDeleteId = (behaviorId: number) => {
@@ -94,7 +94,7 @@ export default function BehaviorsDrawer() {
     const deleted = deleteBehaviors(deletingIds, userId);
     if (!deleted) return;
     updateCachedEntry({
-      entryBehaviors: selectedBehaviors.filter(id => !deletingIds.includes(id)),
+      noteBehaviors: selectedBehaviors.filter(id => !deletingIds.includes(id)),
     });
     setDeletingIds([]);
     await searchBehaviors(searchQuery, { userId });

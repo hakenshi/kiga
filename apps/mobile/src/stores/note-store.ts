@@ -1,37 +1,37 @@
 import { create } from "zustand";
-import { EntryRepository } from "@/repositories/entry-repository";
-import type { EntryFilterOptions } from "@/repositories/entry-repository";
+import { NoteRepository } from "@/repositories/note-repository";
+import type { NoteFilterOptions } from "@/repositories/note-repository";
 import { useToastStore } from "@/stores/toast-store";
 
 const PAGE_SIZE = 20;
 
-interface JournalEntryState {
-  entries: JournalEntry[];
-  searchResults: JournalEntry[];
+interface NoteState {
+  notes: Note[];
+  searchResults: Note[];
   query: string;
   isLoading: boolean;
   hasMore: boolean;
   page: number;
 }
-interface JournalEntryActions {
+interface NoteActions {
   loadInitial: (userId: number) => Promise<void>; loadMore: (userId: number) => Promise<void>;
-  searchEntries: (query: string, filters: EntryFilterOptions) => void;
-  addEntry: (newEntry: JournalEntryInsert) => void;
-  updateEntry: (entryId: number, entryData: JournalEntryUpdate) => void
-  deleteEntry: (entryId: number) => Promise<void>;
-  findEntry: (entryId: number) => Promise<JournalEntry | null>;
+  searchNotes: (query: string, filters: NoteFilterOptions) => void;
+  addNote: (newEntry: NoteInsert) => void;
+  updateNote: (entryId: number, entryData: NoteUpdate) => void
+  deleteNote: (entryId: number) => Promise<void>;
+  findNote: (entryId: number) => Promise<Note | null>;
   reset: () => void;
 }
 
-export function selectEntries(state: JournalEntryState) {
-  return state.query === "" ? state.entries : state.searchResults;
+export function selectNotes(state: NoteState) {
+  return state.query === "" ? state.notes : state.searchResults;
 }
 
-export function getEntryBody(entry: JournalEntry) {
-  const behaviors = entry.entryBehaviors.map(item => item.behavior);
+export function getNoteBody(entry: Note) {
+  const behaviors = entry.noteBehaviors.map(item => item.behavior);
 
   return {
-    images: entry.entryImages.map(item => item.imageUrl),
+    images: entry.noteImages.map(item => item.imageUrl),
     behaviors: behaviors.filter(behavior => Boolean(behavior.icon)),
     reports: behaviors.filter((behavior): behavior is Behavior & { content: string } =>
       !behavior.icon && behavior.content !== null && behavior.content.trim().length > 0
@@ -39,9 +39,9 @@ export function getEntryBody(entry: JournalEntry) {
   };
 }
 
-export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
+export const useNoteStore = create<NoteState & NoteActions>()(
   ((set, get) => ({
-    entries: [],
+    notes: [],
     searchResults: [],
     query: "",
     hasMore: false,
@@ -54,12 +54,12 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
     loadInitial: async (userId) => {
       set(({ isLoading: true, page: 0, hasMore: true }))
       try {
-        const data = await EntryRepository.findMany(userId, {
+        const data = await NoteRepository.findMany(userId, {
           limit: PAGE_SIZE,
           offset: 0,
         });
         set({
-          entries: data,
+          notes: data,
           hasMore: data.length === PAGE_SIZE,
           page: 1,
           isLoading: false,
@@ -69,17 +69,17 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
       }
     },
     loadMore: async (userId) => {
-      const { isLoading, hasMore, page, entries, query } = get();
+      const { isLoading, hasMore, page, notes, query } = get();
       if (!hasMore || isLoading || query !== "") return;
       set({ isLoading: true });
       try {
         const offset = page * PAGE_SIZE;
-        const data = await EntryRepository.findMany(userId, {
+        const data = await NoteRepository.findMany(userId, {
           limit: PAGE_SIZE,
           offset,
         });
         set({
-          entries: [...entries, ...data],
+          notes: [...notes, ...data],
           hasMore: data.length === PAGE_SIZE,
           page: page + 1,
           isLoading: false,
@@ -88,7 +88,7 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
         set({ isLoading: false });
       }
     },
-    searchEntries: (query, filters) => {
+    searchNotes: (query, filters) => {
       query = query.trim();
       if (query === "") {
         set({ query, searchResults: [] });
@@ -96,50 +96,50 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
       }
 
       try {
-        const searchResults = EntryRepository.search(query, filters);
+        const searchResults = NoteRepository.search(query, filters);
         set({ query, searchResults });
       } catch (error) {
         set({ query, searchResults: [] });
         useToastStore.getState().showError("Falha ao buscar relatos.", error);
       }
     },
-    addEntry: (newEntry: JournalEntryInsert) => {
-      const entry = EntryRepository.create(newEntry)
+    addNote: (newEntry: NoteInsert) => {
+      const entry = NoteRepository.create(newEntry)
       set((s) => ({
-        entries: [entry, ...s.entries]
+        notes: [entry, ...s.notes]
       }));
       if (get().query !== "") {
-        get().searchEntries(get().query, { userId: entry.userId });
+        get().searchNotes(get().query, { userId: entry.userId });
       }
     },
-    updateEntry: (entryId, newEntryData) => {
-      const entry = EntryRepository.update(entryId, newEntryData);
+    updateNote: (entryId, newEntryData) => {
+      const entry = NoteRepository.update(entryId, newEntryData);
       set((s) => {
-        const updated = s.entries.map(e => e.id === entryId ? entry : e)
+        const updated = s.notes.map(e => e.id === entryId ? entry : e)
         return {
-          entries: updated,
+          notes: updated,
         }
       })
       if (get().query !== "") {
-        get().searchEntries(get().query, { userId: entry.userId });
+        get().searchNotes(get().query, { userId: entry.userId });
       }
     },
-    findEntry: async (entryId) => {
-      const { entries, searchResults } = get();
-      const cached = entries.find((e) => e.id === entryId) ?? searchResults.find((e) => e.id === entryId);
+    findNote: async (entryId) => {
+      const { notes, searchResults } = get();
+      const cached = notes.find((e) => e.id === entryId) ?? searchResults.find((e) => e.id === entryId);
       if (cached) return cached;
-      return (await EntryRepository.findOne(entryId)) ?? null;
+      return (await NoteRepository.findOne(entryId)) ?? null;
     },
-    deleteEntry: async (entryId) => {
-      const { entries, searchResults } = get();
-      const target = entries.find((i) => i.id === entryId) ?? searchResults.find((i) => i.id === entryId);
+    deleteNote: async (entryId) => {
+      const { notes, searchResults } = get();
+      const target = notes.find((i) => i.id === entryId) ?? searchResults.find((i) => i.id === entryId);
       if (!target) return;
 
-      const targetIndex = entries.findIndex((i) => i.id === entryId);
+      const targetIndex = notes.findIndex((i) => i.id === entryId);
 
       // 1. Remove da tela imediatamente (otimista, sem travar o usuário)
       set((s) => ({
-        entries: s.entries.filter((e) => e.id !== entryId),
+        notes: s.notes.filter((e) => e.id !== entryId),
         searchResults: s.searchResults.filter((e) => e.id !== entryId),
       }));
 
@@ -149,16 +149,16 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
       const commitDelete = async () => {
         if (isUndone) return;
         try {
-          await EntryRepository.delete(entryId);
+          await NoteRepository.delete(entryId);
         } catch (error) {
           useToastStore.getState().showError("Falha ao excluir o relato do banco de dados.", error);
           // Restaura na tela caso falhe no banco
           set((s) => {
-            const next = [...s.entries];
+            const next = [...s.notes];
             if (targetIndex !== -1) next.splice(targetIndex, 0, target);
-            return { entries: next };
+            return { notes: next };
           });
-          get().searchEntries(get().query, { userId: target.userId });
+          get().searchNotes(get().query, { userId: target.userId });
         }
       };
 
@@ -173,18 +173,18 @@ export const useEntryStore = create<JournalEntryState & JournalEntryActions>()(
           clearTimeout(timer);
           // Restaura na mesma posição do feed
           set((s) => {
-            const next = [...s.entries];
+            const next = [...s.notes];
             if (targetIndex !== -1) next.splice(targetIndex, 0, target);
-            return { entries: next };
+            return { notes: next };
           });
-          get().searchEntries(get().query, { userId: target.userId });
+          get().searchNotes(get().query, { userId: target.userId });
         },
         4500
       );
     },
     reset: () => {
       set({
-        entries: [],
+        notes: [],
         searchResults: [],
         query: "",
         isLoading: false,

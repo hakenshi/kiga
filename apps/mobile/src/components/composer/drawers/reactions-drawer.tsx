@@ -51,7 +51,7 @@ export default function ReactionsDrawer() {
   const deleteReactions = useReactionStore((s) => s.deleteReactions);
   const addCategory = useCategoryStore((s) => s.addCategory);
   const deleteCategory = useCategoryStore((s) => s.deleteCategory);
-  const selectedReactions = useEntryCacheStore((s) => s.entryReactions) ?? [];
+  const selectedReactions = useEntryCacheStore((s) => s.noteReactions) ?? [];
   const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
   const isSelectionMode = deletingIds.length > 0;
   const categoryForm = useForm<{ name: string }>({
@@ -74,7 +74,7 @@ export default function ReactionsDrawer() {
   };
 
   const toggleReaction = (reactionId: number) => {
-    updateCachedEntry({ entryReactions: toggleSelectedId(selectedReactions, reactionId) });
+    updateCachedEntry({ noteReactions: toggleSelectedId(selectedReactions, reactionId) });
   };
 
   const toggleDeleteId = (reactionId: number) => {
@@ -93,7 +93,7 @@ export default function ReactionsDrawer() {
     const deleted = deleteReactions(deletingIds, userId);
     if (!deleted) return;
     updateCachedEntry({
-      entryReactions: selectedReactions.filter(id => !deletingIds.includes(id)),
+      noteReactions: selectedReactions.filter(id => !deletingIds.includes(id)),
     });
     setDeletingIds([]);
     await searchReactions(searchQuery, { userId });

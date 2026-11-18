@@ -15,30 +15,30 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { Pencil, RefreshCcw } from "lucide-react-native";
 import { useAuthStore } from "@/stores/auth-store";
-import { useEntryStore } from "@/stores/journal-store";
+import { useNoteStore } from "@/stores/note-store";
 import { useToastStore } from "@/stores/toast-store";
 
 interface Props {
-  entry: JournalEntry;
+  entry: Note;
 }
 
-function RevisitAction({ entry, onClose }: { entry: JournalEntry; onClose: () => void }) {
+function RevisitAction({ entry, onClose }: { entry: Note; onClose: () => void }) {
   const userId = useAuthStore((s) => s.user!.id);
-  const addEntry = useEntryStore((s) => s.addEntry);
+  const addNote = useNoteStore((s) => s.addNote);
 
   const handleSimpleRepost = () => {
     onClose();
     try {
-      addEntry({
+      addNote({
         userId,
-        entryType: "repost",
+        noteType: "repost",
         content: entry.content,
         moodId: entry.moodId,
-        entryBehaviors: entry.entryBehaviors.map(item => item.behaviorId),
-        entryEmotions: entry.entryEmotions.map(item => item.emotionId),
-        entryImages: entry.entryImages.map(item => item.imageUrl),
-        entryReactions: entry.entryReactions.map(item => item.reactionId),
-        entryThoughts: entry.entryThoughts.map(item => item.thoughtsId),
+        noteBehaviors: entry.noteBehaviors.map(item => item.behaviorId),
+        noteEmotions: entry.noteEmotions.map(item => item.emotionId),
+        noteImages: entry.noteImages.map(item => item.imageUrl),
+        noteReactions: entry.noteReactions.map(item => item.reactionId),
+        noteThoughts: entry.noteThoughts.map(item => item.thoughtsId),
       });
       useToastStore.getState().showInfo("Momento revisitado.");
     } catch (err) {

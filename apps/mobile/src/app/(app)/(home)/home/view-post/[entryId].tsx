@@ -25,7 +25,7 @@ import { VStack } from "@/components/ui/vstack";
 import { getBehaviorIcon } from "@/lib/behavior-icons";
 import { resolveMoodConfig } from "@/lib/mood-utils";
 import { useAuthStore } from "@/stores/auth-store";
-import { useEntryStore } from "@/stores/journal-store";
+import { useNoteStore } from "@/stores/note-store";
 import { useToastStore } from "@/stores/toast-store";
 import { RepostDrawer } from "@/components/entry/repost-drawer";
 import { format } from "date-fns";
@@ -47,24 +47,24 @@ export default function ViewPostPage() {
   const insets = useSafeAreaInsets();
   const { entryId } = useLocalSearchParams<{ entryId: string }>();
   const user = useAuthStore((s) => s.user);
-  const updateEntry = useEntryStore((s) => s.updateEntry);
-  const findEntry = useEntryStore((s) => s.findEntry);
+  const updateNote = useNoteStore((s) => s.updateNote);
+  const findNote = useNoteStore((s) => s.findNote);
 
-  const [rootEntry, setRootEntry] = useState<JournalEntry | null>(null);
+  const [rootEntry, setRootEntry] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     if (!entryId) return;
     const numId = Number(entryId);
     try {
-      const entry = await findEntry(numId);
+      const entry = await findNote(numId);
       setRootEntry(entry);
     } catch (error) {
       useToastStore.getState().showError("Falha ao carregar o relato.", error);
     } finally {
       setLoading(false);
     }
-  }, [entryId, findEntry]);
+  }, [entryId, findNote]);
 
   useFocusEffect(
     useCallback(() => {
@@ -75,7 +75,7 @@ export default function ViewPostPage() {
   const handleLike = () => {
     if (!rootEntry) return;
     const newLiked = !rootEntry.liked;
-    updateEntry(rootEntry.id, { liked: newLiked });
+    updateNote(rootEntry.id, { liked: newLiked });
     setRootEntry((prev) =>
       prev
         ? {
@@ -111,19 +111,19 @@ export default function ViewPostPage() {
   }
 
   const rootMood = resolveMoodConfig(rootEntry);
-  const rootThoughts = rootEntry.entryThoughts
+  const rootThoughts = rootEntry.noteThoughts
     .map((t) => t.thought?.name)
     .filter(Boolean);
-  const rootEmotions = rootEntry.entryEmotions
+  const rootEmotions = rootEntry.noteEmotions
     .map((e) => e.emotion?.name)
     .filter(Boolean);
-  const rootReactions = rootEntry.entryReactions
+  const rootReactions = rootEntry.noteReactions
     .map((r) => r.reaction?.name)
     .filter(Boolean);
-  const rootBehaviors = rootEntry.entryBehaviors
+  const rootBehaviors = rootEntry.noteBehaviors
     .map((b) => b.behavior)
     .filter((b): b is NonNullable<typeof b> => Boolean(b?.content));
-  const rootImages = rootEntry.entryImages.map((img) => img.imageUrl);
+  const rootImages = rootEntry.noteImages.map((img) => img.imageUrl);
 
   const authorName = `${user?.firstName ?? ""} ${user?.secondName ?? ""}`.trim();
   const authorHandle = user?.username ? `@${user.username}` : "";

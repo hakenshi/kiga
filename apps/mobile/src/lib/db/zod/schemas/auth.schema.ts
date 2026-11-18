@@ -8,7 +8,7 @@ import { emotionSelectSchema } from "./emotion/index.schema";
 import { moodSelectSchema } from "./mood/index.schema";
 import { reactionSelectSchema } from "./reaction/index.schema";
 import { thoughtSelectSchema } from "./thought/index.schema";
-import { journalEntrySelectSchema } from "./entry/index.schema";
+import { noteSelectSchema } from "./note/index.schema";
 
 // ─── TABELAS BASE (SELECT SCHEMAS VIA DRIZZLE-ZOD) ─────────────────────────
 export const userSelectBaseSchema = createSelectSchema(users).omit({
@@ -112,5 +112,5 @@ export const userWithRelationsSchema = userSelectBaseSchema.extend({
   behaviors: z.array(behaviorSelectSchema).optional(),
   moods: z.array(moodSelectSchema).optional(),
   profileImages: z.array(profileImageSelectSchema).optional(),
-  journalEntries: z.array(journalEntrySelectSchema).optional(),
+  notes: z.array(noteSelectSchema).optional(),
 });

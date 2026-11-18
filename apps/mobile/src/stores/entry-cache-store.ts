@@ -1,18 +1,18 @@
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 import Storage from "expo-sqlite/kv-store"
-import { journalEntryUpdateSchema } from "@/lib/db/zod/schemas/entry/index.schema"
+import { noteUpdateSchema } from "@/lib/db/zod/schemas/note/index.schema"
 import z from "zod"
 import { useAuthStore } from "./auth-store"
 
 const stateSchema = z.object({
   expired: z.boolean(),
   expiresIn: z.number(),
-  entry: journalEntryUpdateSchema,
+  entry: noteUpdateSchema,
 })
 
 type State = z.infer<typeof stateSchema>
-type InputState = z.infer<typeof journalEntryUpdateSchema>
+type InputState = z.infer<typeof noteUpdateSchema>
 
 interface Actions {
   updateCachedEntry: (entryData: InputState) => void

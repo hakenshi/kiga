@@ -3,15 +3,15 @@ import {
   behaviors,
   categories,
   emotions,
-  entryBehaviors,
-  entryEmotions,
-  entryImages,
-  entryReactions,
-  entryReplies,
-  entryReposts,
-  entryThoughts,
-  journalEntries,
   moods,
+  noteBehaviors,
+  noteEmotions,
+  noteImages,
+  noteReactions,
+  noteReplies,
+  noteReposts,
+  notes,
+  noteThoughts,
   profileImages,
   reactions,
   thoughts,
@@ -26,7 +26,7 @@ export const userRelation = relations(users, ({ many }) => ({
   moods: many(moods),
   reactions: many(reactions),
   behaviors: many(behaviors),
-  journalEntries: many(journalEntries),
+  notes: many(notes),
 }));
 
 export const categoriesRelation = relations(categories, ({ one, many }) => ({
@@ -56,7 +56,7 @@ export const emotionsRelation = relations(emotions, ({ one, many }) => ({
     fields: [emotions.categoryId],
     references: [categories.id],
   }),
-  entryEmotions: many(entryEmotions),
+  noteEmotions: many(noteEmotions),
 }));
 
 export const thoughtsRelation = relations(thoughts, ({ one, many }) => ({
@@ -64,7 +64,7 @@ export const thoughtsRelation = relations(thoughts, ({ one, many }) => ({
     fields: [thoughts.userId],
     references: [users.id],
   }),
-  entryThoughts: many(entryThoughts),
+  noteThoughts: many(noteThoughts),
 }));
 
 export const moodsRelations = relations(moods, ({ one, many }) => ({
@@ -72,7 +72,7 @@ export const moodsRelations = relations(moods, ({ one, many }) => ({
     fields: [moods.userId],
     references: [users.id],
   }),
-  journalEntries: many(journalEntries),
+  notes: many(notes),
 }));
 
 export const reactionsRelations = relations(reactions, ({ one, many }) => ({
@@ -84,79 +84,80 @@ export const reactionsRelations = relations(reactions, ({ one, many }) => ({
     fields: [reactions.categoryId],
     references: [categories.id],
   }),
-  entryReactions: many(entryReactions),
+  noteReactions: many(noteReactions),
 }));
 
-export const journalEntriesRelations = relations(journalEntries, ({ one, many }) => ({
+export const notesRelations = relations(notes, ({ one, many }) => ({
   user: one(users, {
-    fields: [journalEntries.userId],
+    fields: [notes.userId],
     references: [users.id],
   }),
   mood: one(moods, {
-    fields: [journalEntries.moodId],
+    fields: [notes.moodId],
     references: [moods.id],
   }),
-  entryReactions: many(entryReactions),
-  entryThoughts: many(entryThoughts),
-  entryEmotions: many(entryEmotions),
-  entryBehaviors: many(entryBehaviors),
-  entryImages: many(entryImages),
-  thread: many(entryReplies),
-  reposts: many(entryReposts),
+  noteReactions: many(noteReactions),
+  noteThoughts: many(noteThoughts),
+  noteEmotions: many(noteEmotions),
+  noteBehaviors: many(noteBehaviors),
+  noteImages: many(noteImages),
+  thread: many(noteReplies),
+  reposts: many(noteReposts),
 }));
 
-export const entryRepliesRelations = relations(entryReplies, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [entryReplies.entryId],
-    references: [journalEntries.id],
-    relationName: "replyEntry",
+export const noteRepliesRelations = relations(noteReplies, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteReplies.noteId],
+    references: [notes.id],
+    relationName: "replyNote",
   }),
 }));
 
-export const entryRepostsRelations = relations(entryReposts, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [entryReposts.entryId],
-    references: [journalEntries.id],
-    relationName: "repostEntry",
+export const noteRepostsRelations = relations(noteReposts, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteReposts.noteId],
+    references: [notes.id],
+    relationName: "repostNote",
   }),
 }));
 
-export const entryReactionsRelations = relations(entryReactions, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [entryReactions.entryId],
-    references: [journalEntries.id],
+export const noteReactionsRelations = relations(noteReactions, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteReactions.noteId],
+    references: [notes.id],
   }),
   reaction: one(reactions, {
-    fields: [entryReactions.reactionId],
+    fields: [noteReactions.reactionId],
     references: [reactions.id],
   }),
 }));
-export const entryThoughtsRelations = relations(entryThoughts, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [entryThoughts.entryId],
-    references: [journalEntries.id],
+
+export const noteThoughtsRelations = relations(noteThoughts, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteThoughts.noteId],
+    references: [notes.id],
   }),
   thought: one(thoughts, {
-    fields: [entryThoughts.thoughtsId],
+    fields: [noteThoughts.thoughtsId],
     references: [thoughts.id],
   }),
 }));
 
-export const entryEmotionsRelations = relations(entryEmotions, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [entryEmotions.entryId],
-    references: [journalEntries.id],
+export const noteEmotionsRelations = relations(noteEmotions, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteEmotions.noteId],
+    references: [notes.id],
   }),
   emotion: one(emotions, {
-    fields: [entryEmotions.emotionId],
+    fields: [noteEmotions.emotionId],
     references: [emotions.id],
   }),
 }));
 
-export const entryImagesRelations = relations(entryImages, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [entryImages.entryId],
-    references: [journalEntries.id],
+export const noteImagesRelations = relations(noteImages, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteImages.noteId],
+    references: [notes.id],
   }),
 }));
 
@@ -169,16 +170,16 @@ export const behaviorsRelations = relations(behaviors, ({ one, many }) => ({
     fields: [behaviors.categoryId],
     references: [categories.id],
   }),
-  entryBehaviors: many(entryBehaviors),
+  noteBehaviors: many(noteBehaviors),
 }));
 
-export const entryBehaviorsRelations = relations(entryBehaviors, ({ one }) => ({
-  entry: one(journalEntries, {
-    fields: [entryBehaviors.entryId],
-    references: [journalEntries.id],
+export const noteBehaviorsRelations = relations(noteBehaviors, ({ one }) => ({
+  note: one(notes, {
+    fields: [noteBehaviors.noteId],
+    references: [notes.id],
   }),
   behavior: one(behaviors, {
-    fields: [entryBehaviors.behaviorId],
+    fields: [noteBehaviors.behaviorId],
     references: [behaviors.id],
   }),
 }));

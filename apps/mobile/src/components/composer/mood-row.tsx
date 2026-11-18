@@ -17,7 +17,7 @@ export default function MoodRow() {
   // const moodId = useComposer((s) => s.moodId);
   // const setMoodId = useComposer((s) => s.setMoodId);
   const cachedMoodId = useEntryCacheStore(e => e.moodId)
-  const updateEntryCache = useEntryCacheStore(e => e.updateCachedEntry)
+  const updateNoteCache = useEntryCacheStore(e => e.updateCachedEntry)
 
   const [moodId, setMoodId] = useState(cachedMoodId)
   const [isSelected, setIsSelected] = useState(false)
@@ -29,7 +29,7 @@ export default function MoodRow() {
       console.log(isSelected ? "selected" : "not sele")
       setIsSelected(!isSelected)
     }
-    updateEntryCache({ moodId: value })
+    updateNoteCache({ moodId: value })
   }
   return (
     <HStack className="justify-between px-4 py-3 items-center border-b border-border">

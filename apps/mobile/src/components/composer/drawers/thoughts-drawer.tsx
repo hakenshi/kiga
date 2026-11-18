@@ -27,7 +27,7 @@ export default function ThoughtsDrawer() {
   const addThought = useThoughtStore((s) => s.addThought);
   const searchThoughts = useThoughtStore((s) => s.searchThoughts);
   const loadThoughts = useThoughtStore((s) => s.loadThoughts);
-  const selectedThoughts = useEntryCacheStore((s) => s.entryThoughts) ?? [];
+  const selectedThoughts = useEntryCacheStore((s) => s.noteThoughts) ?? [];
   const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
   const {
     control,
@@ -40,7 +40,7 @@ export default function ThoughtsDrawer() {
   });
 
   const toggleThought = (thoughtId: number) => {
-    updateCachedEntry({ entryThoughts: toggleSelectedId(selectedThoughts, thoughtId) });
+    updateCachedEntry({ noteThoughts: toggleSelectedId(selectedThoughts, thoughtId) });
   };
 
   const handleOpen = () => {
