@@ -17,7 +17,7 @@ export default function NoteLinkShell({ children, note }: Props) {
       <Link onPress={() => setViewNote(note)} href="/home/view-note"
         push
         asChild>
-        <Pressable className="border-b border-[#E6E8EC] px-4 py-4 bg-white gap-2.5 active:bg-zinc-50/70">
+        <Pressable className="border-b border-gray-200 px-4 py-4 bg-white gap-2.5 active:bg-zinc-50/70">
           {children}
         </Pressable>
       </Link>

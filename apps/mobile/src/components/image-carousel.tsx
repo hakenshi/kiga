@@ -67,7 +67,7 @@ export const ImageCarousel = memo(function ImageCarousel({
             const w = Math.floor(e.nativeEvent.layout.width);
             if (w > 0 && w !== containerWidth) setContainerWidth(w);
           }}
-          className={`w-full rounded-2xl overflow-hidden bg-[#16181D] relative ${className}`}
+          className={`w-full rounded-2xl overflow-hidden bg-zinc-900 relative ${className}`}
           style={{ aspectRatio: carouselRatio }}
         >
           <Pressable
@@ -91,7 +91,7 @@ export const ImageCarousel = memo(function ImageCarousel({
           {/* Borda decorativa sobreposta */}
           <View
             pointerEvents="none"
-            className="absolute inset-0 rounded-2xl border border-[#E6E8EC]/80"
+            className="absolute inset-0 rounded-2xl border border-gray-200/80"
           />
 
           {isComposerMode && onRemove && (
@@ -125,7 +125,7 @@ export const ImageCarousel = memo(function ImageCarousel({
               const w = Math.floor(e.nativeEvent.layout.width);
               if (w > 0 && w !== containerWidth) setContainerWidth(w);
             }}
-            className="w-full rounded-2xl overflow-hidden bg-[#16181D] relative"
+            className="w-full rounded-2xl overflow-hidden bg-zinc-900 relative"
             style={{ aspectRatio: carouselRatio }}
           >
             {containerWidth > 0 && (
@@ -150,7 +150,7 @@ export const ImageCarousel = memo(function ImageCarousel({
                 renderItem={({ item: uri, index }) => (
                   <View
                     style={{ width: containerWidth, height: "100%", overflow: "hidden" }}
-                    className="relative bg-[#16181D]"
+                    className="relative bg-zinc-900"
                   >
                     <Pressable
                       onPress={() => openViewer(index)}
@@ -194,7 +194,7 @@ export const ImageCarousel = memo(function ImageCarousel({
             {/* Borda decorativa sobreposta sem vazar fotos vizinhas */}
             <View
               pointerEvents="none"
-              className="absolute inset-0 rounded-2xl border border-[#E6E8EC]/80"
+              className="absolute inset-0 rounded-2xl border border-gray-200/80"
             />
 
             {/* Badge numérica de slide */}
@@ -220,7 +220,7 @@ export const ImageCarousel = memo(function ImageCarousel({
                 <View
                   key={`dot-${i}`}
                   className={`rounded-full ${
-                    isActive ? "w-4 h-1.5 bg-[#18181B]" : "w-1.5 h-1.5 bg-[#D4D4D8]"
+                    isActive ? "w-4 h-1.5 bg-zinc-900" : "w-1.5 h-1.5 bg-zinc-300"
                   }`}
                 />
               );

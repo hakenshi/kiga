@@ -26,7 +26,7 @@ type DraftStore = Pick<StoreApi<NoteDraftState>, "getState" | "getInitialState" 
 
 function WordCount({ wordCount }: { wordCount: number }) {
   return (
-    <Text className="text-xs font-subtitle text-[#9AA0AA]">
+    <Text className="text-xs font-subtitle text-zinc-400">
       {wordCount} {wordCount === 1 ? "palavra" : "palavras"}
     </Text>
   );
@@ -132,12 +132,12 @@ export default function ComposerLayout() {
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <Slot />
 
-        <VStack className="bg-white border-t border-[#E6E8EC] pt-2 pb-1">
+        <VStack className="bg-white border-t border-gray-200 pt-2 pb-1">
           <HStack className="justify-between px-5 pb-1.5 items-center">
             <WordCount wordCount={wordCount} />
             <HStack className="items-center gap-1">
               <Lock size={11} color="#9AA0AA" />
-              <Text className="text-xs font-subtitle text-[#9AA0AA]">
+              <Text className="text-xs font-subtitle text-zinc-400">
                 Salvo só neste aparelho
               </Text>
             </HStack>

@@ -76,8 +76,8 @@ export default function NavButton({
         minimumFontScale={0.8}
         className={`text-[11px] mt-1 text-center w-full ${
           isHighlighted
-            ? "text-[#16181D] font-subtitle-semibold"
-            : "text-[#71717A] font-subtitle"
+            ? "text-zinc-900 font-subtitle-semibold"
+            : "text-zinc-500 font-subtitle"
         }`}
       >
         {children}

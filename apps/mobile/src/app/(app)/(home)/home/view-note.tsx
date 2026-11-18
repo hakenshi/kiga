@@ -51,7 +51,7 @@ export default function ViewNotePage() {
   }
 
   return (
-    <VStack className="flex-1 bg-[#FAFAFA]">
+    <VStack className="flex-1 bg-zinc-50">
       <View
         style={{ paddingTop: insets.top }}
         className="bg-white border-b border-zinc-200"
@@ -111,8 +111,8 @@ export default function ViewNotePage() {
       </NoteShell>
       <VStack className="flex-1 p-3">
         <HStack space="md" className="">
-          <Avatar className="bg-[#F4F4F5] border border-[#E6E8EC]">
-            <AvatarFallbackText className="text-[#111318] font-heading">
+          <Avatar className="bg-zinc-100 border border-gray-200">
+            <AvatarFallbackText className="text-zinc-900 font-heading">
               {user?.firstName?.charAt(0) || "U"}
             </AvatarFallbackText>
           </Avatar>
@@ -122,12 +122,12 @@ export default function ViewNotePage() {
                 <VStack className="flex-1 justify-center">
                   <HStack className="items-center gap-1.5 flex-wrap">
                     <Text
-                      className="text-base font-heading text-[#111318]"
+                      className="text-base font-heading text-zinc-900"
                       numberOfLines={1}
                     >
                       {user?.firstName} {user?.secondName}
                     </Text>
-                    <Text className="text-sm capitalize text-center font-subtitle text-[#68707C]">
+                    <Text className="text-sm capitalize text-center font-subtitle text-gray-500">
                       {format(note.date, "MMM dd", { locale: ptBR })}
                     </Text>
                   </HStack>

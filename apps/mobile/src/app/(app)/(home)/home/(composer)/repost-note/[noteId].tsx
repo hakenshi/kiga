@@ -50,10 +50,10 @@ export default function RepostNotePage() {
           <ActivityIndicator size="small" color="#18181B" />
         </View>
       ) : context ? (
-        <VStack className="mx-5 mb-4 p-4 bg-[#FAFAFA] border border-[#E4E4E7] rounded-2xl gap-2.5">
+        <VStack className="mx-5 mb-4 p-4 bg-zinc-50 border border-zinc-200 rounded-2xl gap-2.5">
           <HStack className="justify-between items-center">
             <HStack className="items-center gap-2">
-              <Avatar className="w-6 h-6 bg-[#E4E4E7]">
+              <Avatar className="w-6 h-6 bg-zinc-200">
                 <AvatarFallbackText className="text-zinc-700 text-[10px] font-semibold">
                   {context.authorInitial}
                 </AvatarFallbackText>
@@ -86,15 +86,15 @@ export default function RepostNotePage() {
 
           <HStack className="gap-1.5 flex-wrap pt-0.5">
             {context.thoughts.map((thought) => (
-              <View key={thought.id} className="bg-[#F0ECFA] border border-[#DFD6F5] px-2 py-0.5 rounded-md">
-                <Text numberOfLines={1} className="text-[10.5px] font-medium text-[#4B3B8F]">
+              <View key={thought.id} className="bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-md">
+                <Text numberOfLines={1} className="text-[10.5px] font-medium text-violet-900">
                   “{thought.name}”
                 </Text>
               </View>
             ))}
             {context.emotions.map((emotion) => (
-              <View key={emotion.id} className="bg-[#E8F1FB] border border-[#D0E3F7] px-2 py-0.5 rounded-md">
-                <Text numberOfLines={1} className="text-[10.5px] font-medium text-[#1E4E8C]">
+              <View key={emotion.id} className="bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">
+                <Text numberOfLines={1} className="text-[10.5px] font-medium text-blue-900">
                   {emotion.name}
                 </Text>
               </View>

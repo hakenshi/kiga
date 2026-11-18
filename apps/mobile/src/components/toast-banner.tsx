@@ -21,7 +21,7 @@ export const ToastBanner = memo(function ToastBanner() {
       className="absolute left-4 right-4 z-50 items-center"
     >
       <View
-        className="w-full max-w-md bg-[#18181B] border border-[#27272A] rounded-2xl px-4 py-3.5 shadow-2xl flex-row items-center justify-between gap-3"
+        className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3.5 shadow-2xl flex-row items-center justify-between gap-3"
         style={{
           elevation: 10,
           shadowColor: "#000",

@@ -311,20 +311,20 @@ export default function ImageCropperModal({
         style={{ paddingTop: top + 8, paddingBottom: bottom + 12 }}
       >
         {/* Top Studio Bar */}
-        <HStack className="px-4 py-2.5 items-center justify-between border-b border-[#E6E8EC]">
+        <HStack className="px-4 py-2.5 items-center justify-between border-b border-gray-200">
           <Pressable
             onPress={onClose}
             hitSlop={10}
-            className="w-10 h-10 rounded-full bg-[#F2F3F5] items-center justify-center active:opacity-75"
+            className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center active:opacity-75"
           >
             <X size={18} color="#16181D" />
           </Pressable>
 
           <VStack className="items-center">
-            <Text className="text-[16px] font-heading text-[#16181D]">
+            <Text className="text-[16px] font-heading text-zinc-900">
               Ajustar imagem
             </Text>
-            <Text className="text-[11px] font-subtitle text-[#5A606B]">
+            <Text className="text-[11px] font-subtitle text-zinc-600">
               Arraste os cantos ou bordas para recortar
             </Text>
           </VStack>
@@ -332,7 +332,7 @@ export default function ImageCropperModal({
           <Pressable
             onPress={handleConfirm}
             disabled={isProcessing}
-            className="h-10 px-4 rounded-full bg-[#16181D] flex-row items-center justify-center gap-1.5 active:opacity-85"
+            className="h-10 px-4 rounded-full bg-zinc-900 flex-row items-center justify-center gap-1.5 active:opacity-85"
           >
             {isProcessing ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
@@ -349,7 +349,7 @@ export default function ImageCropperModal({
 
         {/* Interactive Crop Stage */}
         <View
-          className="flex-1 items-center justify-center bg-[#F4F4F5]"
+          className="flex-1 items-center justify-center bg-zinc-100"
           onLayout={(e) => {
             const { width, height } = e.nativeEvent.layout;
             setStageSize({ width, height });
@@ -548,17 +548,17 @@ export default function ImageCropperModal({
         {/* Bottom Studio Controls */}
         <VStack
           space="md"
-          className="px-5 pt-3 bg-white border-t border-[#E6E8EC]"
+          className="px-5 pt-3 bg-white border-t border-gray-200"
         >
           {/* Quick Actions: Rotate & Reset */}
           <HStack className="justify-center items-center gap-3">
             <Pressable
               onPress={handleRotate}
               disabled={isProcessing}
-              className="flex-row items-center gap-2 px-4 py-2 rounded-full bg-[#F2F3F5] border border-[#E6E8EC] active:opacity-75"
+              className="flex-row items-center gap-2 px-4 py-2 rounded-full bg-gray-100 border border-gray-200 active:opacity-75"
             >
               <RotateCw size={15} color="#16181D" />
-              <Text className="text-xs font-medium text-[#16181D]">
+              <Text className="text-xs font-medium text-zinc-900">
                 Girar 90°
               </Text>
             </Pressable>
@@ -566,17 +566,17 @@ export default function ImageCropperModal({
             <Pressable
               onPress={() => applyAspectPreset("original")}
               disabled={isProcessing}
-              className="flex-row items-center gap-2 px-4 py-2 rounded-full bg-[#F2F3F5] border border-[#E6E8EC] active:opacity-75"
+              className="flex-row items-center gap-2 px-4 py-2 rounded-full bg-gray-100 border border-gray-200 active:opacity-75"
             >
               <Maximize2 size={15} color="#5A606B" />
-              <Text className="text-xs font-medium text-[#5A606B]">
+              <Text className="text-xs font-medium text-zinc-600">
                 Inteira
               </Text>
             </Pressable>
           </HStack>
 
           {/* Aspect Ratio Preset Pills */}
-          <HStack className="justify-between items-center bg-[#F2F3F5] p-1.5 rounded-2xl border border-[#E6E8EC]">
+          <HStack className="justify-between items-center bg-gray-100 p-1.5 rounded-2xl border border-gray-200">
             {ASPECT_PRESETS.map((item) => {
               const isSelected = preset === item.id;
               return (
@@ -584,7 +584,7 @@ export default function ImageCropperModal({
                   key={item.id}
                   onPress={() => applyAspectPreset(item.id)}
                   className={`flex-1 py-2 rounded-xl items-center justify-center flex-row gap-1 ${
-                    isSelected ? "bg-[#16181D]" : "bg-transparent"
+                    isSelected ? "bg-zinc-900" : "bg-transparent"
                   }`}
                 >
                   {item.id === "free" ? (
@@ -602,7 +602,7 @@ export default function ImageCropperModal({
                     className={`text-xs ${
                       isSelected
                         ? "font-heading text-white"
-                        : "font-subtitle-medium text-[#5A606B]"
+                        : "font-subtitle-medium text-zinc-600"
                     }`}
                   >
                     {item.label}

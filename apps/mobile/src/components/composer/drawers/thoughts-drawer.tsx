@@ -72,23 +72,23 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
           style={{ paddingTop: top + 12, paddingBottom: bottom + 16 }}
         >
           <DrawerHeader className="pb-4 flex-row items-center gap-3">
-            <DrawerCloseButton className="w-10 h-10 rounded-full bg-[#F2F3F5] items-center justify-center p-0 active:opacity-75">
+            <DrawerCloseButton className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center p-0 active:opacity-75">
               <X size={18} color="#16181D" />
             </DrawerCloseButton>
             <VStack space="xs" className="flex-1">
-              <Text className="text-[18px] font-heading text-[#16181D]">
+              <Text className="text-[18px] font-heading text-zinc-900">
                 Pensamentos automáticos
               </Text>
-              <Text className="text-xs font-subtitle text-[#5A606B]">
+              <Text className="text-xs font-subtitle text-zinc-600">
                 O que passou pela sua mente neste momento?
               </Text>
             </VStack>
           </DrawerHeader>
           <VStack
             space="xs"
-            className="mb-3 p-3.5 rounded-xl bg-[#F2F3F5] border border-[#E6E8EC]"
+            className="mb-3 p-3.5 rounded-xl bg-gray-100 border border-gray-200"
           >
-            <Text className="text-xs font-subtitle-medium text-[#5A606B]">
+            <Text className="text-xs font-subtitle-medium text-zinc-600">
               Novo pensamento desta nota:
             </Text>
             <Controller
@@ -97,7 +97,7 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
               render={({ field, fieldState }) => (
                 <FormControl isInvalid={Boolean(fieldState.error)}>
                   <HStack space="sm" className="items-center">
-                    <Input className="flex-1 h-10 rounded-lg bg-white border-[#E6E8EC] shadow-none px-3">
+                    <Input className="flex-1 h-10 rounded-lg bg-white border-gray-200 shadow-none px-3">
                       <InputField
                         value={field.value}
                         onChangeText={field.onChange}
@@ -111,7 +111,7 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
                     <Button
                       size="sm"
                       rounding="lg"
-                      className="h-10 px-3.5 bg-[#16181D]"
+                      className="h-10 px-3.5 bg-zinc-900"
                       disabled={isSubmitting}
                       onPress={handleSubmit(onSubmitThought)}
                     >
@@ -128,7 +128,7 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
               )}
             />
           </VStack>
-          <Input className="h-11 rounded-xl bg-[#F2F3F5] border-transparent data-[focus=true]:bg-white data-[focus=true]:border-[#16181D] shadow-none px-3.5 mb-2">
+          <Input className="h-11 rounded-xl bg-gray-100 border-transparent data-[focus=true]:bg-white data-[focus=true]:border-zinc-900 shadow-none px-3.5 mb-2">
             <Search size={18} color="#9AA0AA" />
             <InputField
               value={searchQuery}
@@ -151,14 +151,14 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
                     key={item.id}
                     onPress={() => toggleThought(item.id)}
                     className={`flex-row items-center rounded-xl px-3.5 py-3 gap-2.5 border ${isSelected
-                      ? "bg-[#F0ECFA] border-[#4B3B8F]"
-                      : "bg-white border-[#E6E8EC]"
+                      ? "bg-violet-100 border-violet-900"
+                      : "bg-white border-gray-200"
                       }`}
                   >
                     {isSelected && <Check size={16} color="#4B3B8F" />}
                     <Text className={`text-[14px] flex-1 ${isSelected
-                      ? "text-[#4B3B8F] font-medium"
-                      : "text-[#16181D] font-normal"
+                      ? "text-violet-900 font-medium"
+                      : "text-zinc-900 font-normal"
                       }`}>
                       “{item.name}”
                     </Text>
@@ -166,14 +166,14 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
                 );
               })}
               {thoughts.length === 0 && (
-                <Text className="text-sm font-subtitle text-[#5A606B]">
+                <Text className="text-sm font-subtitle text-zinc-600">
                   Nenhum pensamento encontrado.
                 </Text>
               )}
             </VStack>
           </DrawerBody>
           <DrawerFooter className="pt-2">
-            <Button rounding="2xl" className="w-full h-[52px] bg-[#16181D]" onPress={() => setOpen(false)}>
+            <Button rounding="2xl" className="w-full h-[52px] bg-zinc-900" onPress={() => setOpen(false)}>
               <ButtonText className="text-[15px] font-semibold text-white">
                 {selectedThoughts.length === 0 && "Concluir"}
                 {selectedThoughts.length > 0 &&

@@ -30,7 +30,7 @@ export default function Content() {
           onPress={() => setExpand((e) => !e)}
           className="self-start py-0.5"
         >
-          <Text className="text-xs font-subtitle-semibold text-[#111318] underline">
+          <Text className="text-xs font-subtitle-semibold text-zinc-900 underline">
             {expand ? "Mostrar menos" : "Ver mais"}
           </Text>
         </Pressable>

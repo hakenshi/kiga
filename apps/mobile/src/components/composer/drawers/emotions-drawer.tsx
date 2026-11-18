@@ -38,13 +38,13 @@ function getEmotionItemClasses(isSelected: boolean, isMarkedForDelete: boolean) 
   }
   if (isSelected) {
     return {
-      button: "bg-[#E8F1FB] border-[#E8F1FB]",
-      text: "text-[#1E4E8C] font-semibold",
+      button: "bg-blue-50 border-blue-50",
+      text: "text-blue-900 font-semibold",
     };
   }
   return {
-    button: "bg-white border-[#E6E8EC]",
-    text: "text-[#16181D] font-normal",
+    button: "bg-white border-gray-200",
+    text: "text-zinc-900 font-normal",
   };
 }
 
@@ -151,20 +151,20 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
           style={{ paddingTop: top + 12, paddingBottom: bottom + 16 }}
         >
           <DrawerHeader className="pb-4 flex-row items-center gap-3">
-            <DrawerCloseButton className="w-10 h-10 rounded-full bg-[#F2F3F5] items-center justify-center p-0 active:opacity-75">
+            <DrawerCloseButton className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center p-0 active:opacity-75">
               <X size={18} color="#16181D" />
             </DrawerCloseButton>
             <VStack space="xs" className="flex-1">
-              <Text className="text-[18px] font-heading text-[#16181D]">
+              <Text className="text-[18px] font-heading text-zinc-900">
                 O que você está sentindo?
               </Text>
-              <Text className="text-xs font-subtitle text-[#5A606B]">
+              <Text className="text-xs font-subtitle text-zinc-600">
                 Selecione ou crie emoções para esta nota
               </Text>
             </VStack>
           </DrawerHeader>
 
-          <Input className="h-11 rounded-xl bg-[#F2F3F5] border-transparent data-[focus=true]:bg-white data-[focus=true]:border-[#16181D] shadow-none px-3.5 mb-2.5">
+          <Input className="h-11 rounded-xl bg-gray-100 border-transparent data-[focus=true]:bg-white data-[focus=true]:border-zinc-900 shadow-none px-3.5 mb-2.5">
             <Search size={18} color="#9AA0AA" />
             <InputField
               value={searchQuery}
@@ -183,8 +183,8 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
             <Pressable
               onPress={() => toggleForm("item")}
               className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${activeForm === "item"
-                ? "bg-[#16181D] border-[#16181D]"
-                : "bg-white border-[#E6E8EC]"
+                ? "bg-zinc-900 border-zinc-900"
+                : "bg-white border-gray-200"
                 }`}
             >
               <Plus
@@ -192,7 +192,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                 color={activeForm === "item" ? "#FFFFFF" : "#16181D"}
               />
               <Text
-                className={`text-xs font-semibold ${activeForm === "item" ? "text-white" : "text-[#16181D]"
+                className={`text-xs font-semibold ${activeForm === "item" ? "text-white" : "text-zinc-900"
                   }`}
               >
                 Nova emoção
@@ -202,8 +202,8 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
             <Pressable
               onPress={() => toggleForm("category")}
               className={`flex-1 h-10 rounded-xl flex-row items-center justify-center gap-1.5 border ${activeForm === "category"
-                ? "bg-[#16181D] border-[#16181D]"
-                : "bg-white border-[#E6E8EC]"
+                ? "bg-zinc-900 border-zinc-900"
+                : "bg-white border-gray-200"
                 }`}
             >
               <FolderPlus
@@ -211,7 +211,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                 color={activeForm === "category" ? "#FFFFFF" : "#16181D"}
               />
               <Text
-                className={`text-xs font-semibold ${activeForm === "category" ? "text-white" : "text-[#16181D]"
+                className={`text-xs font-semibold ${activeForm === "category" ? "text-white" : "text-zinc-900"
                   }`}
               >
                 Nova categoria
@@ -222,7 +222,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
           {activeForm === "item" && (
             <VStack
               space="sm"
-              className="mb-3 p-3.5 rounded-xl bg-[#F2F3F5] border border-[#E6E8EC]"
+              className="mb-3 p-3.5 rounded-xl bg-gray-100 border border-gray-200"
             >
               <Controller
                 control={itemForm.control}
@@ -230,7 +230,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                 render={({ field, fieldState }) => (
                   <FormControl isInvalid={Boolean(fieldState.error)}>
                     <HStack space="sm" className="items-center">
-                      <Input className="flex-1 h-10 rounded-lg bg-white border-[#E6E8EC] shadow-none px-3">
+                      <Input className="flex-1 h-10 rounded-lg bg-white border-gray-200 shadow-none px-3">
                         <InputField
                           value={field.value}
                           onChangeText={field.onChange}
@@ -245,7 +245,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                       <Button
                         size="sm"
                         rounding="lg"
-                        className="h-10 px-4 bg-[#16181D]"
+                        className="h-10 px-4 bg-zinc-900"
                         disabled={itemForm.formState.isSubmitting}
                         onPress={() => console.log("refactoring")}
                       >
@@ -266,7 +266,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                 name="categoryName"
                 render={({ field }) => (
                   <VStack space="xs">
-                    <Text className="text-xs font-subtitle-medium text-[#5A606B]">
+                    <Text className="text-xs font-subtitle-medium text-zinc-600">
                       Categoria (opcional):
                     </Text>
                     <HStack className="flex-wrap gap-1.5">
@@ -277,15 +277,15 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                             key={id}
                             onPress={() => field.onChange(isSelected ? "" : catName)}
                             className={`flex-row items-center h-7 rounded-lg px-2.5 gap-1 border ${isSelected
-                              ? "bg-[#E8F1FB] border-[#1E4E8C]"
-                              : "bg-white border-[#E6E8EC]"
+                              ? "bg-blue-50 border-blue-900"
+                              : "bg-white border-gray-200"
                               }`}
                           >
                             {isSelected && <Check size={12} color="#1E4E8C" />}
                             <Text
                               className={`text-xs ${isSelected
-                                ? "text-[#1E4E8C] font-semibold"
-                                : "text-[#16181D]"
+                                ? "text-blue-900 font-semibold"
+                                : "text-zinc-900"
                                 }`}
                             >
                               {catName}
@@ -303,7 +303,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
           {activeForm === "category" && (
             <VStack
               space="sm"
-              className="mb-3 p-3.5 rounded-xl bg-[#F2F3F5] border border-[#E6E8EC]"
+              className="mb-3 p-3.5 rounded-xl bg-gray-100 border border-gray-200"
             >
               <Controller
                 control={categoryForm.control}
@@ -311,7 +311,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                 render={({ field, fieldState }) => (
                   <FormControl isInvalid={Boolean(fieldState.error)}>
                     <HStack space="sm" className="items-center">
-                      <Input className="flex-1 h-10 rounded-lg bg-white border-[#E6E8EC] shadow-none px-3">
+                      <Input className="flex-1 h-10 rounded-lg bg-white border-gray-200 shadow-none px-3">
                         <InputField
                           value={field.value}
                           onChangeText={field.onChange}
@@ -326,7 +326,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                       <Button
                         size="sm"
                         rounding="lg"
-                        className="h-10 px-4 bg-[#16181D]"
+                        className="h-10 px-4 bg-zinc-900"
                         disabled={categoryForm.formState.isSubmitting}
                         onPress={categoryForm.handleSubmit(onSubmitCategory)}
                       >
@@ -351,22 +351,22 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
             {searchQuery.length > 0 && !hasEmotion(searchQuery) && (
               <VStack space="sm" className="mb-5">
                 {emotions.length === 0 && (
-                  <Text className="text-sm font-subtitle text-[#5A606B]">
+                  <Text className="text-sm font-subtitle text-zinc-600">
                     Nenhuma emoção com esse nome ainda.
                   </Text>
                 )}
                 <Pressable
                   onPress={() => console.log("refactoring")}
-                  className="flex-row items-center h-14 rounded-[14px] border-[1.5px] border-[#16181D] px-3.5 gap-3 active:opacity-80"
+                  className="flex-row items-center h-14 rounded-[14px] border-[1.5px] border-zinc-900 px-3.5 gap-3 active:opacity-80"
                 >
-                  <View className="w-8 h-8 rounded-full bg-[#16181D] items-center justify-center">
+                  <View className="w-8 h-8 rounded-full bg-zinc-900 items-center justify-center">
                     <Plus size={16} color="#FFFFFF" />
                   </View>
                   <VStack className="flex-1">
-                    <Text className="text-[15px] font-heading text-[#16181D]">
+                    <Text className="text-[15px] font-heading text-zinc-900">
                       Criar “{searchQuery}”
                     </Text>
-                    <Text className="text-xs font-subtitle text-[#5A606B]">
+                    <Text className="text-xs font-subtitle text-zinc-600">
                       Adicionar às suas emoções
                     </Text>
                   </VStack>
@@ -378,13 +378,13 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
             {uncategorizedCustom.length > 0 && (
               <VStack className="mb-5" space="sm">
                 <HStack className="justify-between items-end">
-                  <Text className="text-[13px] font-subtitle-medium text-[#5A606B]">
+                  <Text className="text-[13px] font-subtitle-medium text-zinc-600">
                     Sem categoria
                   </Text>
                   <Text
                     className={`text-xs font-subtitle ${isSelectionMode
                       ? "text-destructive font-subtitle-medium"
-                      : "text-[#9AA0AA]"
+                      : "text-zinc-400"
                       }`}
                   >
                     {isSelectionMode
@@ -424,12 +424,12 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
               {emotions.map((cat) => (
                 <VStack key={cat.id} space="sm">
                   <HStack className="justify-between items-center">
-                    <Text className="text-[13px] font-subtitle-medium text-[#5A606B]">
+                    <Text className="text-[13px] font-subtitle-medium text-zinc-600">
                       {cat.name}
                     </Text>
                     {cat.userId !== null && (
                       <HStack space="sm" className="items-center">
-                        <Text className="text-xs font-subtitle text-[#9AA0AA]">
+                        <Text className="text-xs font-subtitle text-zinc-400">
                           Criada por você
                         </Text>
                         <Pressable
@@ -472,7 +472,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                       );
                     })}
                     {cat.emotions.length === 0 && (
-                      <Text className="text-xs text-[#9AA0AA] italic">
+                      <Text className="text-xs text-zinc-400 italic">
                         Nenhuma emoção nesta categoria ainda.
                       </Text>
                     )}
@@ -507,7 +507,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
             {!isSelectionMode && (
               <Button
                 rounding="2xl"
-                className="w-full h-[52px] bg-[#16181D]"
+                className="w-full h-[52px] bg-zinc-900"
                 onPress={() => setOpen(false)}
               >
                 <ButtonText className="text-[15px] font-semibold text-white">
