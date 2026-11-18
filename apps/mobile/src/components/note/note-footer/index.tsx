@@ -1,7 +1,7 @@
 import { HStack } from "@/components/ui/hstack";
 import { PropsWithChildren } from "react";
 
-export default function EntryFooterShell({ children }: PropsWithChildren) {
+export default function NoteFooterShell({ children }: PropsWithChildren) {
   return (
     <HStack className="justify-between items-center pt-1">
       {children}

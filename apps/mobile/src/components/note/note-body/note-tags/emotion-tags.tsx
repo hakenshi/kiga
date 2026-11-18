@@ -1,6 +1,7 @@
 import { Badge, BadgeGroup, BadgeIcon, BadgeText } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, Drama } from "lucide-react-native";
 import { useState } from "react";
+import { useNote } from "../../note-context";
 
 interface Props {
   emotions: Note["noteEmotions"];
@@ -35,8 +36,9 @@ function Expanded({ emotions, onCollapse }: Props & { onCollapse: () => void }) 
   );
 }
 
-export default function EmotionTags({ emotions }: Props) {
+export default function EmotionTags() {
   const [expandedTags, setExpandedTags] = useState(false);
+  const { note: { noteEmotions: emotions } } = useNote()
 
   if (emotions.length === 0) return null;
   if (!expandedTags) {

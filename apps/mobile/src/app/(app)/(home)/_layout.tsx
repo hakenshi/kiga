@@ -24,7 +24,7 @@ const TABS = [
 export default function HomeLayout() {
   const { bottom } = useSafeAreaInsets();
   const currentPath = usePathname();
-  const [hidden, setHidden] = useState(false)
+  const [hidden, setHidden] = useState(true)
   const [date] = useState(() => new Date())
 
   const [weekDrawerOpen, setWeekDrawerOpen] = useState(false)

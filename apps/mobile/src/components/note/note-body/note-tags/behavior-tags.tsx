@@ -2,6 +2,7 @@ import { Badge, BadgeGroup, BadgeIcon, BadgeText } from "@/components/ui/badge";
 import { getBehaviorIcon } from "@/lib/behavior-icons";
 import { ChevronDown, ChevronUp, Footprints } from "lucide-react-native";
 import { useState } from "react";
+import { useNote } from "../../note-context";
 
 interface Props {
   behaviors: Behavior[];
@@ -36,8 +37,12 @@ function Expanded({ behaviors, onCollapse }: Props & { onCollapse: () => void })
   );
 }
 
-export default function BehaviorTags({ behaviors }: Props) {
-  const [expandedTags, setExpandedTags] = useState(false);
+export default function BehaviorTags() {
+  const [expandedTags, setExpandedTags] = useState(false)
+
+  const { note: { noteBehaviors } } = useNote()
+
+  const behaviors = noteBehaviors.map(b => b.behavior)
 
   if (behaviors.length === 0) return null;
   if (!expandedTags) {

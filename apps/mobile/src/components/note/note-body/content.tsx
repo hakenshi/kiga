@@ -1,16 +1,13 @@
 import { VStack } from "@/components/ui/vstack";
 import { useState } from "react";
 import { Pressable, Text } from "react-native";
-
-interface Props {
-  content: string
-}
-
-export default function Content({ content }: Props) {
+import { useNote } from "../note-context";
+export default function Content() {
 
   const [expand, setExpand] = useState(false);
   const maxChars = 280;
 
+  const { note: { content } } = useNote()
 
   const shouldTruncate = content.length > maxChars;
 

@@ -1,24 +1,25 @@
 import { useNoteStore } from "@/stores/note-store";
 import { HeartIcon } from "lucide-react-native";
 import { Pressable, PressableProps, Text } from "react-native";
+import { useNote } from "../note-context";
 
 interface Props extends PressableProps {
-  entryId: number
+  noteId: number
   liked: boolean
 }
 
-export default function KeepButton({ entryId, liked, ...rest }: Props) {
+export default function KeepButton({ ...rest }: PressableProps) {
 
   const updateNote = useNoteStore((s) => s.updateNote);
-
-  const likeEntry = () => {
-    updateNote(entryId, { liked: !liked });
+  const { note: { id: noteId, liked } } = useNote()
+  const likeNote = () => {
+    updateNote(noteId, { liked: !liked });
   };
 
   return (
     <Pressable
       hitSlop={8}
-      onPress={likeEntry}
+      onPress={likeNote}
       className="flex-row items-center bg-zinc-100 py-2 px-4 rounded-full gap-1.5 active:opacity-60"
       {...rest}
     >

@@ -10,6 +10,7 @@ const PAGE_SIZE = 20;
 
 interface NoteState {
   notes: Note[];
+  viewNote: Note | null;
   searchResults: Note[];
   query: string;
   isLoading: boolean;
@@ -24,6 +25,7 @@ interface NoteActions {
   deleteNote: (noteId: number) => Promise<void>;
   findNote: (noteId: number) => Promise<Note | null>;
   findComposerNote: (noteId: string) => Promise<ReturnType<typeof getComposerContext> | null>;
+  setViewNote: (note: Note) => void;
   reset: () => void;
 }
 
@@ -62,11 +64,13 @@ function getComposerContext(note: Note) {
 export const useNoteStore = create<NoteState & NoteActions>()(
   ((set, get) => ({
     notes: [],
+    viewNote: null,
     searchResults: [],
     query: "",
     hasMore: false,
     isLoading: false,
     page: 0,
+    setViewNote: (viewNote) => set({ viewNote }),
     loadInitial: async (userId) => {
       set(({ isLoading: true, page: 0, hasMore: true }))
       try {
@@ -134,6 +138,7 @@ export const useNoteStore = create<NoteState & NoteActions>()(
         const updated = s.notes.map(n => n.id === noteId ? note : n)
         return {
           notes: updated,
+          viewNote: s.viewNote?.id === noteId ? note : s.viewNote,
         }
       })
       if (get().query !== "") {
@@ -207,6 +212,7 @@ export const useNoteStore = create<NoteState & NoteActions>()(
     reset: () => {
       set({
         notes: [],
+        viewNote: null,
         searchResults: [],
         query: "",
         isLoading: false,

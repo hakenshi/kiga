@@ -7,27 +7,23 @@ import { useRouter } from "expo-router";
 import { EllipsisVerticalIcon, Eye, ReplyIcon, HeartIcon, PinIcon, PencilIcon, TrashIcon } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text } from "react-native";
-
-
-interface Props {
-  entryId: number
-  liked: boolean
-  fixed: boolean
-}
-
-export default function Actions({ entryId, fixed, liked }: Props) {
+import { useNote } from "../note-context";
+export default function Actions() {
   const deleteNote = useNoteStore((e) => e.deleteNote);
   const updateNote = useNoteStore((e) => e.updateNote);
   const findNote = useNoteStore(e => e.findNote)
   const loadEditNote = useEditNoteCacheStore(e => e.load)
+  const setViewNote = useNoteStore(e => e.setViewNote)
+  const { note } = useNote()
+  const { id: noteId, liked, fixed } = note
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const navigate = async () => {
-    const entry = await findNote(entryId)
-    if (!entry) return
-    loadEditNote(entry)
+    const note = await findNote(noteId)
+    if (!note) return
+    loadEditNote(note)
     setOpen(false);
-    router.push(`/home/edit-note/${entryId}`);
+    router.push(`/home/edit-note/${noteId}`);
   }
   return (
     <>
@@ -55,19 +51,20 @@ export default function Actions({ entryId, fixed, liked }: Props) {
               <Pressable
                 onPress={() => {
                   setOpen(false);
-                  router.push(`/home/view-post/${entryId}`);
+                  setViewNote(note);
+                  router.push("/home/view-note");
                 }}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >
                 <Eye size={20} color="gray" />
                 <Text className="font-semibold text-gray-900">
-                  Visualizar pensamento
+                  Visualizar nota
                 </Text>
               </Pressable>
               <Pressable
                 onPress={() => {
                   setOpen(false);
-                  router.push(`/home/reply-note/${entryId}`);
+                  router.push(`/home/reply-note/${noteId}`);
                 }}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >
@@ -75,7 +72,7 @@ export default function Actions({ entryId, fixed, liked }: Props) {
                 <Text className="font-semibold text-gray-900">Responder</Text>
               </Pressable>
               <Pressable
-                onPress={() => updateNote(entryId, { liked: !liked })}
+                onPress={() => updateNote(noteId, { liked: !liked })}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >
                 <HeartIcon
@@ -88,7 +85,7 @@ export default function Actions({ entryId, fixed, liked }: Props) {
                   {liked ? "Remover" : "Guardar"}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => updateNote(entryId, { fixed: !fixed })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+              <Pressable onPress={() => updateNote(noteId, { fixed: !fixed })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
 
                 <PinIcon size={20} color="gray" />
                 <Text className="font-semibold text-gray-900">
@@ -105,7 +102,7 @@ export default function Actions({ entryId, fixed, liked }: Props) {
               <Pressable
                 onPress={() => {
                   setOpen(false);
-                  deleteNote(entryId);
+                  deleteNote(noteId);
                 }}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >

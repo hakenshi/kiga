@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const logout = useAuthStore((s) => s.logout);
   const { top } = useSafeAreaInsets();
 
-  const resetEntries = useNoteStore((s) => s.reset);
+  const resetNotes = useNoteStore((s) => s.reset);
 
   return (
     <ScrollView
@@ -44,7 +44,7 @@ export default function ProfilePage() {
           <Button
             variant="destructive"
             onPress={() => {
-              resetEntries()
+              resetNotes()
               logout()
             }}
             className="w-full flex-row items-center justify-center gap-2"

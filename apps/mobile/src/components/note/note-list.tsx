@@ -2,28 +2,29 @@ import { useAuthStore } from "@/stores/auth-store";
 import { getNoteBody, useNoteStore } from "@/stores/note-store";
 import { FlatList, View, ActivityIndicator, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import EntryBodyShell from "./entry-body";
-import Content from "./entry-body/content";
-import { BehaviorReportBlock } from "./entry-body/behavior-report-block";
-import EntryTagsShell from "./entry-body/entry-tags";
-import BehaviorTags from "./entry-body/entry-tags/behavior-tags";
-import EmotionTags from "./entry-body/entry-tags/emotion-tags";
-import ReactionTags from "./entry-body/entry-tags/reaction-tags";
-import ThoughtTags from "./entry-body/entry-tags/thought-tags";
-import EntryFooterShell from "./entry-footer";
-import ContinueButton from "./entry-footer/continue-button";
-import KeepButton from "./entry-footer/keep-button";
-import EntryHeader from "./entry-header";
-import Actions from "./entry-header/actions";
-import Author from "./entry-header/author";
-import Fixed from "./entry-header/fixed";
-import Repost from "./entry-header/repost";
-import EntryLinkShell from "./entry-link-shell";
+import NoteBodyShell from "./note-body";
+import Content from "./note-body/content";
+import { BehaviorReportBlock } from "./note-body/behavior-report-block";
+import NoteTagsShell from "./note-body/note-tags";
+import BehaviorTags from "./note-body/note-tags/behavior-tags";
+import EmotionTags from "./note-body/note-tags/emotion-tags";
+import ReactionTags from "./note-body/note-tags/reaction-tags";
+import ThoughtTags from "./note-body/note-tags/thought-tags";
+import NoteFooterShell from "./note-footer";
+import ContinueButton from "./note-footer/continue-button";
+import KeepButton from "./note-footer/keep-button";
+import NoteHeader from "./note-header";
+import Actions from "./note-header/actions";
+import Author from "./note-header/author";
+import Fixed from "./note-header/fixed";
+import Repost from "./note-header/repost";
+import NoteLinkShell from "./note-link-shell";
 import { RepostDrawer } from "./repost-drawer";
 import { ImageCarousel } from "@/components/image-carousel";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { Sparkles } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 function EmptyList() {
   const query = useNoteStore(s => s.query);
@@ -34,7 +35,7 @@ function EmptyList() {
         <Sparkles size={24} color="#71717A" />
       </View>
       <Text className="text-[15px] font-heading text-zinc-900 text-center">
-        {query === "" ? "Seu diário está em branco" : "Nenhum relato encontrado"}
+        {query === "" ? "Seu diário está em branco" : "Nenhuma nota encontrada"}
       </Text>
       <Text className="text-xs font-subtitle text-zinc-500 text-center max-w-[260px]">
         {query === ""
@@ -49,18 +50,20 @@ interface Props {
   notes: Note[];
 }
 
-export default function EntryList({ notes }: Props) {
+export default function NoteList({ notes }: Props) {
   const loadMore = useNoteStore((s) => s.loadMore);
   const hasMore = useNoteStore((s) => s.hasMore);
   const isLoading = useNoteStore((s) => s.isLoading);
   const userId = useAuthStore((s) => s.user!.id);
-  const { top, bottom } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets()
+
+  const router = useRouter()
 
   return (
     <FlatList
       ListEmptyComponent={<EmptyList />}
       data={notes}
-      keyExtractor={(e) => String(e.id)}
+      keyExtractor={(n) => String(n.id)}
       contentContainerStyle={{ paddingTop: top, paddingBottom: bottom + 88 }}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
@@ -81,37 +84,41 @@ export default function EntryList({ notes }: Props) {
         ) : null
       }
       renderItem={({ item }) => {
-        const { images, behaviors, reports } = getNoteBody(item);
+        const { images, reports } = getNoteBody(item);
 
         return (
-          <EntryLinkShell entryId={item.id}>
+          <NoteLinkShell note={item} >
             {item.fixed && <Fixed />}
             {item.isRepost && <Repost />}
-            <EntryHeader>
+            <NoteHeader>
               <Author />
-              <Actions entryId={item.id} liked={item.liked} fixed={item.fixed} />
-            </EntryHeader>
-            <EntryBodyShell>
-              {item.content.length > 0 && <Content content={item.content} />}
+              <Actions />
+            </NoteHeader>
+            <NoteBodyShell>
+              {item.content.length > 0 && <Content />}
               <ImageCarousel images={images} />
-              <EntryTagsShell>
-                <ThoughtTags thoughts={item.noteThoughts} />
-                <EmotionTags emotions={item.noteEmotions} />
-                <ReactionTags reactions={item.noteReactions} />
-                <BehaviorTags behaviors={behaviors} />
-              </EntryTagsShell>
+              <NoteTagsShell>
+                <ThoughtTags />
+                <EmotionTags />
+                <ReactionTags />
+                <BehaviorTags />
+              </NoteTagsShell>
               {reports.map(behavior => (
                 <BehaviorReportBlock key={behavior.id} text={behavior.content} />
               ))}
-            </EntryBodyShell>
-            <EntryFooterShell>
+            </NoteBodyShell>
+            <NoteFooterShell>
               <HStack space="sm">
-                <ContinueButton entryId={item.id} />
-                <RepostDrawer entry={item} />
-                <KeepButton entryId={item.id} liked={item.liked} />
+                <ContinueButton
+                  onPress={() => {
+                    router.push(`/home/reply-note/${item.id}`)
+                  }}
+                />
+                <RepostDrawer />
+                <KeepButton />
               </HStack>
-            </EntryFooterShell>
-          </EntryLinkShell>
+            </NoteFooterShell>
+          </NoteLinkShell>
         );
       }}
     />
