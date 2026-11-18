@@ -1,7 +1,7 @@
 import { Drawer, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerCloseButton, DrawerBody } from "@/components/ui/drawer";
 import { HStack } from "@/components/ui/hstack";
 import { CloseIcon, Icon } from "@/components/ui/icon";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
+import { useEditNoteCacheStore } from "@/stores/edit-note-cache-store";
 import { useNoteStore } from "@/stores/note-store";
 import { useRouter } from "expo-router";
 import { EllipsisVerticalIcon, Eye, ReplyIcon, HeartIcon, PinIcon, PencilIcon, TrashIcon } from "lucide-react-native";
@@ -19,18 +19,15 @@ export default function Actions({ entryId, fixed, liked }: Props) {
   const deleteNote = useNoteStore((e) => e.deleteNote);
   const updateNote = useNoteStore((e) => e.updateNote);
   const findNote = useNoteStore(e => e.findNote)
+  const loadEditNote = useEditNoteCacheStore(e => e.load)
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const navigate = async () => {
     const entry = await findNote(entryId)
     if (!entry) return
-    useEntryCacheStore.getState().updateCachedEntry({
-      date: entry.date,
-      noteEmotions: entry.noteEmotions,
-      noteType: entry.type
-    })
+    loadEditNote(entry)
     setOpen(false);
-    router.push(`/home/edit-post/${entryId}`);
+    router.push(`/home/edit-note/${entryId}`);
   }
   return (
     <>
@@ -70,7 +67,7 @@ export default function Actions({ entryId, fixed, liked }: Props) {
               <Pressable
                 onPress={() => {
                   setOpen(false);
-                  router.push(`/home/reply-post/${entryId}`);
+                  router.push(`/home/reply-note/${entryId}`);
                 }}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >

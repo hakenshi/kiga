@@ -272,7 +272,7 @@ export default function ViewPostPage() {
 
           <HStack className="justify-between items-center pt-2 border-t border-zinc-100">
             <HStack className="gap-2 items-center">
-              <Link href={`/home/reply-post/${rootEntry.id}`} push asChild>
+              <Link href={`/home/reply-note/${rootEntry.id}`} push asChild>
                 <Pressable
                   hitSlop={8}
                   className="flex-row items-center bg-zinc-100 py-1.5 px-3.5 rounded-full gap-1.5 active:opacity-60"
@@ -311,7 +311,7 @@ export default function ViewPostPage() {
         style={{ paddingBottom: insets.bottom + 8 }}
         className="absolute bottom-0 left-0 right-0 bg-white border-t border-zinc-200 px-4 pt-2.5"
       >
-        <Link href={`/home/reply-post/${rootEntry.id}`} push asChild>
+        <Link href={`/home/reply-note/${rootEntry.id}`} push asChild>
           <Pressable className="bg-zinc-100 rounded-full px-4 py-2.5 flex-row items-center justify-between active:opacity-75">
             <Text className="text-xs text-zinc-500 font-subtitle">
               Continuar esta reflexão no tempo...

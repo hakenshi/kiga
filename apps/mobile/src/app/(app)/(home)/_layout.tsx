@@ -7,11 +7,12 @@ import { Input, InputField, InputIcon } from "@/components/ui/input";
 import { VStack } from "@/components/ui/vstack";
 import { Tabs, usePathname } from "expo-router";
 import { CalendarIcon, ChartBar, ChevronDown, HomeIcon, SearchIcon, SettingsIcon, SlidersHorizontalIcon, UserIcon } from "lucide-react-native";
-import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { AppState, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Drawer, DrawerBackdrop, DrawerBody, DrawerCloseButton, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
 import { useFeedFilterStore } from "@/stores/feed-filter-store";
+import { revalidateNoteCaches } from "@/stores/revalidate-note-caches";
 
 const TABS = [
   { name: "home/index", path: "/home", label: "Feed", icon: HomeIcon },
@@ -47,8 +48,19 @@ export default function HomeLayout() {
     }
   })
 
-  const isComposer = Boolean(currentPath.match(/home\/[a-z0-9_-]+-post/g))
+  const isComposer = Boolean(currentPath.match(/home\/[a-z0-9_-]+-note/g))
 
+  useEffect(() => {
+    revalidateNoteCaches();
+    const interval = setInterval(revalidateNoteCaches, 1000);
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") revalidateNoteCaches();
+    });
+    return () => {
+      clearInterval(interval);
+      subscription.remove();
+    };
+  }, []);
 
 
   return (
@@ -59,7 +71,7 @@ export default function HomeLayout() {
           <>
             <Input className="flex-1">
               <InputIcon as={SearchIcon} />
-              <InputField placeholder="Procure um pensamento..." onChangeText={e => updateQuery(e)} />
+              <InputField placeholder="Procure uma nota..." onChangeText={e => updateQuery(e)} />
             </Input>
             <Button onPress={() => setHidden(h => !h)}>
               <ButtonText>

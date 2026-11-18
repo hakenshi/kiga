@@ -30,19 +30,12 @@ import db from "@/lib/db";
 import { seedDatabase } from "@/lib/db/seed";
 import { DatabaseExceptionFilter } from "@/lib/exceptions/database/filter.exception";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const tickExpiration = useEntryCacheStore(s => s.tickExpiration);
-
-  useEffect(() => {
-    const interval = setInterval(tickExpiration, 1000);
-    return () => clearInterval(interval);
-  }, [tickExpiration]);
 
   const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,

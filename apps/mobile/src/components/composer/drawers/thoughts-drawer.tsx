@@ -8,9 +8,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { thoughtCreateFormSchema } from "@/lib/db/zod/schemas/thought/index.schema";
-import { toggleSelectedId } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
 import { useThoughtStore } from "@/stores/thought-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -18,7 +16,12 @@ import { Controller, useForm } from "react-hook-form";
 import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export default function ThoughtsDrawer() {
+interface Props {
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+}
+
+export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle: toggleThought }: Props) {
   const { top, bottom } = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,8 +30,6 @@ export default function ThoughtsDrawer() {
   const addThought = useThoughtStore((s) => s.addThought);
   const searchThoughts = useThoughtStore((s) => s.searchThoughts);
   const loadThoughts = useThoughtStore((s) => s.loadThoughts);
-  const selectedThoughts = useEntryCacheStore((s) => s.noteThoughts) ?? [];
-  const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
   const {
     control,
     handleSubmit,
@@ -38,10 +39,6 @@ export default function ThoughtsDrawer() {
     resolver: zodResolver(thoughtCreateFormSchema),
     defaultValues: { name: "" },
   });
-
-  const toggleThought = (thoughtId: number) => {
-    updateCachedEntry({ noteThoughts: toggleSelectedId(selectedThoughts, thoughtId) });
-  };
 
   const handleOpen = () => {
     setSearchQuery("");
@@ -92,7 +89,7 @@ export default function ThoughtsDrawer() {
             className="mb-3 p-3.5 rounded-xl bg-[#F2F3F5] border border-[#E6E8EC]"
           >
             <Text className="text-xs font-subtitle-medium text-[#5A606B]">
-              Novo pensamento deste relato:
+              Novo pensamento desta nota:
             </Text>
             <Controller
               control={control}
@@ -105,7 +102,7 @@ export default function ThoughtsDrawer() {
                         value={field.value}
                         onChangeText={field.onChange}
                         onBlur={field.onBlur}
-                        placeholder="Escreva um pensamento deste relato..."
+                        placeholder="Escreva um pensamento desta nota..."
                         maxLength={120}
                         returnKeyType="done"
                         onSubmitEditing={handleSubmit(onSubmitThought)}

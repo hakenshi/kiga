@@ -12,7 +12,7 @@ export default function ContinueButton({ entryId, ...rest }: Props) {
   return (
     <Pressable
       hitSlop={8}
-      onPress={() => router.push(`/home/reply-post/${entryId}`)}
+      onPress={() => router.push(`/home/reply-note/${entryId}`)}
       className="flex-row items-center bg-zinc-100 py-2 px-4 rounded-full gap-1.5 active:opacity-60"
       {...rest}
     >

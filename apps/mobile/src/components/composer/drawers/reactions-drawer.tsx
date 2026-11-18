@@ -11,7 +11,6 @@ import { categoryCreateFormSchema } from "@/lib/db/zod/schemas/category/index.sc
 import { toggleSelectedId } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCategoryStore } from "@/stores/category-store";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
 import { useReactionStore } from "@/stores/reaction-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -38,7 +37,13 @@ function getReactionItemClasses(isSelected: boolean, isMarkedForDelete: boolean)
   };
 }
 
-export default function ReactionsDrawer() {
+interface Props {
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+  onRemove: (ids: number[]) => void;
+}
+
+export default function ReactionsDrawer({ selectedIds: selectedReactions, onToggle: toggleReaction, onRemove }: Props) {
   const { top, bottom } = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,8 +56,6 @@ export default function ReactionsDrawer() {
   const deleteReactions = useReactionStore((s) => s.deleteReactions);
   const addCategory = useCategoryStore((s) => s.addCategory);
   const deleteCategory = useCategoryStore((s) => s.deleteCategory);
-  const selectedReactions = useEntryCacheStore((s) => s.noteReactions) ?? [];
-  const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
   const isSelectionMode = deletingIds.length > 0;
   const categoryForm = useForm<{ name: string }>({
     resolver: zodResolver(categoryCreateFormSchema),
@@ -73,10 +76,6 @@ export default function ReactionsDrawer() {
     await searchReactions(searchQuery, { userId });
   };
 
-  const toggleReaction = (reactionId: number) => {
-    updateCachedEntry({ noteReactions: toggleSelectedId(selectedReactions, reactionId) });
-  };
-
   const toggleDeleteId = (reactionId: number) => {
     setDeletingIds(ids => toggleSelectedId(ids, reactionId));
   };
@@ -92,9 +91,7 @@ export default function ReactionsDrawer() {
   const handleDeleteSelected = async () => {
     const deleted = deleteReactions(deletingIds, userId);
     if (!deleted) return;
-    updateCachedEntry({
-      noteReactions: selectedReactions.filter(id => !deletingIds.includes(id)),
-    });
+    onRemove(deletingIds);
     setDeletingIds([]);
     await searchReactions(searchQuery, { userId });
   };

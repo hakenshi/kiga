@@ -71,7 +71,7 @@ function QuoteAction({ entryId, onClose }: { entryId: number; onClose: () => voi
 
   const handleQuote = () => {
     onClose();
-    router.push(`/home/repost-post/${entryId}`);
+    router.push(`/home/repost-note/${entryId}`);
   };
 
   return (

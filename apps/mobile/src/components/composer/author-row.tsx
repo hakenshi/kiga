@@ -3,13 +3,26 @@ import { Avatar, AvatarImage, AvatarFallbackText } from "../ui/avatar";
 import { HStack } from "../ui/hstack";
 import { VStack } from "../ui/vstack";
 import { TextInput } from "react-native";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
 import Media from "./media";
 
-export default function ComposerTextArea() {
+interface Props {
+  content: string
+  placeholder?: string
+  onChange: (content: string) => void
+  images: string[]
+  onRemoveImage: (uri: string) => void
+  onReplaceImage: (uri: string, replacement: string) => void
+}
+
+export default function ComposerTextArea({
+  content,
+  placeholder = "No que você está pensando?:",
+  onChange,
+  images,
+  onRemoveImage,
+  onReplaceImage,
+}: Props) {
   const firstName = useAuthStore((s) => s.user?.firstName);
-  const cachedContent = useEntryCacheStore(e => e.entry.content)
-  const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
 
   return (
     <HStack className="p-5 gap-3 items-start flex-1">
@@ -19,14 +32,14 @@ export default function ComposerTextArea() {
       </Avatar>
       <VStack className="flex-1" space="md">
         <TextInput
-          placeholder="O que está acontecendo agora?"
+          placeholder={placeholder}
           placeholderTextColor="#9AA0AA"
           autoFocus={false}
           multiline={true}
           scrollEnabled={true}
           className=""
-          onChangeText={e => updateCachedEntry({ content: e })}
-          value={cachedContent ?? ""}
+          onChangeText={onChange}
+          value={content}
           style={{
             flex: 1,
             textAlignVertical: "top",
@@ -38,7 +51,7 @@ export default function ComposerTextArea() {
           }
           }
         />
-        <Media />
+        <Media images={images} onRemove={onRemoveImage} onReplace={onReplaceImage} />
       </VStack>
     </HStack>
   );

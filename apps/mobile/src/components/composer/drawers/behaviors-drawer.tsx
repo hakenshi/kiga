@@ -13,7 +13,6 @@ import { toggleSelectedId } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useBehaviorStore } from "@/stores/behavior-store";
 import { useCategoryStore } from "@/stores/category-store";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -39,7 +38,13 @@ function getBehaviorItemClasses(isSelected: boolean, isMarkedForDelete: boolean)
   };
 }
 
-export default function BehaviorsDrawer() {
+interface Props {
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+  onRemove: (ids: number[]) => void;
+}
+
+export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onToggle: toggleBehavior, onRemove }: Props) {
   const { top, bottom } = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,8 +57,6 @@ export default function BehaviorsDrawer() {
   const deleteBehaviors = useBehaviorStore((s) => s.deleteBehaviors);
   const addCategory = useCategoryStore((s) => s.addCategory);
   const deleteCategory = useCategoryStore((s) => s.deleteCategory);
-  const selectedBehaviors = useEntryCacheStore((s) => s.noteBehaviors) ?? [];
-  const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
   const isSelectionMode = deletingIds.length > 0;
   const categoryForm = useForm<{ name: string }>({
     resolver: zodResolver(categoryCreateFormSchema),
@@ -74,10 +77,6 @@ export default function BehaviorsDrawer() {
     await searchBehaviors(searchQuery, { userId });
   };
 
-  const toggleBehavior = (behaviorId: number) => {
-    updateCachedEntry({ noteBehaviors: toggleSelectedId(selectedBehaviors, behaviorId) });
-  };
-
   const toggleDeleteId = (behaviorId: number) => {
     setDeletingIds(ids => toggleSelectedId(ids, behaviorId));
   };
@@ -93,9 +92,7 @@ export default function BehaviorsDrawer() {
   const handleDeleteSelected = async () => {
     const deleted = deleteBehaviors(deletingIds, userId);
     if (!deleted) return;
-    updateCachedEntry({
-      noteBehaviors: selectedBehaviors.filter(id => !deletingIds.includes(id)),
-    });
+    onRemove(deletingIds);
     setDeletingIds([]);
     await searchBehaviors(searchQuery, { userId });
   };

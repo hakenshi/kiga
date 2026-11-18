@@ -21,7 +21,6 @@ import { toggleSelectedId } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCategoryStore } from "@/stores/category-store";
 import { useEmotionStore } from "@/stores/emotion-store";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -49,7 +48,13 @@ function getEmotionItemClasses(isSelected: boolean, isMarkedForDelete: boolean) 
   };
 }
 
-export default function EmotionsDrawer() {
+interface Props {
+  selectedIds: number[];
+  onToggle: (id: number) => void;
+  onRemove: (ids: number[]) => void;
+}
+
+export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle: toggleEmotion, onRemove }: Props) {
   const { top, bottom } = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<ActiveForm>("none");
@@ -70,13 +75,6 @@ export default function EmotionsDrawer() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     searchEmotions(query, { userId });
-  };
-
-  const selectedEmotions = useEntryCacheStore((s) => s.noteEmotions) ?? [];
-  const updateCachedEntry = useEntryCacheStore((s) => s.updateCachedEntry);
-
-  const toggleEmotion = (emotionId: number) => {
-    updateCachedEntry({ noteEmotions: toggleSelectedId(selectedEmotions, emotionId) });
   };
 
   const itemForm = useForm<{ name: string; categoryName: string }>({
@@ -123,9 +121,7 @@ export default function EmotionsDrawer() {
   const handleDeleteSelected = async () => {
     const deleted = deleteEmotions(deletingIds, userId);
     if (!deleted) return;
-    updateCachedEntry({
-      noteEmotions: selectedEmotions.filter(id => !deletingIds.includes(id)),
-    });
+    onRemove(deletingIds);
     setDeletingIds([]);
     await searchEmotions(searchQuery, { userId });
   };
@@ -163,7 +159,7 @@ export default function EmotionsDrawer() {
                 O que você está sentindo?
               </Text>
               <Text className="text-xs font-subtitle text-[#5A606B]">
-                Selecione ou crie emoções para este relato
+                Selecione ou crie emoções para esta nota
               </Text>
             </VStack>
           </DrawerHeader>

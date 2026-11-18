@@ -22,7 +22,7 @@ export default function HomePage() {
   return (
     <View className="flex-1 bg-zinc-50">
       <EntryList notes={notes} />
-      <Link href="/home/new-post" asChild>
+      <Link href="/home/new-note" asChild>
         <Pressable
           className="absolute right-5 bottom-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg active:scale-95"
           style={{

@@ -1,28 +1,22 @@
 import { useState } from "react";
 import { ImageCarousel } from "../image-carousel";
 import ImageCropperModal from "./drawers/image-cropper-modal";
-import { useEntryCacheStore } from "@/stores/entry-cache-store";
 
-export default function Media() {
-  const images = useEntryCacheStore(e => e.noteImages)
-  const updateCachedEntry = useEntryCacheStore(e => e.updateCachedEntry)
+interface Props {
+  images: string[];
+  onRemove: (uri: string) => void;
+  onReplace: (uri: string, replacement: string) => void;
+}
+
+export default function Media({ images, onRemove, onReplace }: Props) {
   const [editingUri, setEditingUri] = useState<string | null>(null);
 
-  if (!images || images?.length === 0) return null;
-  console.log(images)
-  const removeImage = (uri: string) => {
-    const newImageArray = images.filter(i => !i.includes(uri))
-    updateCachedEntry({ noteImages: newImageArray })
-  }
-  const replaceImage = (editingUri: string, newUri: string) => {
-    const newImageArray = images.map(i => i === editingUri ? newUri : i)
-    updateCachedEntry({ noteImages: newImageArray })
-  }
+  if (images.length === 0) return null;
   return (
     <>
       <ImageCarousel
         images={images}
-        onRemove={(uri) => removeImage(uri)}
+        onRemove={onRemove}
         onEdit={(uri) => setEditingUri(uri)}
       />
       <ImageCropperModal
@@ -30,7 +24,7 @@ export default function Media() {
         uri={editingUri}
         onClose={() => setEditingUri(null)}
         onComplete={(newUri) => {
-          if (editingUri) replaceImage(editingUri, newUri);
+          if (editingUri) onReplace(editingUri, newUri);
           setEditingUri(null);
         }}
       />
