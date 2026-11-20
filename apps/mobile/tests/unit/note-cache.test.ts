@@ -1,14 +1,6 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-
-const values = new Map<string, string>();
-const storage = {
-  getItem: (key: string) => values.get(key) ?? null,
-  setItem: (key: string, value: string) => { values.set(key, value); },
-  removeItem: (key: string) => { values.delete(key); },
-};
-
-mock.module("expo-sqlite/kv-store", () => ({ default: storage }));
-mock.module("@/lib/storage", () => ({ appStorage: storage }));
+import { afterEach, beforeEach, describe, expect, setSystemTime, test } from "bun:test";
+import { storageValues as values } from "../helpers/storage";
+import { selectDraftImageCount, selectDraftWordCount } from "../../src/stores/note-draft";
 
 const { useAuthStore } = await import("../../src/stores/auth-store");
 const { useNewNoteCacheStore } = await import("../../src/stores/new-note-cache-store");
@@ -42,6 +34,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  setSystemTime();
   for (const [, store] of caches) store.getState().clear();
   useAuthStore.getState().logout();
   values.clear();
@@ -137,6 +130,48 @@ describe.each(caches)("%s", (key, store) => {
 
     expect(store.getState().note.content).toBe("");
     expect(store.getState().expiresAt).toBe(0);
+  });
+
+  test("expira exatamente no limite do prazo", () => {
+    setSystemTime(new Date(2026, 10, 19, 12));
+    store.getState().update({ content: "Temporário" });
+    setSystemTime(store.getState().expiresAt);
+    expect(store.getState().revalidate()).toBe(false);
+    expect(store.getState().note.content).toBe("");
+  });
+
+  test("rehidrata dados válidos, preserva ações e descarta dados malformados", async () => {
+    const expiresAt = Date.now() + 60_000;
+    values.set(key, JSON.stringify({
+      state: { note: { content: "Recuperado", userId: user.id }, expiresAt }, version: 0,
+    }));
+    await store.persist.rehydrate();
+    expect(store.getState().note.content).toBe("Recuperado");
+    expect(store.getState().expiresAt).toBe(expiresAt);
+    expect(typeof store.getState().update).toBe("function");
+    store.getState().clear();
+    values.set(key, JSON.stringify({
+      state: { note: { content: 123 }, expiresAt }, version: 0,
+    }));
+    await store.persist.rehydrate();
+    expect(store.getState().note.content).toBe("");
+  });
+
+  test("os seletores contam os recursos reais do rascunho", () => {
+    expect(selectDraftWordCount(store.getState())).toBe(0);
+    expect(selectDraftImageCount(store.getState())).toBe(0);
+    store.getState().update({ content: "  Uma\nnova resposta  ", noteImages: ["file:///1.jpg", "file:///2.jpg"] });
+    expect(selectDraftWordCount(store.getState())).toBe(3);
+    expect(selectDraftImageCount(store.getState())).toBe(2);
+  });
+
+  test.each(["noteThoughts", "noteReactions", "noteBehaviors"] as const)("seleciona e remove IDs de %s independentemente", (resource) => {
+    store.getState().toggleResource(resource, 1);
+    store.getState().toggleResource(resource, 2);
+    store.getState().removeResources(resource, [1]);
+    expect(store.getState().note[resource]).toEqual([2]);
+    store.getState().toggleResource(resource, 2);
+    expect(store.getState().note[resource]).toEqual([]);
   });
 });
 

@@ -1,28 +1,19 @@
-appId: host.exp.exponent
+appId: com.kiga.mobile
 ---
-# Se estiver no Login ou Cadastro, volta para a Home primeiro
-- runFlow:
-    when:
-      visible: "Home"
-    commands:
-      - tapOn: "Home"
-
+- launchApp:
+    clearState: true
 - assertVisible: "Bem-vindo ao Kiga!"
-
-# Navega para tela de cadastro
-- tapOn: "Criar Conta"
+- assertVisible: "100% offline"
+- tapOn: "Começar agora - Criar Conta"
+- assertVisible: "Como podemos te chamar?"
 - assertVisible: "Nome de Usuário"
-- assertVisible: "Confirmar Senha"
-
-# Volta para a home
-- tapOn: "Home"
+- assertVisible: "Data de Nascimento"
+- assertNotVisible: "Confirmar Senha"
+- tapOn: "Voltar"
 - assertVisible: "Bem-vindo ao Kiga!"
-
-# Navega para login
 - tapOn: "Fazer Login"
+- assertVisible: "Bem-vindo de volta!"
 - assertVisible: "Nome de Usuário"
-- assertVisible: "Fazer login na nuvem?"
-
-# Volta para a home
-- tapOn: "Home"
+- assertVisible: "Senha"
+- tapOn: "Início"
 - assertVisible: "Bem-vindo ao Kiga!"

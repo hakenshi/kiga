@@ -1,0 +1,32 @@
+appId: com.kiga.mobile
+---
+# Este subfluxo começa limpando os dados do app. Use somente um emulador de testes.
+- runFlow: register-validation.yaml
+- openLink: "kiga:///home/new-note"
+- tapOn: "No que você está pensando\\?:"
+- inputText: "Nota original do teste de conversa"
+- hideKeyboard
+- tapOn: "Salvar"
+- assertVisible: "Nota original do teste de conversa"
+- tapOn: "Nota original do teste de conversa"
+- tapOn: "^Continuar$"
+- tapOn: "Continuar esta nota..."
+- inputText: "Primeira mensagem da conversa"
+- hideKeyboard
+- tapOn: "Salvar"
+- assertVisible: "Primeira mensagem da conversa"
+- assertVisible: "Nota original do teste de conversa"
+- tapOn: "^Continuar$"
+- tapOn: "Continuar esta nota..."
+- inputText: "Segunda mensagem da conversa"
+- hideKeyboard
+- tapOn: "Salvar"
+- assertVisible: "Primeira mensagem da conversa"
+- assertVisible: "Segunda mensagem da conversa"
+# Reabrir deve recuperar as duas mensagens persistidas, não só o estado em memória.
+- stopApp
+- launchApp
+- assertVisible: "Feed"
+- tapOn: "Nota original do teste de conversa"
+- assertVisible: "Primeira mensagem da conversa"
+- assertVisible: "Segunda mensagem da conversa"

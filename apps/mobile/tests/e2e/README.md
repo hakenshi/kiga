@@ -1,32 +1,34 @@
-# Testes de Interface com Maestro
+# Testes de interface com Maestro
 
-O [Maestro](https://maestro.mobile.dev/) é o framework de testes E2E do projeto para automação de interface no Android e iOS.
+**Use somente um emulador dedicado a testes. Os fluxos usam `clearState: true`,
+apagando contas, notas e rascunhos do app nesse dispositivo.**
 
-## Comandos Rápidos
+Instale uma build atual de `com.kiga.mobile` no emulador. Os fluxos não usam Expo Go.
+Uma development build precisa do Metro em execução; uma build standalone não.
+Não use um APK antigo para validar alterações recentes.
 
-```bash
-# Rodar todos os fluxos de teste no emulador conectado
-bun test:e2e
-
-# Rodar um fluxo específico
-bun maestro test tests/e2e/login-validation.yaml
-
-# Abrir o Maestro Studio (Inspector visual no navegador - igual ao Playwright Codegen)
-bun maestro:studio
-```
-
-## Como funciona
-
-Por padrão, os testes usam `APP_ID=host.exp.exponent` (Expo Go). Caso esteja usando uma build de desenvolvimento / standalone (`com.kiga.mobile`), basta passar a variável de ambiente:
+Na raiz do repositório:
 
 ```bash
-APP_ID=com.kiga.mobile maestro test tests/e2e/login-validation.yaml
+bun run test:e2e
 ```
 
-## Maestro Studio
+Em `apps/mobile`, para executar ou verificar um fluxo:
 
-O **Maestro Studio** é a ferramenta interativa mais poderosa do Maestro:
-1. Deixe o emulador com o app aberto.
-2. Execute `bun maestro:studio`.
-3. Abra a URL exibida no navegador (geralmente `http://localhost:9999`).
-4. Você verá o espelho da tela do celular. Clique nos botões ou campos e ele gerará os comandos do teste automaticamente.
+```bash
+maestro test tests/e2e/thread-flow.yaml
+maestro check-syntax tests/e2e/thread-flow.yaml
+bun run maestro:studio
+```
+
+## Fluxos
+
+- `navigation-flow.yaml`: início, cadastro e login offline.
+- `login-validation.yaml`: campos inválidos e credenciais inexistentes.
+- `register-validation.yaml`: cadastro por etapas, confirmação de senha e teclado do PIN.
+- `protected-route.yaml`: bloqueio da área privada sem sessão.
+- `thread-flow.yaml`: cria uma nota, salva duas respostas e confere a conversa após reabrir o app.
+
+Os vínculos de humor, emoções, pensamentos, reações, comportamentos e imagens de
+cada resposta são verificados com SQLite real na suíte de integração.
+Validar sintaxe dos fluxos não equivale a executá-los em um dispositivo.

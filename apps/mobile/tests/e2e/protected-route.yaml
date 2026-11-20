@@ -1,9 +1,10 @@
-appId: host.exp.exponent
+appId: com.kiga.mobile
 ---
-# Tenta navegar diretamente para a rota /home
-- openLink: "exp://127.0.0.1:8081/--/home"
-
-# Verifica se a Home foi bloqueada e redirecionada para a tela de Login
-# Se a Home estiver desprotegida, este assert vai falhar mostrando a falha de segurança
-- assertVisible: "Fazer Login"
-- assertNotVisible: "Header"
+- launchApp:
+    clearState: true
+- assertVisible: "Bem-vindo ao Kiga!"
+- openLink: "kiga:///home"
+- assertVisible: "Bem-vindo de volta!"
+- assertVisible:
+    id: "login-button"
+- assertNotVisible: "Filtros"
