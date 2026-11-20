@@ -1,7 +1,8 @@
 import "../../global.css";
 
 import { Stack } from "expo-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/query-client";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
@@ -32,8 +33,6 @@ import { DatabaseExceptionFilter } from "@/lib/exceptions/database/filter.except
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 SplashScreen.preventAutoHideAsync().catch(() => { });
-
-const queryClient = new QueryClient();
 
 export default function RootLayout() {
 

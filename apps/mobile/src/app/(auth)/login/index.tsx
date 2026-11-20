@@ -22,14 +22,12 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Logo from "@/components/common/logo";
 import { View } from "react-native";
-import { useNoteStore } from "@/stores/note-store";
 import * as Crypto from "expo-crypto"
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  const loadInitial = useNoteStore((e) => e.loadInitial);
   const setUser = useAuthStore((s) => s.setUser);
 
   const {
@@ -82,7 +80,6 @@ export default function LoginPage() {
       return;
     }
 
-    loadInitial(user.id)
     setUser({ user, isAuthenticated: true });
     router.navigate("/home");
   };
