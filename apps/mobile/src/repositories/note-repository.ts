@@ -10,47 +10,93 @@ import { noteRepostInsertSchema } from "@/lib/db/zod/schemas/note/repost.schema"
 import { noteThoughtsInsertSchema } from "@/lib/db/zod/schemas/note/thought.schema";
 import { DatabaseException } from "@/lib/exceptions/database/index.exception";
 import { NotFoundException } from "@/lib/exceptions/not-found/index.exception";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { ForbiddenException } from "@/lib/exceptions/forbidden/index.exception";
+import { ValidationException } from "@/lib/exceptions/validation/index.exception";
+import { and, asc, desc, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 import { BaseRepository, Tx } from "./base-repository";
+
+export interface NoteDateRange {
+  start: Date;
+  end: Date;
+}
 
 export interface NoteFilterOptions {
   userId: number;
+  dateRange?: NoteDateRange;
 }
 
+const noteRelations = {
+  noteBehaviors: { with: { behavior: true } },
+  noteEmotions: { with: { emotion: true } },
+  noteImages: true,
+  noteReactions: { with: { reaction: true } },
+  noteThoughts: { with: { thought: true } },
+  mood: true,
+  reposts: true,
+} as const;
+
+const noteWithThread = {
+  ...noteRelations,
+  thread: {
+    with: { reply: { with: noteRelations } },
+    orderBy: [asc(noteReplies.id)],
+  },
+};
+
+type NoteRow = Omit<Note, "isRepost" | "isPureRepost" | "thread"> & {
+  thread: {
+    id: number;
+    noteId: number;
+    reply: Omit<Note["thread"][number]["reply"], "isRepost" | "isPureRepost" | "thread">;
+  }[];
+};
+
 export class NoteRepository extends BaseRepository {
-  public static async findMany(userId: number, options: { limit: number, offset: number }): Promise<Note[]> {
-    const { limit = 20, offset = 0 } = options
-    const rows = await db.query.notes.findMany({
+  private static parseNote(note: NoteRow): Note {
+    const isRepost = note.noteType === "repost";
+    return noteSelectSchema.parse({
+      ...note,
+      isRepost,
+      isPureRepost: isRepost && note.content.trim().length === 0,
+      thread: note.thread.map(item => ({
+        ...item,
+        reply: { ...item.reply, isRepost: false, isPureRepost: false },
+      })),
+    });
+  }
+
+  public static findMany(userId: number, options: { limit: number; offset: number; dateRange?: NoteDateRange }): Note[] {
+    const { limit = 20, offset = 0, dateRange } = options
+    const rows = db.query.notes.findMany({
       where: and(
         eq(notes.userId, userId),
         isNull(notes.deletedAt),
-        eq(notes.noteType, "note")
+        eq(notes.noteType, "note"),
+        dateRange ? gte(notes.date, dateRange.start) : undefined,
+        dateRange ? lte(notes.date, dateRange.end) : undefined,
       ),
       orderBy: [desc(notes.fixed), desc(notes.deletedAt), desc(notes.id)],
       limit,
       offset,
-      with: {
-        noteBehaviors: { with: { behavior: true } },
-        noteEmotions: { with: { emotion: true } },
-        noteImages: true,
-        noteReactions: { with: { reaction: true } },
-        noteThoughts: { with: { thought: true } },
-        mood: true,
-        thread: true,
-        reposts: true
-      },
-    });
-    return rows.map(note => {
-      const isRepost = note.noteType === "repost";
-      return noteSelectSchema.parse({
-        ...note,
-        isRepost,
-        isPureRepost: isRepost && note.content.trim().length === 0,
-      });
-    });
+      with: noteWithThread,
+    }).sync();
+    return rows.map(note => this.parseNote(note));
   }
 
-  public static async findOne(noteId: number) {
+  public static findNoteDates(userId: number): Date[] {
+    return db
+      .select({ date: notes.date })
+      .from(notes)
+      .where(and(
+        eq(notes.userId, userId),
+        isNull(notes.deletedAt),
+        eq(notes.noteType, "note"),
+      ))
+      .all()
+      .map(row => row.date);
+  }
+
+  public static findOne(noteId: number) {
     return this.readNote(db, noteId);
   }
 
@@ -60,24 +106,10 @@ export class NoteRepository extends BaseRepository {
         eq(notes.id, noteId),
         isNull(notes.deletedAt)
       ),
-      with: {
-        noteBehaviors: { with: { behavior: true } },
-        noteEmotions: { with: { emotion: true } },
-        noteImages: true,
-        noteReactions: { with: { reaction: true } },
-        noteThoughts: { with: { thought: true } },
-        mood: true,
-        reposts: true,
-        thread: true,
-      },
+      with: noteWithThread,
     }).sync();
     if (!note) return note;
-    const isRepost = note.noteType === "repost";
-    return noteSelectSchema.parse({
-      ...note,
-      isRepost,
-      isPureRepost: isRepost && note.content.trim().length === 0,
-    });
+    return this.parseNote(note);
   }
 
   public static search(query: string, filters: NoteFilterOptions): Note[] {
@@ -85,58 +117,59 @@ export class NoteRepository extends BaseRepository {
       where: and(
         eq(notes.userId, filters.userId),
         isNull(notes.deletedAt),
+        eq(notes.noteType, "note"),
         this.searchText(notes.content, query.trim()),
+        filters.dateRange ? gte(notes.date, filters.dateRange.start) : undefined,
+        filters.dateRange ? lte(notes.date, filters.dateRange.end) : undefined,
       ),
       orderBy: [desc(notes.fixed), desc(notes.deletedAt), desc(notes.id)],
-      with: {
-        noteBehaviors: { with: { behavior: true } },
-        noteEmotions: { with: { emotion: true } },
-        noteImages: true,
-        noteReactions: { with: { reaction: true } },
-        noteThoughts: { with: { thought: true } },
-        mood: true,
-        thread: true,
-        reposts: true,
-      },
+      with: noteWithThread,
     }).sync();
 
-    return rows.map(note => {
-      const isRepost = note.noteType === "repost";
-      return noteSelectSchema.parse({
-        ...note,
-        isRepost,
-        isPureRepost: isRepost && note.content.trim().length === 0,
-      });
-    });
+    return rows.map(note => this.parseNote(note));
   }
 
   public static create(data: NoteInsert) {
-    return db.transaction((tx) => {
-      const [newNote] = this.insert(tx, data, noteInsertSchema, notes)
-
-      if (!newNote) {
-        throw new DatabaseException("Falha ao criar nova nota")
-      }
-
-      this.insertRelations(tx, newNote.id, data)
-
-      if (data.noteType === "reply") {
-        this.reply(tx, newNote.id)
-      }
-      else if (data.noteType === "repost") {
-        this.repost(tx, newNote.id)
-      }
-
-      const note = this.readNote(tx, newNote.id);
-      if (!note) {
-        throw new DatabaseException("Falha ao consultar a nota criada");
-      }
-      return note;
-    })
+    if (data.noteType === "reply") {
+      throw new ValidationException("Use a nota original para adicionar uma resposta.");
+    }
+    return db.transaction((tx) => this.insertNote(tx, data));
   }
 
-  private static reply(tx: Tx, noteId: number) {
-    this.insert(tx, { noteId }, noteRepliesInsertSchema, noteReplies)
+  private static insertNote(tx: Tx, data: NoteInsert) {
+    const [newNote] = this.insert(tx, data, noteInsertSchema, notes)
+
+    if (!newNote) {
+      throw new DatabaseException("Falha ao criar nova nota")
+    }
+
+    this.insertRelations(tx, newNote.id, data)
+
+    if (data.noteType === "repost") {
+      this.repost(tx, newNote.id)
+    }
+
+    const note = this.readNote(tx, newNote.id);
+    if (!note) {
+      throw new DatabaseException("Falha ao consultar a nota criada");
+    }
+    return note;
+  }
+
+  public static createReply(noteId: number, data: NoteInsert) {
+    return db.transaction((tx) => {
+      const note = this.readNote(tx, noteId);
+      if (!note) throw new NotFoundException("Nota respondida não encontrada.");
+      if (note.noteType !== "note") throw new ValidationException("Só é possível responder à nota original.");
+      if (note.userId !== data.userId) throw new ForbiddenException("Não é possível responder à nota de outra conta.");
+
+      const reply = this.insertNote(tx, { ...data, noteType: "reply" });
+      this.insert(tx, { id: reply.id, noteId }, noteRepliesInsertSchema, noteReplies);
+
+      const updatedNote = this.readNote(tx, noteId);
+      if (!updatedNote) throw new DatabaseException("Falha ao consultar a nota respondida.");
+      return { reply, note: updatedNote };
+    });
   }
 
   private static repost(tx: Tx, noteId: number) {
@@ -190,6 +223,10 @@ export class NoteRepository extends BaseRepository {
   }
 
   public static async delete(noteId: number) {
-    return await db.delete(notes).where(eq(notes.id, noteId)).returning()
+    return db.transaction((tx) => {
+      const replies = tx.select({ id: noteReplies.id }).from(noteReplies).where(eq(noteReplies.noteId, noteId));
+      tx.delete(notes).where(inArray(notes.id, replies)).run();
+      return tx.delete(notes).where(eq(notes.id, noteId)).returning().all();
+    });
   }
 }

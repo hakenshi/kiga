@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { behaviors, categories, emotions, moods, reactions, seeds, thoughts, type CategoryType } from "./schema";
+import { behaviors, categories, emotions, moods, reactions, seeds, thoughts, users, type CategoryType } from "./schema";
 import db from ".";
 import { defaultCategories } from "../data/categories";
 import { defaultBehaviors } from "../data/behaviors";
@@ -7,9 +7,10 @@ import { defaultEmotions } from "../data/emotions";
 import { defaultThoughts } from "../data/thoughts";
 import { defaultReactions } from "../data/reactions";
 import { defaultMoods } from "../data/moods";
+import * as Crypto from "expo-crypto"
 
 export function seedDatabase() {
-  db.transaction(tx => {
+  db.transaction(async tx => {
     console.log("began seeding process...")
     const applied = tx.select().from(seeds).where(eq(seeds.version, 1)).get()
 
@@ -18,6 +19,27 @@ export function seedDatabase() {
       return
     }
 
+    console.log("seeding user")
+
+    const password = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.MD5, "123456")
+
+    const [user] = await db.insert(users).values({
+      gender: "male",
+      pronoun: "he_him",
+      birthDate: new Date("2003-08-18"),
+      firstName: "Felipe",
+      secondName: "Kafka",
+      pin: "5123",
+      password,
+      username: "yoru",
+    }).returning()
+
+    if (!user) {
+      console.log("failed to create user")
+      return
+    }
+
+    console.log("user: ", user)
 
     console.log("seeding categories")
 

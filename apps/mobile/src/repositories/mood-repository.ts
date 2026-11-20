@@ -29,23 +29,23 @@ export class MoodRepository extends BaseRepository {
     return this.search("", { userId });
   }
 
-  public static async search(query: string, filters: MoodFilterOptions) {
+  public static search(query: string, filters: MoodFilterOptions) {
     query = query.trim();
     const { userId } = filters;
     const nameFilter = this.searchText(moods.name, query);
-    const userMoods = await db.query.moods.findMany({
+    const userMoods = db.query.moods.findMany({
       where: and(
         eq(moods.userId, userId),
         isNull(moods.deletedAt),
         nameFilter,
       ),
       orderBy: [asc(moods.id)],
-    });
+    }).sync();
 
-    const defaultMoods = await db.query.moods.findMany({
+    const defaultMoods = db.query.moods.findMany({
       where: and(isNull(moods.userId), isNull(moods.deletedAt), nameFilter),
       orderBy: [asc(moods.id)],
-    });
+    }).sync();
     return [...userMoods, ...defaultMoods];
   }
 

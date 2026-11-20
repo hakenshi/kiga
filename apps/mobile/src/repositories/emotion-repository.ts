@@ -30,12 +30,12 @@ export class EmotionRepository extends BaseRepository {
     return this.search("", { userId });
   }
 
-  public static async search(query: string, filters: EmotionFilterOptions) {
+  public static search(query: string, filters: EmotionFilterOptions) {
     query = query.trim();
     const { userId, categoryId } = filters;
     const nameFilter = this.searchText(emotions.name, query);
     const categoryFilter = categoryId === undefined ? undefined : eq(categories.id, categoryId);
-    const userEmotions = await db.query.categories.findMany({
+    const userEmotions = db.query.categories.findMany({
       where: and(
         eq(categories.type, "emotion"),
         eq(categories.userId, userId),
@@ -51,9 +51,9 @@ export class EmotionRepository extends BaseRepository {
           )
         }
       }
-    })
+    }).sync()
 
-    const defaults = await db.query.categories.findMany({
+    const defaults = db.query.categories.findMany({
       where: and(
         eq(categories.type, "emotion"),
         isNull(categories.userId),
@@ -69,7 +69,7 @@ export class EmotionRepository extends BaseRepository {
           )
         }
       }
-    })
+    }).sync()
     const results = [...userEmotions, ...defaults];
     if (query === "") return results;
     return results.filter(category => category.emotions.length > 0);

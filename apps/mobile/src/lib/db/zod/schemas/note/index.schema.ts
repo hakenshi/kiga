@@ -14,7 +14,7 @@ import { moodSelectSchema } from "@/lib/db/zod/schemas/mood/index.schema";
 import { reactionSelectSchema } from "@/lib/db/zod/schemas/reaction/index.schema";
 import { thoughtSelectSchema } from "@/lib/db/zod/schemas/thought/index.schema";
 
-export const noteSelectSchema = createSelectSchema(notes).extend({
+const noteSelectBaseSchema = createSelectSchema(notes).extend({
   noteBehaviors: noteBehaviorSelectSchema.extend({ behavior: behaviorSelectSchema }).array(),
   noteEmotions: noteEmotionsSelectSchema.extend({ emotion: emotionSelectSchema }).array(),
   noteImages: noteImagesSelectSchema.array(),
@@ -23,8 +23,15 @@ export const noteSelectSchema = createSelectSchema(notes).extend({
   mood: moodSelectSchema.nullable(),
   isRepost: z.boolean(),
   isPureRepost: z.boolean(),
-  thread: noteRepliesSelectSchema.array(),
   reposts: noteRepostSelectSchema.array(),
+});
+
+export const noteReplySelectSchema = noteSelectBaseSchema.extend({
+  thread: z.tuple([]).default([]),
+});
+
+export const noteSelectSchema = noteSelectBaseSchema.extend({
+  thread: noteRepliesSelectSchema.extend({ reply: noteReplySelectSchema }).array(),
 });
 
 const noteInsertBaseSchema = createInsertSchema(notes)

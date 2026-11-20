@@ -30,12 +30,12 @@ export class ReactionRepository extends BaseRepository {
     return this.search("", { userId });
   }
 
-  public static async search(query: string, filters: ReactionFilterOptions) {
+  public static search(query: string, filters: ReactionFilterOptions) {
     query = query.trim();
     const { userId, categoryId } = filters;
     const nameFilter = this.searchText(reactions.name, query);
     const categoryFilter = categoryId === undefined ? undefined : eq(categories.id, categoryId);
-    const userReactions = await db.query.categories.findMany({
+    const userReactions = db.query.categories.findMany({
       where: and(
         eq(categories.type, "reaction"),
         eq(categories.userId, userId),
@@ -52,9 +52,9 @@ export class ReactionRepository extends BaseRepository {
           orderBy: [asc(reactions.orderIndex), asc(reactions.id)],
         },
       },
-    });
+    }).sync();
 
-    const defaults = await db.query.categories.findMany({
+    const defaults = db.query.categories.findMany({
       where: and(
         eq(categories.type, "reaction"),
         isNull(categories.userId),
@@ -72,7 +72,7 @@ export class ReactionRepository extends BaseRepository {
         },
       },
 
-    })
+    }).sync()
     const results = [...userReactions, ...defaults];
     if (query === "") return results;
     return results.filter(category => category.reactions.length > 0);

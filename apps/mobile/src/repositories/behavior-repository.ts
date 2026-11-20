@@ -30,12 +30,12 @@ export class BehaviorRepository extends BaseRepository {
     return this.search("", { userId });
   }
 
-  public static async search(query: string, filters: BehaviorFilterOptions) {
+  public static search(query: string, filters: BehaviorFilterOptions) {
     query = query.trim();
     const { userId, categoryId } = filters;
     const contentFilter = this.searchText(behaviors.content, query);
     const categoryFilter = categoryId === undefined ? undefined : eq(categories.id, categoryId);
-    const userBehaviors = await db.query.categories.findMany({
+    const userBehaviors = db.query.categories.findMany({
       where: and(
         eq(categories.type, "behavior"),
         eq(categories.userId, userId),
@@ -52,9 +52,9 @@ export class BehaviorRepository extends BaseRepository {
           orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
         },
       },
-    });
+    }).sync();
 
-    const defaults = await db.query.categories.findMany({
+    const defaults = db.query.categories.findMany({
       where: and(
         eq(categories.type, "behavior"),
         isNull(categories.userId),
@@ -71,7 +71,7 @@ export class BehaviorRepository extends BaseRepository {
           orderBy: [asc(behaviors.orderIndex), asc(behaviors.id)],
         },
       },
-    })
+    }).sync()
 
     const results = [...userBehaviors, ...defaults];
     if (query === "") return results;

@@ -101,7 +101,7 @@ export const notesRelations = relations(notes, ({ one, many }) => ({
   noteEmotions: many(noteEmotions),
   noteBehaviors: many(noteBehaviors),
   noteImages: many(noteImages),
-  thread: many(noteReplies),
+  thread: many(noteReplies, { relationName: "noteThread" }),
   reposts: many(noteReposts),
 }));
 
@@ -109,7 +109,12 @@ export const noteRepliesRelations = relations(noteReplies, ({ one }) => ({
   note: one(notes, {
     fields: [noteReplies.noteId],
     references: [notes.id],
-    relationName: "replyNote",
+    relationName: "noteThread",
+  }),
+  reply: one(notes, {
+    fields: [noteReplies.id],
+    references: [notes.id],
+    relationName: "replyContent",
   }),
 }));
 

@@ -30,11 +30,11 @@ export class CategoryRepository extends BaseRepository {
     return this.search("", { userId, type });
   }
 
-  public static async search(query: string, filters: CategoryFilterOptions) {
+  public static search(query: string, filters: CategoryFilterOptions) {
     query = query.trim();
     const { userId, type } = filters;
     const nameFilter = this.searchText(categories.name, query);
-    const userCategories = await db.query.categories.findMany({
+    const userCategories = db.query.categories.findMany({
       where: and(
         eq(categories.userId, userId),
         type ? eq(categories.type, type) : undefined,
@@ -42,9 +42,9 @@ export class CategoryRepository extends BaseRepository {
         nameFilter,
       ),
       orderBy: [asc(categories.orderIndex), asc(categories.id)],
-    });
+    }).sync();
 
-    const defaults = await db.query.categories.findMany({
+    const defaults = db.query.categories.findMany({
       where: and(
         isNull(categories.userId),
         type ? eq(categories.type, type) : undefined,
@@ -52,7 +52,7 @@ export class CategoryRepository extends BaseRepository {
         nameFilter,
       ),
       orderBy: [asc(categories.orderIndex), asc(categories.id)],
-    })
+    }).sync()
 
     return [...userCategories, ...defaults];
   }

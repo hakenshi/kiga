@@ -143,7 +143,8 @@ export const noteBehaviors = sqliteTable("note_behaviors", {
 
 
 export const noteReplies = sqliteTable("note_replies", {
-  id: integer().primaryKey({ autoIncrement: true }),
+  // Compartilha o ID do registro que contém o texto e os recursos da resposta.
+  id: integer().primaryKey().references(() => notes.id, { onDelete: "cascade" }),
   noteId: integer().notNull().references(() => notes.id, { onDelete: "cascade" }),
 })
 

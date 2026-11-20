@@ -29,27 +29,27 @@ export class ThoughtRepository extends BaseRepository {
     return this.search("", { userId });
   }
 
-  public static async search(query: string, filters: ThoughtFilterOptions) {
+  public static search(query: string, filters: ThoughtFilterOptions) {
     query = query.trim();
     const { userId } = filters;
     const nameFilter = this.searchText(thoughts.name, query);
-    const userThoughts = await db.query.thoughts.findMany({
+    const userThoughts = db.query.thoughts.findMany({
       where: and(
         eq(thoughts.userId, userId),
         isNull(thoughts.deletedAt),
         nameFilter,
       ),
       orderBy: [asc(thoughts.orderIndex), asc(thoughts.id)],
-    });
+    }).sync();
 
-    const defaults = await db.query.thoughts.findMany({
+    const defaults = db.query.thoughts.findMany({
       where: and(
         isNull(thoughts.userId),
         isNull(thoughts.deletedAt),
         nameFilter,
       ),
       orderBy: [asc(thoughts.orderIndex), asc(thoughts.id)],
-    })
+    }).sync()
 
     return [...userThoughts, ...defaults];
   }
