@@ -2,14 +2,21 @@ import { Badge, BadgeGroup, BadgeIcon, BadgeText } from "@/components/ui/badge";
 import { Brain, ChevronDown, ChevronUp } from "lucide-react-native";
 import { useState } from "react";
 import { useNote } from "../../note-context";
+import type { Props } from "./default-props";
 
-interface Props {
-  thoughts: Note["noteThoughts"];
+interface SummaryProps extends Props {
+  count: number;
+  onExpand: () => void;
 }
 
-function Summary({ count, onExpand }: { count: number; onExpand: () => void }) {
+interface ExpandedProps extends Props {
+  thoughts: Note["noteThoughts"];
+  onCollapse: () => void;
+}
+
+function Summary({ size, count, onExpand }: SummaryProps) {
   return (
-    <Badge variant="thought" size="md" rounding="full" onPress={onExpand}>
+    <Badge variant="thought" size={size} rounding="full" onPress={onExpand}>
       <BadgeIcon as={Brain} />
       <BadgeText className="font-heading">
         {`${count} pensamento${count === 1 ? "" : "s"}`}
@@ -19,16 +26,16 @@ function Summary({ count, onExpand }: { count: number; onExpand: () => void }) {
   );
 }
 
-function Expanded({ thoughts, onCollapse }: Props & { onCollapse: () => void }) {
+function Expanded({ size, thoughts, onCollapse }: ExpandedProps) {
   return (
     <BadgeGroup wrap className="max-w-full">
       {thoughts.map(({ thought }) => (
-        <Badge key={thought.id} variant="thought" className="max-w-full">
+        <Badge key={thought.id} variant="thought" size={size} className="max-w-full">
           <BadgeIcon as={Brain} />
           <BadgeText className="font-medium">“{thought.name}”</BadgeText>
         </Badge>
       ))}
-      <Badge variant="muted" size="xs" rounding="full" onPress={onCollapse}>
+      <Badge variant="muted" size={size} rounding="full" onPress={onCollapse}>
         <BadgeIcon as={ChevronUp} />
         <BadgeText>Recolher pensamentos</BadgeText>
       </Badge>
@@ -36,14 +43,14 @@ function Expanded({ thoughts, onCollapse }: Props & { onCollapse: () => void }) 
   );
 }
 
-export default function ThoughtTags() {
+export default function ThoughtTags({ size = "sm" }: Props) {
   const [expandedTags, setExpandedTags] = useState(false);
 
   const { note: { noteThoughts: thoughts } } = useNote()
 
   if (thoughts.length === 0) return null;
   if (!expandedTags) {
-    return <Summary count={thoughts.length} onExpand={() => setExpandedTags(true)} />;
+    return <Summary size={size} count={thoughts.length} onExpand={() => setExpandedTags(true)} />;
   }
-  return <Expanded thoughts={thoughts} onCollapse={() => setExpandedTags(false)} />;
+  return <Expanded size={size} thoughts={thoughts} onCollapse={() => setExpandedTags(false)} />;
 }

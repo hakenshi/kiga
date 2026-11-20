@@ -3,14 +3,21 @@ import { getBehaviorIcon } from "@/lib/behavior-icons";
 import { ChevronDown, ChevronUp, Footprints } from "lucide-react-native";
 import { useState } from "react";
 import { useNote } from "../../note-context";
+import type { Props } from "./default-props";
 
-interface Props {
-  behaviors: Behavior[];
+interface SummaryProps extends Props {
+  count: number;
+  onExpand: () => void;
 }
 
-function Summary({ count, onExpand }: { count: number; onExpand: () => void }) {
+interface ExpandedProps extends Props {
+  behaviors: Behavior[];
+  onCollapse: () => void;
+}
+
+function Summary({ size, count, onExpand }: SummaryProps) {
   return (
-    <Badge variant="behavior" size="md" rounding="full" onPress={onExpand}>
+    <Badge variant="behavior" size={size} rounding="full" onPress={onExpand}>
       <BadgeIcon as={Footprints} />
       <BadgeText className="font-heading">
         {`${count} ${count === 1 ? "ação" : "ações"}`}
@@ -20,16 +27,16 @@ function Summary({ count, onExpand }: { count: number; onExpand: () => void }) {
   );
 }
 
-function Expanded({ behaviors, onCollapse }: Props & { onCollapse: () => void }) {
+function Expanded({ size, behaviors, onCollapse }: ExpandedProps) {
   return (
     <BadgeGroup wrap className="max-w-full">
       {behaviors.map(behavior => (
-        <Badge key={behavior.id} variant="behavior">
+        <Badge key={behavior.id} variant="behavior" size={size}>
           <BadgeIcon as={getBehaviorIcon(behavior.icon)} />
           <BadgeText className="font-medium">{behavior.content}</BadgeText>
         </Badge>
       ))}
-      <Badge variant="muted" size="xs" rounding="full" onPress={onCollapse}>
+      <Badge variant="muted" size={size} rounding="full" onPress={onCollapse}>
         <BadgeIcon as={ChevronUp} />
         <BadgeText>Recolher ações</BadgeText>
       </Badge>
@@ -37,7 +44,7 @@ function Expanded({ behaviors, onCollapse }: Props & { onCollapse: () => void })
   );
 }
 
-export default function BehaviorTags() {
+export default function BehaviorTags({ size = "sm" }: Props) {
   const [expandedTags, setExpandedTags] = useState(false)
 
   const { note: { noteBehaviors } } = useNote()
@@ -46,7 +53,7 @@ export default function BehaviorTags() {
 
   if (behaviors.length === 0) return null;
   if (!expandedTags) {
-    return <Summary count={behaviors.length} onExpand={() => setExpandedTags(true)} />;
+    return <Summary size={size} count={behaviors.length} onExpand={() => setExpandedTags(true)} />;
   }
-  return <Expanded behaviors={behaviors} onCollapse={() => setExpandedTags(false)} />;
+  return <Expanded size={size} behaviors={behaviors} onCollapse={() => setExpandedTags(false)} />;
 }

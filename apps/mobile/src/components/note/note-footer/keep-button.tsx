@@ -1,19 +1,15 @@
-import { useNoteStore } from "@/stores/note-store";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { noteMutations } from "@/queries/notes/queries";
 import { HeartIcon } from "lucide-react-native";
-import { Pressable, PressableProps, Text } from "react-native";
+import { Pressable, Text, type PressableProps } from "react-native";
 import { useNote } from "../note-context";
 
-interface Props extends PressableProps {
-  noteId: number
-  liked: boolean
-}
-
-export default function KeepButton({ ...rest }: PressableProps) {
-
-  const updateNote = useNoteStore((s) => s.updateNote);
-  const { note: { id: noteId, liked } } = useNote()
+export default function KeepButton(rest: PressableProps) {
+  const { note: { id: noteId, userId, liked } } = useNote();
+  const client = useQueryClient();
+  const update = useMutation(noteMutations.update(client, userId));
   const likeNote = () => {
-    updateNote(noteId, { liked: !liked });
+    update.mutate({ noteId, data: { liked: !liked } });
   };
 
   return (
@@ -33,5 +29,5 @@ export default function KeepButton({ ...rest }: PressableProps) {
         {liked ? "Remover" : "Guardar"}
       </Text>
     </Pressable>
-  )
+  );
 }

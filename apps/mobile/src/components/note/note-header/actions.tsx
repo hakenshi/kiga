@@ -1,27 +1,23 @@
 import { Drawer, DrawerBackdrop, DrawerContent, DrawerHeader, DrawerCloseButton, DrawerBody } from "@/components/ui/drawer";
 import { HStack } from "@/components/ui/hstack";
 import { CloseIcon, Icon } from "@/components/ui/icon";
-import { useEditNoteCacheStore } from "@/stores/edit-note-cache-store";
-import { useNoteStore } from "@/stores/note-store";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { loadEditNote, noteMutations } from "@/queries/notes/queries";
 import { useRouter } from "expo-router";
 import { EllipsisVerticalIcon, Eye, ReplyIcon, HeartIcon, PinIcon, PencilIcon, TrashIcon } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text } from "react-native";
 import { useNote } from "../note-context";
 export default function Actions() {
-  const deleteNote = useNoteStore((e) => e.deleteNote);
-  const updateNote = useNoteStore((e) => e.updateNote);
-  const findNote = useNoteStore(e => e.findNote)
-  const loadEditNote = useEditNoteCacheStore(e => e.load)
-  const setViewNote = useNoteStore(e => e.setViewNote)
   const { note } = useNote()
+  const client = useQueryClient();
+  const update = useMutation(noteMutations.update(client, note.userId));
+  const remove = useMutation(noteMutations.remove(client, note.userId));
   const { id: noteId, liked, fixed } = note
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const navigate = async () => {
-    const note = await findNote(noteId)
-    if (!note) return
-    loadEditNote(note)
+    if (!await loadEditNote(client, note.userId, noteId)) return;
     setOpen(false);
     router.push(`/home/edit-note/${noteId}`);
   }
@@ -51,8 +47,7 @@ export default function Actions() {
               <Pressable
                 onPress={() => {
                   setOpen(false);
-                  setViewNote(note);
-                  router.push("/home/view-note");
+                  router.push({ pathname: "/home/view-note", params: { noteId } });
                 }}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >
@@ -72,7 +67,7 @@ export default function Actions() {
                 <Text className="font-semibold text-gray-900">Responder</Text>
               </Pressable>
               <Pressable
-                onPress={() => updateNote(noteId, { liked: !liked })}
+                onPress={() => update.mutate({ noteId, data: { liked: !liked } })}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >
                 <HeartIcon
@@ -85,7 +80,7 @@ export default function Actions() {
                   {liked ? "Remover" : "Guardar"}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => updateNote(noteId, { fixed: !fixed })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
+              <Pressable onPress={() => update.mutate({ noteId, data: { fixed: !fixed } })} className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl">
 
                 <PinIcon size={20} color="gray" />
                 <Text className="font-semibold text-gray-900">
@@ -102,7 +97,7 @@ export default function Actions() {
               <Pressable
                 onPress={() => {
                   setOpen(false);
-                  deleteNote(noteId);
+                  remove.mutate(noteId);
                 }}
                 className="flex-row items-center gap-3 p-4 active:bg-zinc-100 rounded-xl"
               >

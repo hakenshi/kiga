@@ -1,5 +1,6 @@
 import { Pressable, View } from "react-native";
 import { useRouter } from "expo-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import RevisitButton from "@/components/note/note-footer/revisit-button";
 import {
@@ -14,37 +15,16 @@ import { Icon, CloseIcon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { Pencil, RefreshCcw } from "lucide-react-native";
-import { useAuthStore } from "@/stores/auth-store";
-import { useNoteStore } from "@/stores/note-store";
-import { useToastStore } from "@/stores/toast-store";
+import { noteMutations } from "@/queries/notes/queries";
 import { useNote } from "./note-context";
 
-interface Props {
-  note: Note;
-}
-
 function RevisitAction({ note, onClose }: { note: Note; onClose: () => void }) {
-  const userId = useAuthStore((s) => s.user!.id);
-  const addNote = useNoteStore((s) => s.addNote);
+  const client = useQueryClient();
+  const revisit = useMutation(noteMutations.revisit(client, note.userId));
 
   const handleSimpleRepost = () => {
     onClose();
-    try {
-      addNote({
-        userId,
-        noteType: "repost",
-        content: note.content,
-        moodId: note.moodId,
-        noteBehaviors: note.noteBehaviors.map(item => item.behaviorId),
-        noteEmotions: note.noteEmotions.map(item => item.emotionId),
-        noteImages: note.noteImages.map(item => item.imageUrl),
-        noteReactions: note.noteReactions.map(item => item.reactionId),
-        noteThoughts: note.noteThoughts.map(item => item.thoughtsId),
-      });
-      useToastStore.getState().showInfo("Nota revisitada.");
-    } catch (err) {
-      useToastStore.getState().showError("Falha ao revisitar nota.", err);
-    }
+    revisit.mutate(note);
   };
 
   return (

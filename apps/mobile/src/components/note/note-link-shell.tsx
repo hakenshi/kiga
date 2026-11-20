@@ -1,4 +1,3 @@
-import { useNoteStore } from "@/stores/note-store";
 import { Link } from "expo-router";
 import { PropsWithChildren } from "react";
 import { Pressable } from "react-native";
@@ -9,12 +8,11 @@ interface Props extends PropsWithChildren {
 }
 
 export default function NoteLinkShell({ children, note }: Props) {
-  const setViewNote = useNoteStore(s => s.setViewNote)
 
   return (
     <NoteContextProvider note={note}>
 
-      <Link onPress={() => setViewNote(note)} href="/home/view-note"
+      <Link href={{ pathname: "/home/view-note", params: { noteId: note.id } }}
         push
         asChild>
         <Pressable className="border-b border-gray-200 px-4 py-4 bg-white gap-2.5 active:bg-zinc-50/70">

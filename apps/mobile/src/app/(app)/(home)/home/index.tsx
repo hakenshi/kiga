@@ -1,26 +1,15 @@
 import { Pressable, View } from "react-native";
-import { Link, useFocusEffect } from "expo-router";
-import { useCallback } from "react";
+import { Link } from "expo-router";
 import { PlusIcon } from "lucide-react-native";
 import NoteList from "@/components/note/note-list";
-import { selectNotes, useNoteStore } from "@/stores/note-store";
-import { useFeedFilterStore } from "@/stores/feed-filter-store";
-import { useAuthStore } from "@/stores/auth-store";
 
 
 export default function HomePage() {
 
-  const notes = useNoteStore(selectNotes)
-  const searchNotes = useNoteStore(e => e.searchNotes)
-  const query = useFeedFilterStore(f => f.query)
-  const userId = useAuthStore(s => s.user!.id)
-  useFocusEffect(useCallback(() => {
-    searchNotes(query, { userId });
-  }, [query, userId, searchNotes]));
 
   return (
     <View className="flex-1 bg-zinc-50">
-      <NoteList notes={notes} />
+      <NoteList />
       <Link href="/home/new-note" asChild>
         <Pressable
           className="absolute right-5 bottom-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg active:scale-95"
