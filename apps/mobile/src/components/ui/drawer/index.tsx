@@ -221,7 +221,7 @@ type IDrawerCloseButtonProps = React.ComponentProps<typeof Pressable> &
   VariantProps<typeof drawerCloseButtonStyle> & { className?: string; children?: React.ReactNode };
 
 const Drawer = React.forwardRef<any, IDrawerProps>(function Drawer(
-  { className, size = 'md', anchor = 'left', style, ...props },
+  { className, size = 'md', anchor = 'bottom', style, ...props },
   ref
 ) {
   return (
