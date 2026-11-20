@@ -120,7 +120,8 @@ function useDeletedNoteIds(userId: number) {
   });
 }
 
-export function useNotes(userId: number, query: string, dateRange?: NoteDateRange) {
+export function useNotes(query: string, dateRange?: NoteDateRange) {
+  const userId = useAuthStore.getState().user?.id as number
   const isSearching = query.trim() !== "";
   const feed = useInfiniteQuery({ ...noteQueries.feed(userId, dateRange), enabled: !isSearching });
   const search = useQuery({ ...noteQueries.search(userId, query, dateRange), enabled: isSearching });

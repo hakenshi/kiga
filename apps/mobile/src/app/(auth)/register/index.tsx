@@ -187,6 +187,7 @@ export default function NamePage() {
             </FormControl>
           )}
         />
+
       </VStack>
 
       <AuthButtonsContainer>

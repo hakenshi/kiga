@@ -46,13 +46,12 @@ function EmptyList({ isSearching }: { isSearching: boolean }) {
     </VStack>
   );
 }
-
 export default function NoteList() {
   const user = useAuthStore(state => state.user!);
   const search = useFeedFilterStore(state => state.query);
   const dateRange = useFeedFilterStore(state => state.dateRange);
   const syncFilters = useFeedFilterStore(state => state.sync);
-  const { notes, isSearching, loadMore } = useNotes(user.id, search, dateRange);
+  const { notes, isSearching, loadMore } = useNotes(search, dateRange);
   const { top, bottom } = useSafeAreaInsets()
 
   useEffect(() => {

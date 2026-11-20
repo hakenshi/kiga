@@ -62,7 +62,7 @@ export default function HomeLayout() {
 
   return (
     <VStack className="flex-1 bg-background">
-      <HStack className={`${isComposer ? "hidden" : "flex"} ${hidden && "border-b border-border"} ${hidden ? "p-3" : "px-3 pt-3"} `} space="md">
+      <HStack className={`${isComposer || !currentPath.includes("/home") ? "hidden" : "flex"} ${hidden && "border-b border-border"} ${hidden ? "p-3" : "px-3 pt-3"} `} space="md">
         <Logo size="sm" />
         {currentPath === "/home" && (
           <>

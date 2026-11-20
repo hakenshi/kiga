@@ -15,7 +15,7 @@ export default function Index() {
   }
 
   return (
-    <VStack className="flex-1 justify-center items-center px-5 py-20 bg-background">
+    <VStack className="flex-1 justify-center items-center px-5 py-20" >
       <VStack className="flex-1 justify-center items-center gap-4">
         <Logo size="xl" />
         <Text className="text-2xl text-center font-heading text-foreground">

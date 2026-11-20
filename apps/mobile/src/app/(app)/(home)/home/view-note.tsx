@@ -161,11 +161,11 @@ export default function ViewNotePage() {
                         <VStack className="flex-1 justify-center">
                           <HStack className="items-center gap-1.5 justify-between flex-wrap">
                             <View className="flex-row gap-2">
-                              <Text className="text-zinc-700 text-sm font-semibold">
-                                {differnce}
-                              </Text>
-                              <Text className="text-zinc-700 capitalize text-sm font-semibold">
+                              <Text className="text-zinc-800 capitalize text-sm font-semibold">
                                 {format(reply.date, "E - HH:mm", { locale: ptBR })}
+                              </Text>
+                              <Text className="text-zinc-500 text-sm font-semibold">
+                                {differnce}
                               </Text>
                             </View>
                             <MoodTags />

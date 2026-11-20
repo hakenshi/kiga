@@ -2,7 +2,6 @@ import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ComposerHeader from "@/components/composer/composer-header";
 import MoodRow from "@/components/composer/mood-row";
-import { Button, ButtonText } from "@/components/ui/button";
 import { noteMutations } from "@/queries/notes/queries";
 import { useAuthStore } from "@/stores/auth-store";
 import { useEditNoteCacheStore } from "@/stores/edit-note-cache-store";
