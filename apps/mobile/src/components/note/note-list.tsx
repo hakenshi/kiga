@@ -1,6 +1,8 @@
+import { getNoteBody, useNotes } from "@/queries/notes/queries";
 import { useAuthStore } from "@/stores/auth-store";
-import { getNoteBody, useNoteStore } from "@/stores/note-store";
-import { FlatList, View, ActivityIndicator, Text } from "react-native";
+import { useFeedFilterStore } from "@/stores/feed-filter-store";
+import { useEffect } from "react";
+import { FlatList, View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NoteBodyShell from "./note-body";
 import Content from "./note-body/content";
@@ -26,8 +28,7 @@ import { VStack } from "@/components/ui/vstack";
 import { Sparkles } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
-function EmptyList() {
-  const query = useNoteStore(s => s.query);
+function EmptyList({ isSearching }: { isSearching: boolean }) {
 
   return (
     <VStack className="py-24 items-center justify-center px-6 gap-3">
@@ -35,33 +36,34 @@ function EmptyList() {
         <Sparkles size={24} color="#71717A" />
       </View>
       <Text className="text-base font-heading text-zinc-900 text-center">
-        {query === "" ? "Seu diário está em branco" : "Nenhuma nota encontrada"}
+        {isSearching ? "Nenhuma nota encontrada" : "Seu diário está em branco"}
       </Text>
       <Text className="text-xs font-subtitle text-zinc-500 text-center max-w-65">
-        {query === ""
-          ? "Registre como você está se sentindo ou um pensamento que passou pela sua cabeça."
-          : "Tente buscar por outro texto."}
+        {isSearching
+          ? "Tente buscar por outro texto."
+          : "Registre como você está se sentindo ou um pensamento que passou pela sua cabeça."}
       </Text>
     </VStack>
   );
 }
 
-interface Props {
-  notes: Note[];
-}
-
-export default function NoteList({ notes }: Props) {
-  const loadMore = useNoteStore((s) => s.loadMore);
-  const hasMore = useNoteStore((s) => s.hasMore);
-  const isLoading = useNoteStore((s) => s.isLoading);
-  const userId = useAuthStore((s) => s.user!.id);
+export default function NoteList() {
+  const user = useAuthStore(state => state.user!);
+  const search = useFeedFilterStore(state => state.query);
+  const dateRange = useFeedFilterStore(state => state.dateRange);
+  const syncFilters = useFeedFilterStore(state => state.sync);
+  const { notes, isSearching, loadMore } = useNotes(user.id, search, dateRange);
   const { top, bottom } = useSafeAreaInsets()
+
+  useEffect(() => {
+    syncFilters(user.id, user.createdAt);
+  }, [notes.length, syncFilters, user.createdAt, user.id]);
 
   const router = useRouter()
 
   return (
     <FlatList
-      ListEmptyComponent={<EmptyList />}
+      ListEmptyComponent={<EmptyList isSearching={isSearching || Boolean(dateRange)} />}
       data={notes}
       keyExtractor={(n) => String(n.id)}
       contentContainerStyle={{ paddingTop: top, paddingBottom: bottom + 88 }}
@@ -70,19 +72,8 @@ export default function NoteList({ notes }: Props) {
       initialNumToRender={20}
       maxToRenderPerBatch={20}
       windowSize={5}
-      onEndReached={() => {
-        if (hasMore && !isLoading) {
-          loadMore(userId);
-        }
-      }}
+      onEndReached={loadMore}
       onEndReachedThreshold={0.4}
-      ListFooterComponent={
-        isLoading && notes.length > 0 ? (
-          <View className="py-4 items-center justify-center">
-            <ActivityIndicator size="small" />
-          </View>
-        ) : null
-      }
       renderItem={({ item }) => {
         const { images, reports } = getNoteBody(item);
 
