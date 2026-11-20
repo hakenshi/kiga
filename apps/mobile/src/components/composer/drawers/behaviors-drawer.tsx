@@ -10,10 +10,11 @@ import { VStack } from "@/components/ui/vstack";
 import { getBehaviorIcon } from "@/lib/behavior-icons";
 import { categoryCreateFormSchema } from "@/lib/db/zod/schemas/category/index.schema";
 import { toggleSelectedId } from "@/lib/utils";
+import { behaviorMutations, behaviorQueries } from "@/queries/behaviors/queries";
+import { categoryMutations } from "@/queries/categories/queries";
 import { useAuthStore } from "@/stores/auth-store";
-import { useBehaviorStore } from "@/stores/behavior-store";
-import { useCategoryStore } from "@/stores/category-store";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable } from "react-native";
@@ -51,30 +52,24 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
   const [deletingIds, setDeletingIds] = useState<number[]>([]);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const userId = useAuthStore((s) => s.user!.id);
-  const behaviors = useBehaviorStore((s) => s.behaviors);
-  const searchBehaviors = useBehaviorStore((s) => s.searchBehaviors);
-  const loadBehaviors = useBehaviorStore((s) => s.loadBehaviors);
-  const deleteBehaviors = useBehaviorStore((s) => s.deleteBehaviors);
-  const addCategory = useCategoryStore((s) => s.addCategory);
-  const deleteCategory = useCategoryStore((s) => s.deleteCategory);
+  const client = useQueryClient();
+  const { data: behaviors = [] } = useQuery({ ...behaviorQueries.list(userId, searchQuery), enabled: open });
+  const createCategory = useMutation(categoryMutations.create(client, userId));
+  const deleteCategory = useMutation(categoryMutations.remove(client, userId));
+  const deleteBehaviors = useMutation(behaviorMutations.remove(client, userId));
   const isSelectionMode = deletingIds.length > 0;
   const categoryForm = useForm<{ name: string }>({
     resolver: zodResolver(categoryCreateFormSchema),
     defaultValues: { name: "" },
   });
 
-  const onSubmitCategory = async (data: { name: string }) => {
-    const category = await addCategory({ ...data, userId, type: "behavior" });
-    if (!category) return;
-    categoryForm.reset({ name: "" });
-    setShowCategoryForm(false);
-    await searchBehaviors(searchQuery, { userId });
-  };
-
-  const handleDeleteCategory = async (categoryId: number) => {
-    const deleted = await deleteCategory(categoryId);
-    if (!deleted) return;
-    await searchBehaviors(searchQuery, { userId });
+  const onSubmitCategory = (data: { name: string }) => {
+    createCategory.mutate({ ...data, type: "behavior" }, {
+      onSuccess: () => {
+        categoryForm.reset({ name: "" });
+        setShowCategoryForm(false);
+      },
+    });
   };
 
   const toggleDeleteId = (behaviorId: number) => {
@@ -89,12 +84,13 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
     }
   };
 
-  const handleDeleteSelected = async () => {
-    const deleted = deleteBehaviors(deletingIds, userId);
-    if (!deleted) return;
-    onRemove(deletingIds);
-    setDeletingIds([]);
-    await searchBehaviors(searchQuery, { userId });
+  const handleDeleteSelected = () => {
+    deleteBehaviors.mutate(deletingIds, {
+      onSuccess: (_data, ids) => {
+        onRemove(ids);
+        setDeletingIds([]);
+      },
+    });
   };
 
   const handleOpen = () => {
@@ -103,12 +99,6 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
     setShowCategoryForm(false);
     categoryForm.reset({ name: "" });
     setOpen(true);
-    loadBehaviors(userId);
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    searchBehaviors(query, { userId });
   };
 
   return (
@@ -139,12 +129,12 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
             <Search size={18} color="#9AA0AA" />
             <InputField
               value={searchQuery}
-              onChangeText={handleSearch}
+              onChangeText={setSearchQuery}
               placeholder="Buscar comportamento..."
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
-              <Pressable onPress={() => handleSearch("")} hitSlop={8}>
+              <Pressable onPress={() => setSearchQuery("")} hitSlop={8}>
                 <X size={16} color="#9AA0AA" />
               </Pressable>
             )}
@@ -182,7 +172,7 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
                         size="sm"
                         rounding="lg"
                         className="h-10 px-4 bg-zinc-900"
-                        disabled={categoryForm.formState.isSubmitting}
+                        disabled={createCategory.isPending}
                         onPress={categoryForm.handleSubmit(onSubmitCategory)}
                       >
                         <ButtonText>Criar</ButtonText>
@@ -205,7 +195,7 @@ export default function BehaviorsDrawer({ selectedIds: selectedBehaviors, onTogg
                       {category.name}
                     </Text>
                     {category.userId !== null && (
-                      <Pressable onPress={() => handleDeleteCategory(category.id)} hitSlop={8}>
+                      <Pressable onPress={() => deleteCategory.mutate(category.id)} hitSlop={8}>
                         <Trash2 size={14} color="#ef4444" />
                       </Pressable>
                     )}

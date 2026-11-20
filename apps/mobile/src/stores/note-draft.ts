@@ -42,3 +42,7 @@ export function selectDraftWordCount(state: NoteDraftState): number {
 export function selectDraftImageCount(state: NoteDraftState): number {
   return state.note.noteImages?.length ?? 0;
 }
+
+export function getDraftImages(uris: string[]): Pick<NoteImage, "imageUrl">[] {
+  return uris.map(imageUrl => ({ imageUrl }));
+}

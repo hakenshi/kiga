@@ -3,38 +3,25 @@ import ComposerTextArea from "@/components/composer/author-row";
 import { Avatar, AvatarFallbackText } from "@/components/ui/avatar";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
-import { useNoteStore } from "@/stores/note-store";
+import { useComposerNote } from "@/queries/notes/queries";
+import RepostNoteHeader from "@/components/composer/repost-note-header";
+import ComposerShell from "@/components/composer/composer-shell";
+import { useAuthStore } from "@/stores/auth-store";
 import { useRepostNoteCacheStore } from "@/stores/repost-note-cache-store";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 export default function RepostNotePage() {
   const { noteId } = useLocalSearchParams<{ noteId: string }>();
-  const findComposerNote = useNoteStore((s) => s.findComposerNote);
-  const [context, setContext] = useState<Awaited<ReturnType<typeof findComposerNote>>>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const userId = useAuthStore(s => s.user!.id);
+  const { context } = useComposerNote(userId, noteId);
   const draft = useRepostNoteCacheStore((s) => s.note);
   const update = useRepostNoteCacheStore((s) => s.update);
   const removeImage = useRepostNoteCacheStore((s) => s.removeImage);
   const replaceImage = useRepostNoteCacheStore((s) => s.replaceImage);
 
-  useEffect(() => {
-    let active = true;
-
-    findComposerNote(noteId).then((note) => {
-      if (active) {
-        setContext(note);
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [noteId, findComposerNote]);
-
   return (
+    <ComposerShell draftStore={useRepostNoteCacheStore} header={<RepostNoteHeader />}>
     <ScrollView className="flex-1" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       <ComposerTextArea
         placeholder="O que mudou desde então? Ou o que você percebe ao reler esta nota?"
@@ -45,21 +32,17 @@ export default function RepostNotePage() {
         onReplaceImage={replaceImage}
       />
 
-      {isLoading ? (
-        <View className="py-6 items-center justify-center">
-          <ActivityIndicator size="small" color="#18181B" />
-        </View>
-      ) : context ? (
+      {context ? (
         <VStack className="mx-5 mb-4 p-4 bg-zinc-50 border border-zinc-200 rounded-2xl gap-2.5">
           <HStack className="justify-between items-center">
             <HStack className="items-center gap-2">
               <Avatar className="w-6 h-6 bg-zinc-200">
                 <AvatarFallbackText className="text-zinc-700 text-xs font-semibold">
-                  {context.authorInitial}
+                  {context.userName}
                 </AvatarFallbackText>
               </Avatar>
               <Text className="text-xs font-subtitle-semibold text-zinc-800">
-                {context.authorName}
+                {context.userName}
               </Text>
               <Text className="text-zinc-400 text-xs">·</Text>
               <Text className="text-xs font-subtitle text-zinc-500">
@@ -107,5 +90,6 @@ export default function RepostNotePage() {
         </View>
       )}
     </ScrollView>
+    </ComposerShell>
   );
 }

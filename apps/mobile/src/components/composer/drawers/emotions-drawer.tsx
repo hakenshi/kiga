@@ -18,10 +18,11 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { categoryCreateFormSchema } from "@/lib/db/zod/schemas/category/index.schema";
 import { toggleSelectedId } from "@/lib/utils";
+import { categoryMutations, categoryQueries } from "@/queries/categories/queries";
+import { emotionMutations, emotionQueries, hasEmotion } from "@/queries/emotions/queries";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCategoryStore } from "@/stores/category-store";
-import { useEmotionStore } from "@/stores/emotion-store";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Pressable, View } from "react-native";
@@ -62,20 +63,12 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
   const [searchQuery, setSearchQuery] = useState("");
 
   const userId = useAuthStore((s) => s.user!.id);
-  const emotions = useEmotionStore((s) => s.emotions);
-  const loadEmotions = useEmotionStore((s) => s.loadEmotions);
-  const hasEmotion = useEmotionStore((s) => s.hasEmotion);
-  const searchEmotions = useEmotionStore((s) => s.searchEmotions);
-  const deleteEmotions = useEmotionStore((s) => s.deleteEmotions);
-  const categories = useCategoryStore((s) => s.categories);
-  const loadCategories = useCategoryStore((s) => s.loadCategories);
-  const addCategory = useCategoryStore((s) => s.addCategory);
-  const deleteCategory = useCategoryStore((s) => s.deleteCategory);
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    searchEmotions(query, { userId });
-  };
+  const client = useQueryClient();
+  const { data: emotions = [] } = useQuery({ ...emotionQueries.list(userId, searchQuery), enabled: open });
+  const { data: categories = [] } = useQuery({ ...categoryQueries.list(userId, "", "emotion"), enabled: open });
+  const createCategory = useMutation(categoryMutations.create(client, userId));
+  const deleteCategory = useMutation(categoryMutations.remove(client, userId));
+  const deleteEmotions = useMutation(emotionMutations.remove(client, userId));
 
   const itemForm = useForm<{ name: string; categoryName: string }>({
     defaultValues: { name: "", categoryName: "" },
@@ -91,19 +84,14 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
     setActiveForm(current => current === form ? "none" : form);
   };
 
-  const onSubmitCategory = async (data: { name: string }) => {
-    const category = await addCategory({ ...data, userId, type: "emotion" });
-    if (!category) return;
-    itemForm.setValue("categoryName", category.name);
-    categoryForm.reset({ name: "" });
-    setActiveForm("none");
-    await searchEmotions(searchQuery, { userId });
-  };
-
-  const handleDeleteCategory = async (categoryId: number) => {
-    const deleted = await deleteCategory(categoryId);
-    if (!deleted) return;
-    await searchEmotions(searchQuery, { userId });
+  const onSubmitCategory = (data: { name: string }) => {
+    createCategory.mutate({ ...data, type: "emotion" }, {
+      onSuccess: category => {
+        itemForm.setValue("categoryName", category.name);
+        categoryForm.reset({ name: "" });
+        setActiveForm("none");
+      },
+    });
   };
 
   const toggleDeleteId = (emotionId: number) => {
@@ -118,12 +106,13 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
     }
   };
 
-  const handleDeleteSelected = async () => {
-    const deleted = deleteEmotions(deletingIds, userId);
-    if (!deleted) return;
-    onRemove(deletingIds);
-    setDeletingIds([]);
-    await searchEmotions(searchQuery, { userId });
+  const handleDeleteSelected = () => {
+    deleteEmotions.mutate(deletingIds, {
+      onSuccess: (_data, ids) => {
+        onRemove(ids);
+        setDeletingIds([]);
+      },
+    });
   };
 
   return (
@@ -134,8 +123,6 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
         setDeletingIds([]);
         categoryForm.reset({ name: "" });
         setOpen(true);
-        loadEmotions(userId);
-        loadCategories(userId, "emotion");
       }}>
         Emoções
       </NavButton>
@@ -168,12 +155,12 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
             <Search size={18} color="#9AA0AA" />
             <InputField
               value={searchQuery}
-              onChangeText={handleSearch}
+              onChangeText={setSearchQuery}
               placeholder="Buscar emoção..."
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
-              <Pressable onPress={() => handleSearch("")} hitSlop={8}>
+              <Pressable onPress={() => setSearchQuery("")} hitSlop={8}>
                 <X size={16} color="#9AA0AA" />
               </Pressable>
             )}
@@ -327,7 +314,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                         size="sm"
                         rounding="lg"
                         className="h-10 px-4 bg-zinc-900"
-                        disabled={categoryForm.formState.isSubmitting}
+                        disabled={createCategory.isPending}
                         onPress={categoryForm.handleSubmit(onSubmitCategory)}
                       >
                         <ButtonText>Criar</ButtonText>
@@ -348,7 +335,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
             className="flex-1 mt-2 mb-2"
             showsVerticalScrollIndicator={false}
           >
-            {searchQuery.length > 0 && !hasEmotion(searchQuery) && (
+            {searchQuery.length > 0 && !hasEmotion(emotions, searchQuery) && (
               <VStack space="sm" className="mb-5">
                 {emotions.length === 0 && (
                   <Text className="text-sm font-subtitle text-zinc-600">
@@ -433,7 +420,7 @@ export default function EmotionsDrawer({ selectedIds: selectedEmotions, onToggle
                           Criada por você
                         </Text>
                         <Pressable
-                          onPress={() => handleDeleteCategory(cat.id)}
+                          onPress={() => deleteCategory.mutate(cat.id)}
                           hitSlop={8}
                         >
                           <Trash2 size={14} color="#ef4444" />

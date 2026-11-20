@@ -12,7 +12,7 @@ import {
 import { ImageViewerModal } from "./image-viewer-modal";
 
 interface ImageCarouselProps {
-  images: string[];
+  images: Pick<NoteImage, "imageUrl">[]
   /** Proporção fixa opcional. Por padrão usa 1:1 (quadrado) para carrossel e natural para foto única. */
   aspectRatio?: number;
   onRemove?: (uri: string, index: number) => void;
@@ -75,7 +75,7 @@ export const ImageCarousel = memo(function ImageCarousel({
             className="w-full h-full justify-center items-center active:opacity-95"
           >
             <Image
-              source={{ uri: images[0] }}
+              source={{ uri: images[0].imageUrl }}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
               onLoad={(e) => {
@@ -96,7 +96,7 @@ export const ImageCarousel = memo(function ImageCarousel({
 
           {isComposerMode && onRemove && (
             <Pressable
-              onPress={() => onRemove(images[0], 0)}
+              onPress={() => onRemove(images[0].imageUrl, 0)}
               hitSlop={8}
               style={{ backgroundColor: "rgba(22, 24, 29, 0.85)" }}
               className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full items-center justify-center active:opacity-80 z-10"
@@ -107,7 +107,7 @@ export const ImageCarousel = memo(function ImageCarousel({
 
           {isComposerMode && onEdit && (
             <Pressable
-              onPress={() => onEdit(images[0], 0)}
+              onPress={() => onEdit(images[0].imageUrl, 0)}
               hitSlop={8}
               style={{ backgroundColor: "rgba(22, 24, 29, 0.85)" }}
               className="absolute bottom-2.5 right-2.5 h-7 px-3 rounded-full flex-row items-center justify-center gap-1.5 active:opacity-80 z-10"
@@ -147,7 +147,7 @@ export const ImageCarousel = memo(function ImageCarousel({
                   offset: containerWidth * index,
                   index,
                 })}
-                renderItem={({ item: uri, index }) => (
+                renderItem={({ item: { imageUrl: uri }, index }) => (
                   <View
                     style={{ width: containerWidth, height: "100%", overflow: "hidden" }}
                     className="relative bg-zinc-900"
@@ -230,7 +230,7 @@ export const ImageCarousel = memo(function ImageCarousel({
       {/* Modal de Tela Cheia (Exibe a imagem 100% inteira sem cortes) */}
       <ImageViewerModal
         visible={viewerVisible}
-        images={images}
+        images={images.map(i => i.imageUrl)}
         initialIndex={viewerInitialIndex}
         onClose={() => setViewerVisible(false)}
       />

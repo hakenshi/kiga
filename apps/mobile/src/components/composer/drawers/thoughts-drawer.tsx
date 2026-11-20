@@ -8,9 +8,10 @@ import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { thoughtCreateFormSchema } from "@/lib/db/zod/schemas/thought/index.schema";
+import { thoughtMutations, thoughtQueries } from "@/queries/thoughts/queries";
 import { useAuthStore } from "@/stores/auth-store";
-import { useThoughtStore } from "@/stores/thought-store";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable } from "react-native";
@@ -26,15 +27,13 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const userId = useAuthStore((s) => s.user!.id);
-  const thoughts = useThoughtStore((s) => s.thoughts);
-  const addThought = useThoughtStore((s) => s.addThought);
-  const searchThoughts = useThoughtStore((s) => s.searchThoughts);
-  const loadThoughts = useThoughtStore((s) => s.loadThoughts);
+  const client = useQueryClient();
+  const { data: thoughts = [] } = useQuery({ ...thoughtQueries.list(userId, searchQuery), enabled: open });
+  const createThought = useMutation(thoughtMutations.create(client, userId));
   const {
     control,
     handleSubmit,
     reset,
-    formState: { isSubmitting },
   } = useForm<Pick<ThoughtInsert, "name">>({
     resolver: zodResolver(thoughtCreateFormSchema),
     defaultValues: { name: "" },
@@ -44,20 +43,16 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
     setSearchQuery("");
     reset({ name: "" });
     setOpen(true);
-    loadThoughts(userId);
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    searchThoughts(query, { userId });
   };
 
   const onSubmitThought = (data: Pick<ThoughtInsert, "name">) => {
-    const thought = addThought({ ...data, userId });
-    if (!thought) return;
-    toggleThought(thought.id);
-    handleSearch("");
-    reset({ name: "" });
+    createThought.mutate(data, {
+      onSuccess: thought => {
+        toggleThought(thought.id);
+        setSearchQuery("");
+        reset({ name: "" });
+      },
+    });
   };
 
   return (
@@ -112,7 +107,7 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
                       size="sm"
                       rounding="lg"
                       className="h-10 px-3.5 bg-zinc-900"
-                      disabled={isSubmitting}
+                      disabled={createThought.isPending}
                       onPress={handleSubmit(onSubmitThought)}
                     >
                       <Plus size={14} color="#FFFFFF" />
@@ -132,12 +127,12 @@ export default function ThoughtsDrawer({ selectedIds: selectedThoughts, onToggle
             <Search size={18} color="#9AA0AA" />
             <InputField
               value={searchQuery}
-              onChangeText={handleSearch}
+              onChangeText={setSearchQuery}
               placeholder="Buscar nas sugestões..."
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
-              <Pressable onPress={() => handleSearch("")} hitSlop={8}>
+              <Pressable onPress={() => setSearchQuery("")} hitSlop={8}>
                 <X size={16} color="#9AA0AA" />
               </Pressable>
             )}

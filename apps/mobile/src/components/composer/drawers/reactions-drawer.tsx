@@ -9,10 +9,11 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { categoryCreateFormSchema } from "@/lib/db/zod/schemas/category/index.schema";
 import { toggleSelectedId } from "@/lib/utils";
+import { categoryMutations } from "@/queries/categories/queries";
+import { reactionMutations, reactionQueries } from "@/queries/reactions/queries";
 import { useAuthStore } from "@/stores/auth-store";
-import { useCategoryStore } from "@/stores/category-store";
-import { useReactionStore } from "@/stores/reaction-store";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable } from "react-native";
@@ -50,30 +51,24 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
   const [deletingIds, setDeletingIds] = useState<number[]>([]);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const userId = useAuthStore((s) => s.user!.id);
-  const reactions = useReactionStore((s) => s.reactions);
-  const searchReactions = useReactionStore((s) => s.searchReactions);
-  const loadReactions = useReactionStore((s) => s.loadReactions);
-  const deleteReactions = useReactionStore((s) => s.deleteReactions);
-  const addCategory = useCategoryStore((s) => s.addCategory);
-  const deleteCategory = useCategoryStore((s) => s.deleteCategory);
+  const client = useQueryClient();
+  const { data: reactions = [] } = useQuery({ ...reactionQueries.list(userId, searchQuery), enabled: open });
+  const createCategory = useMutation(categoryMutations.create(client, userId));
+  const deleteCategory = useMutation(categoryMutations.remove(client, userId));
+  const deleteReactions = useMutation(reactionMutations.remove(client, userId));
   const isSelectionMode = deletingIds.length > 0;
   const categoryForm = useForm<{ name: string }>({
     resolver: zodResolver(categoryCreateFormSchema),
     defaultValues: { name: "" },
   });
 
-  const onSubmitCategory = async (data: { name: string }) => {
-    const category = await addCategory({ ...data, userId, type: "reaction" });
-    if (!category) return;
-    categoryForm.reset({ name: "" });
-    setShowCategoryForm(false);
-    await searchReactions(searchQuery, { userId });
-  };
-
-  const handleDeleteCategory = async (categoryId: number) => {
-    const deleted = await deleteCategory(categoryId);
-    if (!deleted) return;
-    await searchReactions(searchQuery, { userId });
+  const onSubmitCategory = (data: { name: string }) => {
+    createCategory.mutate({ ...data, type: "reaction" }, {
+      onSuccess: () => {
+        categoryForm.reset({ name: "" });
+        setShowCategoryForm(false);
+      },
+    });
   };
 
   const toggleDeleteId = (reactionId: number) => {
@@ -88,12 +83,13 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
     }
   };
 
-  const handleDeleteSelected = async () => {
-    const deleted = deleteReactions(deletingIds, userId);
-    if (!deleted) return;
-    onRemove(deletingIds);
-    setDeletingIds([]);
-    await searchReactions(searchQuery, { userId });
+  const handleDeleteSelected = () => {
+    deleteReactions.mutate(deletingIds, {
+      onSuccess: (_data, ids) => {
+        onRemove(ids);
+        setDeletingIds([]);
+      },
+    });
   };
 
   const handleOpen = () => {
@@ -102,12 +98,6 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
     setShowCategoryForm(false);
     categoryForm.reset({ name: "" });
     setOpen(true);
-    loadReactions(userId);
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    searchReactions(query, { userId });
   };
 
   return (
@@ -138,12 +128,12 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
             <Search size={18} color="#9AA0AA" />
             <InputField
               value={searchQuery}
-              onChangeText={handleSearch}
+              onChangeText={setSearchQuery}
               placeholder="Buscar reação corporal..."
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
-              <Pressable onPress={() => handleSearch("")} hitSlop={8}>
+              <Pressable onPress={() => setSearchQuery("")} hitSlop={8}>
                 <X size={16} color="#9AA0AA" />
               </Pressable>
             )}
@@ -181,7 +171,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
                         size="sm"
                         rounding="lg"
                         className="h-10 px-4 bg-zinc-900"
-                        disabled={categoryForm.formState.isSubmitting}
+                        disabled={createCategory.isPending}
                         onPress={categoryForm.handleSubmit(onSubmitCategory)}
                       >
                         <ButtonText>Criar</ButtonText>
@@ -204,7 +194,7 @@ export default function ReactionsDrawer({ selectedIds: selectedReactions, onTogg
                       {category.name}
                     </Text>
                     {category.userId !== null && (
-                      <Pressable onPress={() => handleDeleteCategory(category.id)} hitSlop={8}>
+                      <Pressable onPress={() => deleteCategory.mutate(category.id)} hitSlop={8}>
                         <Trash2 size={14} color="#ef4444" />
                       </Pressable>
                     )}

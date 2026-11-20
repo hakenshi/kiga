@@ -138,9 +138,8 @@ export function ImageViewerModal({
             {images.map((_, idx) => (
               <View
                 key={`viewer-dot-${idx}`}
-                className={`rounded-full ${
-                  idx === currentIndex ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40"
-                }`}
+                className={`rounded-full ${idx === currentIndex ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40"
+                  }`}
               />
             ))}
           </View>

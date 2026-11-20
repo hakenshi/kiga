@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getDraftImages } from "@/stores/note-draft";
 import { ImageCarousel } from "../image-carousel";
 import ImageCropperModal from "./drawers/image-cropper-modal";
 
@@ -15,7 +16,7 @@ export default function Media({ images, onRemove, onReplace }: Props) {
   return (
     <>
       <ImageCarousel
-        images={images}
+        images={getDraftImages(images)}
         onRemove={onRemove}
         onEdit={(uri) => setEditingUri(uri)}
       />
